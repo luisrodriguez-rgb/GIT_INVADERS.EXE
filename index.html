@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>GIT_INVADERS.EXE // GitHub Activity Arcade Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👾</text></svg>">
+</head>
+<body data-theme="cyan">
+  <div class="arcade-cabinet">
+    <!-- Top Header Bar with Theme Selector, Controls, Pause and Store -->
+    <header class="arcade-header">
+      <div class="header-brand">
+        <span class="pulse-led"></span>
+        <span class="header-title">GIT_INVADERS.EXE</span>
+        <span class="header-badge">v2.5 PRO</span>
+      </div>
+
+      <div class="header-controls">
+        <!-- Theme Select Dropdown -->
+        <div class="theme-select-box">
+          <select id="themeSelect" class="theme-dropdown" title="Select Visual Theme">
+            <option value="cyan" selected>Cyber Cyan (Azul)</option>
+            <option value="matrix">Matrix Phosphor (Oscuro)</option>
+            <option value="light">Modo Claro (GitHub Light)</option>
+            <option value="cyberpunk">Cyberpunk Neon (Fucsia)</option>
+            <option value="amber">Amber CRT (Terminal)</option>
+          </select>
+        </div>
+
+        <button id="storeBtn" class="control-chip highlight-chip" title="Open Upgrades & Skins Store">STORE ⚡</button>
+        <button id="pauseBtn" class="control-chip" title="Pause / Resume Game">PAUSE [ESC]</button>
+        <button id="crtToggle" class="control-chip active" title="Toggle CRT Scanlines">CRT FX</button>
+        <button id="audioToggle" class="control-chip" title="Toggle Audio Synthesizer">AUDIO: ON</button>
+      </div>
+    </header>
+
+    <!-- Main CRT Monitor Container -->
+    <main class="monitor-wrapper">
+      <div class="crt-screen">
+        <div class="crt-scanline-overlay"></div>
+        <div class="crt-bloom-overlay"></div>
+
+        <!-- Canvas -->
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- HUD Layer -->
+        <div id="hudContainer" class="hud-container"></div>
+
+        <!-- Terminal Bootloader Overlay -->
+        <div id="terminalOverlay" class="terminal-overlay"></div>
+
+        <!-- Modals Overlay (Boss Blueprint, Game Over, Victory, Pause, Store) -->
+        <div id="modalOverlay" class="modal-overlay" style="display: none;"></div>
+      </div>
+    </main>
+
+    <!-- Mobile Virtual Controls Pad -->
+    <div class="mobile-controls">
+      <div class="d-pad">
+        <button id="btnLeft" class="touch-btn">◀</button>
+        <button id="btnRight" class="touch-btn">▶</button>
+      </div>
+      <div class="tactical-pad">
+        <button id="btnRebase" class="touch-btn touch-tactical">REBASE [Q]</button>
+        <button id="btnStash" class="touch-btn touch-tactical">STASH [E]</button>
+      </div>
+      <div class="action-pad">
+        <button id="btnOverdrive" class="touch-btn touch-special">PUSH --FORCE</button>
+        <button id="btnFire" class="touch-btn touch-fire">FIRE</button>
+      </div>
+    </div>
+
+    <!-- Desktop Key Bindings Footer -->
+    <footer class="arcade-footer">
+      <div class="key-hint"><kbd>A</kbd> <kbd>D</kbd> or <kbd>←</kbd> <kbd>→</kbd> Move</div>
+      <div class="key-hint"><kbd>SPACE</kbd> Blaster Fire</div>
+      <div class="key-hint"><kbd>Q</kbd> Git Rebase (Slow-Mo)</div>
+      <div class="key-hint"><kbd>E</kbd> Git Stash (Shield)</div>
+      <div class="key-hint"><kbd>SHIFT</kbd> Git Push --Force</div>
+      <div class="key-hint"><kbd>ESC</kbd> / <kbd>P</kbd> Pause</div>
+    </footer>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

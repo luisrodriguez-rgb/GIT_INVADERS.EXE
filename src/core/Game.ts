@@ -1,0 +1,475 @@
+import { Player } from '../entities/Player';
+import { Projectile } from '../entities/Projectile';
+import { Entity } from '../entities/Entity';
+import { Bunker } from '../entities/Bunker';
+import { Boss } from '../entities/Boss';
+import { IssueBomber } from '../entities/IssueBomber';
+import { ParticleSystem } from '../rendering/Particles';
+import { CRTEffects } from '../rendering/CRT';
+import { Renderer } from '../rendering/Renderer';
+import { GameState } from './GameState';
+import { GameLoop } from './GameLoop';
+import { CollisionSystem } from './CollisionSystem';
+import { NormalizedGameData, GameMode } from '../github/Types';
+import { GitHubClient } from '../github/GitHubClient';
+import { DataSynthesizer } from '../github/DataSynthesizer';
+import { EnemyFactory } from '../procedural/EnemyFactory';
+import { Terminal } from '../ui/Terminal';
+import { HUD } from '../ui/HUD';
+import { Modals } from '../ui/Modals';
+import { StoreModal } from '../ui/StoreModal';
+import { Store } from '../store/Store';
+import { AudioEngine } from '../audio/AudioEngine';
+import { SFX } from '../audio/SFX';
+import { Music } from '../audio/Music';
+
+export class Game {
+  public canvas: HTMLCanvasElement;
+  public renderer: Renderer;
+  public loop: GameLoop;
+  public state: GameState;
+  public particles: ParticleSystem;
+  public crt: CRTEffects;
+
+  public player: Player;
+  public projectiles: Projectile[] = [];
+  public enemies: Entity[] = [];
+  public bunkers: Bunker[] = [];
+  public boss: Boss | null = null;
+
+  public gameData: NormalizedGameData | null = null;
+
+  public terminal: Terminal;
+  public hud: HUD;
+  public modals: Modals;
+  public storeModal: StoreModal;
+
+  public isPaused: boolean = false;
+
+  // Input states
+  private keys: Record<string, boolean> = {};
+  private waveMovementDirection: number = 1;
+  private waveStepTimer: number = 0;
+  private waveDropPending: boolean = false;
+  private invaderFireTimer: number = 2.0;
+  private edgeCooldown: number = 0;
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    terminalContainer: HTMLElement,
+    hudContainer: HTMLElement,
+    modalContainer: HTMLElement
+  ) {
+    this.canvas = canvas;
+    this.renderer = new Renderer(canvas);
+    this.state = new GameState();
+    this.particles = new ParticleSystem();
+    this.crt = new CRTEffects();
+
+    this.player = new Player(this.renderer.width / 2 - 20, this.renderer.height - 54);
+
+    this.terminal = new Terminal(terminalContainer, this.onLaunchGame.bind(this));
+    this.hud = new HUD(hudContainer);
+    this.modals = new Modals(modalContainer);
+    this.storeModal = new StoreModal(modalContainer);
+
+    this.loop = new GameLoop(this.update.bind(this), this.render.bind(this));
+
+    this.bindInputs();
+    this.initBunkers();
+
+    // Start in terminal boot mode
+    this.state.phase = 'BOOT';
+    this.terminal.show();
+    this.loop.start();
+  }
+
+  private initBunkers(): void {
+    this.bunkers = [];
+    const labels = ['.gitignore', 'docs/', 'lockfile', 'tests/'];
+    const count = 4;
+    const spacing = this.renderer.width / (count + 1);
+
+    for (let i = 1; i <= count; i++) {
+      const bx = i * spacing - 32;
+      const by = this.renderer.height - 130;
+      this.bunkers.push(new Bunker(bx, by, labels[i - 1]));
+    }
+  }
+
+  private bindInputs(): void {
+    window.addEventListener('keydown', (e) => {
+      // Audio engine auto unlock
+      AudioEngine.getInstance().init();
+
+      // Pause toggle
+      if (e.code === 'Escape' || e.code === 'KeyP') {
+        if (this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') {
+          e.preventDefault();
+          this.togglePause();
+          return;
+        }
+      }
+
+      this.keys[e.code] = true;
+
+      if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
+        if (e.code === 'Space') {
+          e.preventDefault();
+          const shots = this.player.tryShoot();
+          this.projectiles.push(...shots);
+        } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+          const activated = this.player.activateOverdrive();
+          if (activated) {
+            this.crt.addTrauma(0.4);
+            this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT PUSH --FORCE ACTIVATED!', '#ff007f');
+          }
+        } else if (e.code === 'KeyQ') {
+          const rebasing = this.player.activateRebaseSlowMo();
+          if (rebasing) {
+            this.crt.addTrauma(0.2);
+            this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT REBASE: SLOW-MO (4s)', '#00e5ff');
+          }
+        } else if (e.code === 'KeyE') {
+          const stashed = this.player.activateStashShield();
+          if (stashed) {
+            this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT STASH SHIELD ENGAGED', '#10b981');
+          }
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      this.keys[e.code] = false;
+    });
+
+    // Resize listener
+    window.addEventListener('resize', () => {
+      this.renderer.resize();
+    });
+  }
+
+  public togglePause(): void {
+    this.isPaused = !this.isPaused;
+    if (this.isPaused) {
+      Music.stop();
+      this.modals.showPause(
+        this.state,
+        () => {
+          this.isPaused = false;
+          Music.start();
+        },
+        () => {
+          this.openStore();
+        },
+        () => {
+          this.isPaused = false;
+          this.returnToTerminal();
+        }
+      );
+    } else {
+      this.modals.hide();
+      Music.start();
+    }
+  }
+
+  public openStore(): void {
+    const wasPlaying = this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT';
+    if (wasPlaying) {
+      this.isPaused = true;
+      Music.stop();
+    }
+
+    this.storeModal.show(() => {
+      this.player.applyStoreUpgrades();
+      if (wasPlaying && this.isPaused) {
+        this.togglePause(); // Resume
+      }
+    });
+  }
+
+  public async onLaunchGame(mode: GameMode, input: string): Promise<void> {
+    AudioEngine.getInstance().init();
+    this.terminal.clearLogs();
+    this.terminal.addLog(`ANALYZING GITHUB REPOSITORY TELEMETRY...`, 'text-cyan');
+
+    try {
+      if (mode === 'chaos') {
+        this.terminal.addLog(`SYNTHESIZING CHAOS PROTOCOL (9999 COMMITS)...`, 'text-pink');
+        this.gameData = DataSynthesizer.generateChaosMode();
+      } else if (mode === 'repository') {
+        this.gameData = await GitHubClient.fetchRepository(input || 'luisrodriguez-rgb/sketion', (msg) => {
+          this.terminal.addLog(msg);
+        });
+      } else {
+        this.gameData = await GitHubClient.fetchProfile(input || 'luisrodriguez-rgb', (msg) => {
+          this.terminal.addLog(msg);
+        });
+      }
+
+      this.terminal.addLog(`THREAT LEVEL: ${this.gameData.threatLevel}% [${this.gameData.threatRating}]`, 'text-green');
+      this.terminal.addLog(`PRIMARY LANGUAGE: ${this.gameData.primaryLanguage}`);
+      this.terminal.addLog(`INITIALIZING COMPILER DEFENSE SYSTEMS IN 1s...`, 'text-cyan');
+
+      setTimeout(() => {
+        this.startCampaign();
+      }, 1200);
+    } catch (err: any) {
+      this.terminal.addLog(`ERROR: ${err.message || err}`, 'text-pink');
+      this.terminal.addLog(`Rerouting to offline procedural generator...`);
+      this.gameData = DataSynthesizer.generateFallback(input || 'luisrodriguez-rgb');
+      setTimeout(() => {
+        this.startCampaign();
+      }, 1200);
+    }
+  }
+
+  private startCampaign(): void {
+    if (!this.gameData) return;
+
+    this.terminal.hide();
+    this.state.reset();
+    this.state.totalWaves = this.gameData.totalWaves;
+    this.state.currentWave = 1;
+    this.state.phase = 'PLAYING';
+    this.isPaused = false;
+
+    this.player.reset(this.renderer.width / 2 - 20, this.renderer.height - 54);
+    this.initBunkers();
+    this.projectiles = [];
+    this.particles.clear();
+    this.boss = null;
+
+    Music.setBpm(105 + (this.gameData.threatLevel / 100) * 25);
+    Music.start();
+
+    this.spawnWave(1);
+  }
+
+  private spawnWave(waveNum: number): void {
+    if (!this.gameData) return;
+    this.enemies = EnemyFactory.createWave(waveNum - 1, this.gameData, {
+      width: this.renderer.width,
+      height: this.renderer.height,
+    });
+    this.waveMovementDirection = 1;
+    this.waveStepTimer = 0;
+    this.waveDropPending = false;
+    this.invaderFireTimer = 1.8;
+
+    this.particles.emitText(
+      this.renderer.width / 2 - 50,
+      140,
+      `WAVE 0${waveNum}: ${this.gameData.repoName.toUpperCase()}`,
+      this.gameData.languageColor
+    );
+  }
+
+  private triggerBossAlert(): void {
+    if (!this.gameData) return;
+    this.state.phase = 'BOSS_ALERT';
+    Music.stop();
+    SFX.playBossWarning();
+
+    this.modals.showBossBlueprint(this.gameData.bossBlueprint, () => {
+      this.engageBossFight();
+    });
+  }
+
+  private engageBossFight(): void {
+    if (!this.gameData) return;
+    this.state.phase = 'BOSS_FIGHT';
+    this.boss = new Boss(
+      this.renderer.width / 2 - 70,
+      70,
+      this.gameData.bossBlueprint
+    );
+    this.enemies = [];
+    this.projectiles = [];
+
+    Music.setBpm(145);
+    Music.start();
+  }
+
+  private update(dt: number): void {
+    this.renderer.updateStars(dt);
+    this.particles.update(dt);
+
+    if (this.state.phase === 'BOOT' || this.isPaused) return;
+
+    // Tactical slow-mo factor from GIT REBASE
+    const enemyDt = this.player.isRebasing ? dt * 0.35 : dt;
+
+    // 1. Player Movement & Updates
+    if (this.keys['ArrowLeft'] || this.keys['KeyA']) {
+      this.player.vx = -this.player.speed;
+    } else if (this.keys['ArrowRight'] || this.keys['KeyD']) {
+      this.player.vx = this.player.speed;
+    } else {
+      this.player.vx = 0;
+    }
+
+    this.player.update(dt, { width: this.renderer.width, height: this.renderer.height });
+
+    // Auto-fire while holding space
+    if (this.keys['Space'] && (this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT')) {
+      const shots = this.player.tryShoot();
+      if (shots.length > 0) this.projectiles.push(...shots);
+    }
+
+    // 2. Projectiles Update (Enemy projectiles slow down in Rebase mode)
+    for (let i = this.projectiles.length - 1; i >= 0; i--) {
+      const p = this.projectiles[i];
+      const pDt = p.owner === 'player' ? dt : enemyDt;
+      p.update(pDt, { width: this.renderer.width, height: this.renderer.height });
+      if (!p.isAlive) {
+        this.projectiles.splice(i, 1);
+      }
+    }
+
+    // 3. Invaders Wave Motion
+    if (this.state.phase === 'PLAYING') {
+      this.updateInvaders(enemyDt);
+    }
+
+    // 4. Boss Update & Attack
+    if (this.state.phase === 'BOSS_FIGHT' && this.boss && this.boss.isAlive) {
+      this.boss.update(enemyDt, { width: this.renderer.width, height: this.renderer.height });
+      const bossShots = this.boss.tryAttack(this.player.centerX);
+      if (bossShots.length > 0) {
+        this.projectiles.push(...bossShots);
+      }
+
+      // Check Boss Defeat
+      if (!this.boss.isAlive) {
+        this.state.phase = 'VICTORY';
+        Music.stop();
+        Store.getInstance().addXp(this.state.xp);
+        this.modals.showVictory(
+          this.state,
+          this.boss.blueprint,
+          () => {
+            this.returnToTerminal();
+          },
+          () => {
+            this.openStore();
+          }
+        );
+      }
+    }
+
+    // 5. Collision Resolution
+    CollisionSystem.resolve(
+      this.player,
+      this.projectiles,
+      this.enemies,
+      this.bunkers,
+      this.boss,
+      this.particles,
+      this.crt,
+      this.state
+    );
+
+    // 6. Check Player Death
+    if (!this.player.isAlive && this.state.phase !== 'GAMEOVER') {
+      this.state.phase = 'GAMEOVER';
+      Music.stop();
+      Store.getInstance().addXp(this.state.xp);
+      this.modals.showGameOver(this.state, () => {
+        this.startCampaign();
+      });
+    }
+
+    // 7. Update HUD
+    this.hud.update(this.state, this.player, this.boss, this.gameData);
+  }
+
+  private updateInvaders(dt: number): void {
+    const aliveEnemies = this.enemies.filter((e) => e.isAlive);
+
+    // Wave Cleared Check
+    if (aliveEnemies.length === 0) {
+      if (this.state.currentWave < this.state.totalWaves) {
+        this.state.currentWave++;
+        this.spawnWave(this.state.currentWave);
+      } else {
+        this.triggerBossAlert();
+      }
+      return;
+    }
+
+    // Rhythm speed scales as enemy count dwindles
+    const baseSpeed = this.gameData?.enemySpeedBase || 60;
+    const speedMultiplier = 1.0 + (1 - aliveEnemies.length / 40) * 1.5;
+    const currentSpeed = baseSpeed * speedMultiplier;
+
+    let hitEdge = false;
+    for (const enemy of aliveEnemies) {
+      enemy.vx = currentSpeed * this.waveMovementDirection;
+      enemy.update(dt, { width: this.renderer.width, height: this.renderer.height });
+
+      if (
+        (enemy.x < 15 && this.waveMovementDirection < 0) ||
+        (enemy.x + enemy.width > this.renderer.width - 15 && this.waveMovementDirection > 0)
+      ) {
+        hitEdge = true;
+      }
+
+      // Only marching formation invaders breach the defense line
+      const isDivingBug = enemy instanceof IssueBomber && enemy.isDiving;
+      if (!isDivingBug && enemy.y + enemy.height >= this.player.y) {
+        this.player.lives = 0;
+        this.player.isAlive = false;
+      }
+    }
+
+    if (hitEdge && this.edgeCooldown <= 0) {
+      this.edgeCooldown = 0.45;
+      this.waveMovementDirection *= -1;
+      const dropAmount = this.gameData?.enemyDropSpeed || 16;
+      for (const enemy of aliveEnemies) {
+        if (!(enemy instanceof IssueBomber && enemy.isDiving)) {
+          enemy.y += dropAmount;
+        }
+      }
+    }
+
+    if (this.edgeCooldown > 0) {
+      this.edgeCooldown -= dt;
+    }
+
+    // Invader return fire
+    this.invaderFireTimer -= dt;
+    if (this.invaderFireTimer <= 0) {
+      this.invaderFireTimer = 1.2 + Math.random() * 1.2;
+      const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+      if (shooter) {
+        SFX.playLaser('enemy');
+        this.projectiles.push(
+          new Projectile(shooter.centerX - 2, shooter.y + shooter.height, 0, 240, 'enemy', 'laser', 20, '#ef4444')
+        );
+      }
+    }
+  }
+
+  private render(): void {
+    const shake = this.crt.update(0.016);
+    this.renderer.render(
+      this.player,
+      this.enemies.filter((e) => e.isAlive),
+      this.projectiles,
+      this.bunkers,
+      this.boss,
+      this.particles,
+      this.crt,
+      shake
+    );
+  }
+
+  public returnToTerminal(): void {
+    this.state.phase = 'BOOT';
+    this.isPaused = false;
+    this.terminal.show();
+    this.modals.hide();
+  }
+}
