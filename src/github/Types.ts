@@ -55,12 +55,62 @@ export interface BossPhaseConfig {
   description: string;
 }
 
+export type BossArchetype =
+  | 'commit_core'
+  | 'the_fortress'
+  | 'issue_swarm'
+  | 'dependency_hydra'
+  | 'merge_conflict'
+  | 'contributor_overlord'
+  | 'branchlord'
+  | 'rebase_phantom'
+  | 'security_sentinel'
+  | 'code_abyss';
+
+export type BossMutation =
+  | 'OVERCLOCKED'
+  | 'RECURSIVE'
+  | 'CORRUPTED'
+  | 'FORKED'
+  | 'UNSTABLE'
+  | 'SECURED'
+  | 'LEGACY'
+  | 'DISTRIBUTED';
+
+export interface BossAbility {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+}
+
+export interface BossArchetypeData {
+  archetype: BossArchetype;
+  codeNumber: string;
+  title: string;
+  canonicalRepo: string;
+  profileDescription: string;
+  specialStatName: string;
+  specialStatValue: number;
+  baseHpRating: number;
+  shieldRating: number;
+  attackRating: number;
+  speedRating: number;
+  abilities: BossAbility[];
+  conceptQuote: string;
+  finalPhaseName: string;
+}
+
 export interface BossBlueprint {
   repoName: string;
   coreName: string;
   language: string;
   languageColor: string;
-  chassisType?: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel';
+  archetype: BossArchetype;
+  mutation?: BossMutation;
+  modifierTitle?: string;
+  archetypeData: BossArchetypeData;
+  chassisType?: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel' | BossArchetype;
   threatIndex: number; // 0 - 100
   maxHp: number;
   cannons: number;

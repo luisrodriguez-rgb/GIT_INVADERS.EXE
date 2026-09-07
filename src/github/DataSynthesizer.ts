@@ -1,5 +1,6 @@
 import { NormalizedGameData, SampleCommit, SamplePR, SampleIssue, GitHubMetrics, RepositoryDNA, GameDNA } from './Types';
 import { DataNormalizer } from './Normalizer';
+import { BossGenerator } from '../procedural/BossGenerator';
 
 export class DataSynthesizer {
   /**
@@ -279,6 +280,217 @@ export class DataSynthesizer {
   }
 
   public static readonly REPO_PRESETS: RepositoryDNA[] = [
+    // 01. THE COMMIT CORE
+    {
+      id: 'alpha_project',
+      name: 'alpha-project',
+      author: 'core-team',
+      description: 'THE COMMIT CORE // High velocity continuous integration',
+      commits: 3840,
+      pullRequests: 18,
+      issues: 12,
+      contributors: 5,
+      threatLevel: 80,
+      threatRating: 'HIGH',
+      languages: [
+        { name: 'TS', pct: 60, color: '#38bdf8' },
+        { name: 'JS', pct: 40, color: '#facc15' },
+      ],
+      primaryLanguage: 'TypeScript',
+      accentColor: '#ff0055',
+      bossCoreName: 'THE COMMIT CORE',
+    },
+    // 02. THE FORTRESS
+    {
+      id: 'mobile_app',
+      name: 'mobile-app',
+      author: 'collab-team',
+      description: 'THE FORTRESS // Heavy PR review & impenetrable defense',
+      commits: 1250,
+      pullRequests: 95,
+      issues: 24,
+      contributors: 14,
+      threatLevel: 75,
+      threatRating: 'CRITICAL',
+      languages: [
+        { name: 'PYTHON', pct: 50, color: '#3b82f6' },
+        { name: 'REACT', pct: 30, color: '#00e5ff' },
+        { name: 'DJANGO', pct: 20, color: '#10b981' },
+      ],
+      primaryLanguage: 'Python',
+      accentColor: '#00e5ff',
+      bossCoreName: 'THE FORTRESS',
+    },
+    // 03. THE ISSUE SWARM
+    {
+      id: 'bug_hunter',
+      name: 'bug-hunter',
+      author: 'system-debug',
+      description: 'THE ISSUE SWARM // Living biomechanical bug cluster',
+      commits: 890,
+      pullRequests: 14,
+      issues: 142,
+      contributors: 3,
+      threatLevel: 85,
+      threatRating: 'CRITICAL',
+      languages: [
+        { name: 'GO', pct: 45, color: '#06b6d4' },
+        { name: 'RUST', pct: 35, color: '#ef4444' },
+        { name: 'C++', pct: 20, color: '#ec4899' },
+      ],
+      primaryLanguage: 'Go',
+      accentColor: '#a855f7',
+      bossCoreName: 'THE ISSUE SWARM',
+    },
+    // 04. THE DEPENDENCY HYDRA
+    {
+      id: 'infra_service',
+      name: 'infra-service',
+      author: 'cloud-mesh',
+      description: 'THE DEPENDENCY HYDRA // Complex multi-module dependency nexus',
+      commits: 1650,
+      pullRequests: 32,
+      issues: 28,
+      contributors: 8,
+      threatLevel: 78,
+      threatRating: 'HIGH',
+      languages: [
+        { name: 'NODE', pct: 45, color: '#10b981' },
+        { name: 'TS', pct: 35, color: '#38bdf8' },
+        { name: 'PYTHON', pct: 20, color: '#3b82f6' },
+      ],
+      primaryLanguage: 'TypeScript',
+      accentColor: '#10b981',
+      bossCoreName: 'THE DEPENDENCY HYDRA',
+    },
+    // 05. THE MERGE CONFLICT
+    {
+      id: 'feature_branch',
+      name: 'feature-branch',
+      author: 'git-merge',
+      description: 'THE MERGE CONFLICT // Bifurcated HEAD vs branch reality',
+      commits: 1420,
+      pullRequests: 64,
+      issues: 35,
+      contributors: 9,
+      threatLevel: 70,
+      threatRating: 'ELEVATED',
+      languages: [
+        { name: 'HTML', pct: 40, color: '#ff5252' },
+        { name: 'CSS', pct: 35, color: '#7c4dff' },
+        { name: 'JS', pct: 25, color: '#ffd600' },
+      ],
+      primaryLanguage: 'JavaScript',
+      accentColor: '#ff5252',
+      bossCoreName: 'THE MERGE CONFLICT',
+    },
+    // 06. THE CONTRIBUTOR OVERLORD
+    {
+      id: 'open_source',
+      name: 'open-source',
+      author: 'community',
+      description: 'THE CONTRIBUTOR OVERLORD // Distributed community armada',
+      commits: 2400,
+      pullRequests: 88,
+      issues: 45,
+      contributors: 64,
+      threatLevel: 82,
+      threatRating: 'CRITICAL',
+      languages: [
+        { name: 'RUST', pct: 45, color: '#ef4444' },
+        { name: 'PYTHON', pct: 35, color: '#3b82f6' },
+        { name: 'GO', pct: 20, color: '#06b6d4' },
+      ],
+      primaryLanguage: 'Rust',
+      accentColor: '#c084fc',
+      bossCoreName: 'THE CONTRIBUTOR OVERLORD',
+    },
+    // 07. THE BRANCHLORD
+    {
+      id: 'feature_universe',
+      name: 'feature-universe',
+      author: 'git-flow',
+      description: 'THE BRANCHLORD // Multi-branching timeline dreadnought',
+      commits: 1980,
+      pullRequests: 52,
+      issues: 31,
+      contributors: 7,
+      threatLevel: 74,
+      threatRating: 'HIGH',
+      languages: [
+        { name: 'TS', pct: 50, color: '#38bdf8' },
+        { name: 'JS', pct: 30, color: '#facc15' },
+        { name: 'CSS', pct: 20, color: '#00e5ff' },
+      ],
+      primaryLanguage: 'TypeScript',
+      accentColor: '#fbbf24',
+      bossCoreName: 'THE BRANCHLORD',
+    },
+    // 08. THE REBASE PHANTOM
+    {
+      id: 'legacy_system',
+      name: 'legacy-system',
+      author: 'ancient-kernel',
+      description: 'THE REBASE PHANTOM // Stealth crimson needle & history rewrite',
+      commits: 4200,
+      pullRequests: 22,
+      issues: 19,
+      contributors: 4,
+      threatLevel: 88,
+      threatRating: 'CRITICAL',
+      languages: [
+        { name: 'C++', pct: 55, color: '#ec407a' },
+        { name: 'ASM', pct: 30, color: '#f59e0b' },
+        { name: 'C', pct: 15, color: '#94a3b8' },
+      ],
+      primaryLanguage: 'C++',
+      accentColor: '#ef4444',
+      bossCoreName: 'THE REBASE PHANTOM',
+    },
+    // 09. THE SECURITY SENTINEL
+    {
+      id: 'enterprise',
+      name: 'enterprise',
+      author: 'corp-shield',
+      description: 'THE SECURITY SENTINEL // Zero-trust encrypted cyber-aegis',
+      commits: 2100,
+      pullRequests: 42,
+      issues: 26,
+      contributors: 12,
+      threatLevel: 80,
+      threatRating: 'HIGH',
+      languages: [
+        { name: 'JAVA', pct: 50, color: '#ff9100' },
+        { name: 'SPRING', pct: 30, color: '#10b981' },
+        { name: 'KOTLIN', pct: 20, color: '#ab47bc' },
+      ],
+      primaryLanguage: 'Java',
+      accentColor: '#38bdf8',
+      bossCoreName: 'THE SECURITY SENTINEL',
+    },
+    // 10. THE CODE ABYSS
+    {
+      id: 'monolith',
+      name: 'monolith',
+      author: 'megastructure',
+      description: 'THE CODE ABYSS // Cosmic gravitational code singularity',
+      commits: 8800,
+      pullRequests: 320,
+      issues: 280,
+      contributors: 38,
+      threatLevel: 98,
+      threatRating: 'CHAOS_MAX',
+      languages: [
+        { name: 'RUST', pct: 35, color: '#ef4444' },
+        { name: 'TS', pct: 30, color: '#38bdf8' },
+        { name: 'C++', pct: 20, color: '#ec407a' },
+        { name: 'ASM', pct: 15, color: '#f59e0b' },
+      ],
+      primaryLanguage: 'Rust',
+      accentColor: '#ff007f',
+      bossCoreName: 'THE CODE ABYSS',
+    },
+    // Classics & Community Favorites
     {
       id: 'sketion',
       name: 'sketion',
@@ -294,11 +506,11 @@ export class DataSynthesizer {
         { name: 'TS', pct: 58, color: '#38bdf8' },
         { name: 'JS', pct: 24, color: '#facc15' },
         { name: 'CSS', pct: 12, color: '#00e5ff' },
-        { name: 'HTML', pct: 6, color: '#f97316' }
+        { name: 'HTML', pct: 6, color: '#f97316' },
       ],
       primaryLanguage: 'TypeScript',
       accentColor: '#00e5ff',
-      bossCoreName: 'SKETION CORE'
+      bossCoreName: 'SKETION CORE',
     },
     {
       id: 'singularity',
@@ -314,11 +526,11 @@ export class DataSynthesizer {
       languages: [
         { name: 'RUST', pct: 60, color: '#ef4444' },
         { name: 'TS', pct: 25, color: '#38bdf8' },
-        { name: 'ASM', pct: 15, color: '#a855f7' }
+        { name: 'ASM', pct: 15, color: '#a855f7' },
       ],
       primaryLanguage: 'Rust',
       accentColor: '#ff007f',
-      bossCoreName: 'SINGULARITY REACTOR'
+      bossCoreName: 'SINGULARITY REACTOR',
     },
     {
       id: 'codebase_universe',
@@ -334,11 +546,11 @@ export class DataSynthesizer {
       languages: [
         { name: 'TS', pct: 65, color: '#38bdf8' },
         { name: 'WEBGL', pct: 20, color: '#10b981' },
-        { name: 'AST', pct: 15, color: '#fbbf24' }
+        { name: 'AST', pct: 15, color: '#fbbf24' },
       ],
       primaryLanguage: 'TypeScript',
       accentColor: '#38bdf8',
-      bossCoreName: 'CITADEL MEGASTRUCTURE'
+      bossCoreName: 'CITADEL MEGASTRUCTURE',
     },
     {
       id: 'linux',
@@ -354,11 +566,11 @@ export class DataSynthesizer {
       languages: [
         { name: 'C', pct: 85, color: '#94a3b8' },
         { name: 'ASM', pct: 10, color: '#f59e0b' },
-        { name: 'MAKE', pct: 5, color: '#64748b' }
+        { name: 'MAKE', pct: 5, color: '#64748b' },
       ],
       primaryLanguage: 'C',
       accentColor: '#ffd600',
-      bossCoreName: 'MONOLITH KERNEL'
+      bossCoreName: 'MONOLITH KERNEL',
     },
     {
       id: 'space_invaders',
@@ -374,12 +586,12 @@ export class DataSynthesizer {
       languages: [
         { name: 'TS', pct: 72, color: '#38bdf8' },
         { name: 'CSS', pct: 22, color: '#00e5ff' },
-        { name: 'HTML', pct: 6, color: '#f97316' }
+        { name: 'HTML', pct: 6, color: '#f97316' },
       ],
       primaryLanguage: 'TypeScript',
       accentColor: '#10b981',
-      bossCoreName: 'COMPILER CORE MK-IV'
-    }
+      bossCoreName: 'COMPILER CORE MK-IV',
+    },
   ];
 
   public static generateFromDNA(dna: RepositoryDNA): NormalizedGameData {
@@ -425,14 +637,7 @@ export class DataSynthesizer {
 
     data.threatLevel = dna.threatLevel;
     data.threatRating = dna.threatRating;
-    data.bossBlueprint.coreName = dna.bossCoreName;
-    data.bossBlueprint.threatIndex = dna.threatLevel;
-    data.bossBlueprint.phases = [
-      { phaseNumber: 1, name: 'CORE BREACH', hpThresholdPercent: 100, attackPattern: 'salvo', speedMultiplier: 1.0, description: 'Shield perimeter active' },
-      { phaseNumber: 2, name: 'DEPENDENCY HELL', hpThresholdPercent: 75, attackPattern: 'merge_matrix_lasers', speedMultiplier: 1.25, description: 'Dual cannons deployed' },
-      { phaseNumber: 3, name: 'MERGE CONFLICT', hpThresholdPercent: 45, attackPattern: 'cicd_overdrive_bombers', speedMultiplier: 1.6, description: 'Rapid missile bombardment' },
-      { phaseNumber: 4, name: 'FINAL PUSH', hpThresholdPercent: 20, attackPattern: 'merge_matrix_lasers', speedMultiplier: 2.0, description: 'Core overload critical' }
-    ];
+    data.bossBlueprint = BossGenerator.generateFromDNA(dna);
 
     return data;
   }

@@ -8,6 +8,7 @@ import { AudioEngine } from '../audio/AudioEngine';
 import { SFX } from '../audio/SFX';
 import { Security } from '../utils/Security';
 import { I18n, LanguageCode } from '../i18n/I18n';
+import { BossGenerator, ARCHETYPE_DATABASE } from '../procedural/BossGenerator';
 
 export type LobbyTab = 'HANGAR' | 'PLAY' | 'STORE' | 'PROFILE' | 'STATS' | 'SETTINGS';
 
@@ -210,6 +211,9 @@ export class Lobby {
     `).join('');
 
     const langMods = WaveGenerator.getLanguageModifiers(dna.primaryLanguage);
+    const bossArchetype = BossGenerator.classifyArchetype(dna, dna.threatLevel);
+    const archetypeData = ARCHETYPE_DATABASE[bossArchetype];
+    const mutation = BossGenerator.deriveMutation(dna, dna.threatLevel);
 
     return `
       <!-- Upper Split: Pilot Console + Target Repo -->
@@ -280,6 +284,23 @@ export class Lobby {
             </div>
             <div class="threat-track">
               <div class="threat-fill" style="width: ${dna.threatLevel}%;"></div>
+            </div>
+          </div>
+
+          <!-- Code Boss DNA Classification -->
+          <div class="dna-boss-classification" style="background: rgba(255, 0, 85, 0.08); border: 1px solid rgba(255, 0, 85, 0.35); border-radius: 4px; padding: 6px 10px; margin-top: 8px; font-family: var(--font-mono);">
+            <div style="font-size: 0.65rem; color: #ff0055; font-weight: 800; display: flex; justify-content: space-between;">
+              <span>CODE BOSS // ENCOUNTER</span>
+              <span>[#${archetypeData.codeNumber}]</span>
+            </div>
+            <div style="font-size: 0.82rem; font-weight: 900; color: #ffffff; margin: 2px 0;">
+              ${archetypeData.title}
+            </div>
+            <div style="font-size: 0.64rem; color: #38bdf8; margin-bottom: 2px;">
+              MUTATION: <b style="color: #f43f5e;">${mutation}</b> // STAT: <b style="color: #c084fc;">${archetypeData.specialStatName} ${archetypeData.specialStatValue}%</b>
+            </div>
+            <div style="font-size: 0.62rem; color: #94a3b8; font-style: italic;">
+              "${archetypeData.conceptQuote}"
             </div>
           </div>
         </div>

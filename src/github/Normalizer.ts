@@ -8,6 +8,7 @@ import {
   SamplePR,
   SampleIssue,
 } from './Types';
+import { BossGenerator } from '../procedural/BossGenerator';
 
 /**
  * Maps popular programming languages to retro cyber/arcade hex colors
@@ -115,78 +116,7 @@ export class DataNormalizer {
   ): BossBlueprint {
     const lang = metrics.primaryLanguage || 'TypeScript';
     const langColor = LANGUAGE_COLORS[lang] || '#00e5ff';
-
-    // Boss HP: 1,000 to 3,400 HP (mathematically bounded)
-    const maxHp = Math.round(this.logScale(metrics.totalCommits, 4000, 1000, 3400));
-
-    // Cannons: 2 to 6 cannons
-    const cannons = this.clamp(Math.round(2 + Math.log2(metrics.contributors + 1)), 2, 6);
-
-    // Shield layers: 1 to 4 layers
-    const shieldLayers = this.clamp(Math.floor(Math.sqrt(metrics.pullRequests) * 0.7), 1, 4);
-
-    // Fire rate in seconds (faster for higher threat)
-    const fireRateSeconds = Number(this.clamp(2.2 - (threatLevel / 100) * 1.1, 0.9, 2.2).toFixed(2));
-
-    let chassisType: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel' = 'octo_destroyer';
-    const repoLower = repoName.toLowerCase();
-    if (repoLower.includes('citadel') || metrics.languages.length >= 4) {
-      chassisType = 'quantum_citadel';
-    } else if (metrics.totalCommits > 300 || metrics.pullRequests > 20) {
-      chassisType = 'dreadnought_carrier';
-    } else if (metrics.openIssues > 10 || threatLevel >= 75) {
-      chassisType = 'titan_skull';
-    } else if (repoLower.includes('sketion') || repoLower.includes('git') || metrics.contributors >= 3) {
-      chassisType = 'octo_destroyer';
-    } else {
-      chassisType = 'cyber_sentinel';
-    }
-
-    return {
-      repoName,
-      coreName: `${repoName.toUpperCase()} // CORE`,
-      language: lang,
-      languageColor: langColor,
-      chassisType,
-      threatIndex: threatLevel,
-      maxHp,
-      cannons,
-      shieldLayers,
-      fireRateSeconds,
-      phases: [
-        {
-          phaseNumber: 1,
-          name: 'STAGING CORE',
-          hpThresholdPercent: 100,
-          attackPattern: 'salvo',
-          speedMultiplier: 1.0,
-          description: 'Frontal plasma bursts with cadence calibrated to repository commits.',
-        },
-        {
-          phaseNumber: 2,
-          name: 'MERGE CONFLICT MATRIX',
-          hpThresholdPercent: 65,
-          attackPattern: 'merge_matrix_lasers',
-          speedMultiplier: 1.35,
-          description: 'PR shield rotation activated. Diagonal intersecting laser grid deployed.',
-        },
-        {
-          phaseNumber: 3,
-          name: 'CI/CD PIPELINE OVERDRIVE',
-          hpThresholdPercent: 30,
-          attackPattern: 'cicd_overdrive_bombers',
-          speedMultiplier: 1.75,
-          description: 'Terminal alert: Rapid dive-bombing bug swarms and bullet spray.',
-        },
-      ],
-      statsDisplay: {
-        commits: metrics.totalCommits,
-        contributors: metrics.contributors,
-        pullRequests: metrics.pullRequests,
-        issues: metrics.openIssues,
-        languagesCount: Math.max(1, metrics.languages.length),
-      },
-    };
+    return BossGenerator.generateFromMetrics(repoName, metrics, threatLevel, lang, langColor);
   }
 
   /**
