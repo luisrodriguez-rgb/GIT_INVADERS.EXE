@@ -6,10 +6,14 @@ export class IssueBomber extends Entity {
   public issueTitle: string;
   public scoreValue: number = 80;
   public xpValue: number = 80;
+  public targetPlayerX: number = 0;
+  public targetPlayerY: number = 0;
+  public startDiveX: number = 0;
+  public diveProgress: number = 0;
+  public originalY: number = 0;
+  public diveTimer: number = 0;
   public isDiving: boolean = false;
-  private time: number = 0;
-  private diveTimer: number = 0;
-  private originalY: number;
+  public time: number = 0;
 
   constructor(
     x: number,
@@ -21,7 +25,7 @@ export class IssueBomber extends Entity {
     this.issueNumber = issueNumber;
     this.issueTitle = issueTitle;
     this.originalY = y;
-    this.diveTimer = 4.0 + Math.random() * 8.0;
+    this.diveTimer = 3.5 + Math.random() * 6.0;
   }
 
   public update(dt: number, bounds: { width: number; height: number }): void {
@@ -31,25 +35,31 @@ export class IssueBomber extends Entity {
       this.diveTimer -= dt;
       if (this.diveTimer <= 0) {
         this.isDiving = true;
-        this.vy = 160;
-        this.vx = (Math.random() - 0.5) * 120;
+        this.startDiveX = this.x;
+        this.diveProgress = 0;
+        this.vy = 210;
+        this.vx = (this.targetPlayerX - this.x) * 0.8;
       } else {
-        this.x += this.vx * dt;
+        // High agility sinusoidal jitter while in formation
+        this.x += this.vx * dt + Math.sin(this.time * 4) * 8 * dt;
         this.y += this.vy * dt;
         return;
       }
     }
 
-    // Diving motion
-    this.x += (this.vx + Math.sin(this.time * 6) * 140) * dt;
+    // Diving motion: Acrobatic swoop targeting player position
+    this.diveProgress += dt * 0.75;
+    const swoopOffset = Math.sin(this.diveProgress * Math.PI) * 45;
+    this.x += (this.vx + swoopOffset) * dt;
     this.y += this.vy * dt;
 
     // Reset loop if off bottom
-    if (this.y > bounds.height + 20) {
-      this.y = -30;
+    if (this.y > bounds.height + 25) {
+      this.y = -35;
+      this.x = Math.max(30, Math.min(bounds.width - 50, this.startDiveX));
       this.isDiving = false;
       this.vy = 0;
-      this.diveTimer = 6.0 + Math.random() * 10.0;
+      this.diveTimer = 5.0 + Math.random() * 8.0;
     }
   }
 

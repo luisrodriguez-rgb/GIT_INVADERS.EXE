@@ -8,25 +8,37 @@ export class DependencyDrone extends Entity {
   public parent?: DependencyDrone;
   public children: DependencyDrone[] = [];
   public pkgName: string;
-  private animTimer: number = 0;
+  public orbitAngle: number = 0;
+  public orbitRadius: number = 16;
+  public orbitSpeed: number = 1.8;
+  public animTimer: number = 0;
 
-  constructor(x: number, y: number, pkgName: string, isRoot: boolean = false) {
-    super(x, y, 26, 22);
+  constructor(x: number, y: number, pkgName: string, isRoot: boolean = false, orbitPhase: number = 0) {
+    super(x, y, 22, 18);
     this.pkgName = pkgName;
     this.isRoot = isRoot;
+    this.orbitAngle = orbitPhase;
     if (isRoot) {
       this.hp = 50;
       this.maxHp = 50;
       this.scoreValue = 75;
-      this.width = 32;
-      this.height = 26;
+      this.width = 30;
+      this.height = 24;
     }
   }
 
   public update(dt: number, bounds: { width: number; height: number }): void {
     this.animTimer += dt * 5;
-    this.x += this.vx * dt;
-    this.y += this.vy * dt;
+
+    // Child nodes orbit their root package parent dynamically
+    if (this.parent && this.parent.isAlive) {
+      this.orbitAngle += dt * this.orbitSpeed;
+      this.x = this.parent.centerX + Math.cos(this.orbitAngle) * this.orbitRadius - this.width / 2;
+      this.y = this.parent.centerY + Math.sin(this.orbitAngle) * (this.orbitRadius * 0.65) - this.height / 2;
+    } else {
+      this.x += this.vx * dt;
+      this.y += this.vy * dt;
+    }
   }
 
   public render(ctx: CanvasRenderingContext2D): void {

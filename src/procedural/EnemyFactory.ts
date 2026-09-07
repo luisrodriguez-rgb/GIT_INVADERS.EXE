@@ -45,8 +45,8 @@ export class EnemyFactory {
         const pkg = pkgNames[depIdx % pkgNames.length];
         depIdx++;
         const root = new DependencyDrone(pt.x, pt.y, pkg, true);
-        const child1 = new DependencyDrone(pt.x - 18, pt.y + 24, `${pkg}-core`, false);
-        const child2 = new DependencyDrone(pt.x + 18, pt.y + 24, `${pkg}-types`, false);
+        const child1 = new DependencyDrone(pt.x, pt.y, `${pkg}-core`, false, 0);
+        const child2 = new DependencyDrone(pt.x, pt.y, `${pkg}-types`, false, Math.PI);
         child1.parent = root;
         child2.parent = root;
         root.children.push(child1, child2);
