@@ -53,6 +53,92 @@ export class DataSynthesizer {
   }
 
   /**
+   * Generates dedicated CODEBASE.UNIVERSE Citadela architectural defense mode
+   */
+  public static generateCitadelUniverseMode(): NormalizedGameData {
+    const metrics: GitHubMetrics = {
+      totalCommits: 3840,
+      pullRequests: 142,
+      openIssues: 58,
+      contributors: 18,
+      languages: ['TypeScript', 'WebGL', 'AST', 'Rust', 'Tree-sitter'],
+      primaryLanguage: 'TypeScript',
+      streakDays: 120,
+      recentActivityScore: 96,
+      repoCount: 8,
+      stars: 4890,
+    };
+
+    const commits: SampleCommit[] = [
+      { sha: '0x9C48', message: 'feat: 2.5D Citadel World Generator & Tree-sitter AST', author: 'luisrodriguez-rgb' },
+      { sha: '0x7F21', message: 'perf: 90%+ Token Savings with Codebase-Memory-MCP', author: 'luisrodriguez-rgb' },
+      { sha: '0x5D3B', message: 'sim: Tarjan SCC Cyclic Wormhole & Blast Radius Cascade', author: 'luisrodriguez-rgb' },
+      { sha: '0x3E19', message: 'feat: Dijkstra Trace Path GPS animated flight trajectory', author: 'luisrodriguez-rgb' },
+      { sha: '0x2A04', message: 'sync: Git Time Machine historical commit-by-commit replay', author: 'luisrodriguez-rgb' },
+      { sha: '0x1C88', message: 'refactor: decouple God-Class Megastructure into 8 biomes', author: 'luisrodriguez-rgb' },
+    ];
+
+    const prs: SamplePR[] = [
+      { number: 108, title: 'PR #108: Architectural Intelligence Platform v2.5 GA', author: 'luisrodriguez-rgb' },
+      { number: 94, title: 'PR #94: Betweenness Centrality Beacons & Skyward Conduits', author: 'luisrodriguez-rgb' },
+      { number: 72, title: 'PR #72: Universal Ingestion Matrix (40+ Ecosystems)', author: 'luisrodriguez-rgb' },
+    ];
+
+    const issues: SampleIssue[] = [
+      { number: 95, title: 'ALERT #95: God-Class Megastructure detected in core/renderer.ts' },
+      { number: 63, title: 'HAZARD #63: Cyclic Wormhole feedback loop in state bus' },
+      { number: 41, title: 'INCIDENT #41: Downstream blast radius cascade across 41 callers' },
+    ];
+
+    const data = DataNormalizer.normalize(
+      'citadel',
+      'luisrodriguez-rgb/CODEBASE.UNIVERSE',
+      'luisrodriguez-rgb',
+      'CODEBASE.UNIVERSE',
+      metrics,
+      commits,
+      prs,
+      issues
+    );
+
+    // Customize Citadel Boss Blueprint
+    data.bossBlueprint.coreName = 'CITADEL_CORE // GOD-CLASS MEGASTRUCTURE';
+    data.bossBlueprint.language = 'TypeScript / AST Citadela';
+    data.bossBlueprint.languageColor = '#38bdf8';
+    data.bossBlueprint.threatIndex = 95;
+    data.bossBlueprint.cannons = 5;
+    data.bossBlueprint.shieldLayers = 4;
+    data.bossBlueprint.phases = [
+      {
+        phaseNumber: 1,
+        name: 'PHASE 01: PERIMETER CONDUITS [STORAGE & POWER]',
+        hpThresholdPercent: 100,
+        attackPattern: 'salvo',
+        speedMultiplier: 1.1,
+        description: 'Multi-directional blast radius energy packets dispatched along dependency paths.',
+      },
+      {
+        phaseNumber: 2,
+        name: 'PHASE 02: TARJAN CYCLIC WORMHOLE',
+        hpThresholdPercent: 65,
+        attackPattern: 'merge_matrix_lasers',
+        speedMultiplier: 1.45,
+        description: 'Circular dependency deadlocks manifest as intersecting crossfire laser beams.',
+      },
+      {
+        phaseNumber: 3,
+        name: 'PHASE 03: GOD-CLASS OVERDRIVE CASCADE',
+        hpThresholdPercent: 30,
+        attackPattern: 'cicd_overdrive_bombers',
+        speedMultiplier: 1.85,
+        description: '41 direct dependent modules overload. Blast radius bombers dropped en masse.',
+      },
+    ];
+
+    return data;
+  }
+
+  /**
    * Generates a curated or procedural fallback for any username/repo if rate-limited
    */
   public static generateFallback(username: string, repoInput?: string): NormalizedGameData {
@@ -190,6 +276,165 @@ export class DataSynthesizer {
       prs,
       issues
     );
+  }
+
+  public static readonly REPO_PRESETS: RepositoryDNA[] = [
+    {
+      id: 'sketion',
+      name: 'sketion',
+      author: 'luisrodriguez-rgb',
+      description: 'Autonomous Visual Composition & Architecture Engine',
+      commits: 342,
+      pullRequests: 28,
+      issues: 13,
+      contributors: 4,
+      threatLevel: 82,
+      threatRating: 'CRITICAL',
+      languages: [
+        { name: 'TS', pct: 58, color: '#38bdf8' },
+        { name: 'JS', pct: 24, color: '#facc15' },
+        { name: 'CSS', pct: 12, color: '#00e5ff' },
+        { name: 'HTML', pct: 6, color: '#f97316' }
+      ],
+      primaryLanguage: 'TypeScript',
+      accentColor: '#00e5ff',
+      bossCoreName: 'SKETION CORE'
+    },
+    {
+      id: 'singularity',
+      name: 'SINGULARITY_CORE',
+      author: 'SYSTEM_ANOMALY',
+      description: 'Quantum Spacetime Compiler & Memory Singularity',
+      commits: 9999,
+      pullRequests: 482,
+      issues: 731,
+      contributors: 48,
+      threatLevel: 96,
+      threatRating: 'CHAOS_MAX',
+      languages: [
+        { name: 'RUST', pct: 60, color: '#ef4444' },
+        { name: 'TS', pct: 25, color: '#38bdf8' },
+        { name: 'ASM', pct: 15, color: '#a855f7' }
+      ],
+      primaryLanguage: 'Rust',
+      accentColor: '#ff007f',
+      bossCoreName: 'SINGULARITY REACTOR'
+    },
+    {
+      id: 'codebase_universe',
+      name: 'CODEBASE.UNIVERSE',
+      author: 'luisrodriguez-rgb',
+      description: '2.5D Living Architectural Codebase Citadel',
+      commits: 3840,
+      pullRequests: 142,
+      issues: 58,
+      contributors: 18,
+      threatLevel: 78,
+      threatRating: 'HIGH',
+      languages: [
+        { name: 'TS', pct: 65, color: '#38bdf8' },
+        { name: 'WEBGL', pct: 20, color: '#10b981' },
+        { name: 'AST', pct: 15, color: '#fbbf24' }
+      ],
+      primaryLanguage: 'TypeScript',
+      accentColor: '#38bdf8',
+      bossCoreName: 'CITADEL MEGASTRUCTURE'
+    },
+    {
+      id: 'linux',
+      name: 'torvalds/linux',
+      author: 'torvalds',
+      description: 'The Linux Kernel Monolithic Megastructure',
+      commits: 1100000,
+      pullRequests: 840,
+      issues: 120,
+      contributors: 14000,
+      threatLevel: 88,
+      threatRating: 'CRITICAL',
+      languages: [
+        { name: 'C', pct: 85, color: '#94a3b8' },
+        { name: 'ASM', pct: 10, color: '#f59e0b' },
+        { name: 'MAKE', pct: 5, color: '#64748b' }
+      ],
+      primaryLanguage: 'C',
+      accentColor: '#ffd600',
+      bossCoreName: 'MONOLITH KERNEL'
+    },
+    {
+      id: 'space_invaders',
+      name: 'GIT_INVADERS.EXE',
+      author: 'luisrodriguez-rgb',
+      description: 'GitHub Activity Arcade Engine & CRT Simulator',
+      commits: 1482,
+      pullRequests: 48,
+      issues: 39,
+      contributors: 3,
+      threatLevel: 65,
+      threatRating: 'ELEVATED',
+      languages: [
+        { name: 'TS', pct: 72, color: '#38bdf8' },
+        { name: 'CSS', pct: 22, color: '#00e5ff' },
+        { name: 'HTML', pct: 6, color: '#f97316' }
+      ],
+      primaryLanguage: 'TypeScript',
+      accentColor: '#10b981',
+      bossCoreName: 'COMPILER CORE MK-IV'
+    }
+  ];
+
+  public static generateFromDNA(dna: RepositoryDNA): NormalizedGameData {
+    const metrics: GitHubMetrics = {
+      totalCommits: dna.commits,
+      pullRequests: dna.pullRequests,
+      openIssues: dna.issues,
+      contributors: dna.contributors,
+      languages: dna.languages.map(l => l.name),
+      primaryLanguage: dna.primaryLanguage,
+      streakDays: 45,
+      recentActivityScore: dna.threatLevel,
+      repoCount: 6,
+      stars: 1200,
+    };
+
+    const commits: SampleCommit[] = [
+      { sha: '0x3F9A', message: `feat(${dna.name}): initial kernel build`, author: dna.author },
+      { sha: '0x8B22', message: `refactor: optimize AST tree-sitter bindings`, author: dna.author },
+      { sha: '0x1C7E', message: `hotfix: thread deadlock in memory cache`, author: dna.author },
+    ];
+
+    const prs: SamplePR[] = [
+      { number: dna.pullRequests, title: `PR #${dna.pullRequests}: Zero-Day Security Protocol`, author: dna.author },
+      { number: Math.max(1, dna.pullRequests - 1), title: `PR #${Math.max(1, dna.pullRequests - 1)}: Decouple Core Dependencies`, author: dna.author },
+    ];
+
+    const issues: SampleIssue[] = [
+      { number: dna.issues, title: `ALERT #${dna.issues}: Memory leak in async pipeline` },
+      { number: Math.max(1, dna.issues - 1), title: `ISSUE #${Math.max(1, dna.issues - 1)}: Cyclic dependency warning` },
+    ];
+
+    const data = DataNormalizer.normalize(
+      'repository',
+      `${dna.author}/${dna.name}`,
+      dna.author,
+      dna.name,
+      metrics,
+      commits,
+      prs,
+      issues
+    );
+
+    data.threatLevel = dna.threatLevel;
+    data.threatRating = dna.threatRating;
+    data.bossBlueprint.coreName = dna.bossCoreName;
+    data.bossBlueprint.threatIndex = dna.threatLevel;
+    data.bossBlueprint.phases = [
+      { phaseNumber: 1, name: 'CORE BREACH', hpThresholdPercent: 100, attackPattern: 'salvo', speedMultiplier: 1.0, description: 'Shield perimeter active' },
+      { phaseNumber: 2, name: 'DEPENDENCY HELL', hpThresholdPercent: 75, attackPattern: 'merge_matrix_lasers', speedMultiplier: 1.25, description: 'Dual cannons deployed' },
+      { phaseNumber: 3, name: 'MERGE CONFLICT', hpThresholdPercent: 45, attackPattern: 'cicd_overdrive_bombers', speedMultiplier: 1.6, description: 'Rapid missile bombardment' },
+      { phaseNumber: 4, name: 'FINAL PUSH', hpThresholdPercent: 20, attackPattern: 'merge_matrix_lasers', speedMultiplier: 2.0, description: 'Core overload critical' }
+    ];
+
+    return data;
   }
 
   private static hashString(str: string): number {

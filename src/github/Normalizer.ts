@@ -175,7 +175,7 @@ export class DataNormalizer {
    * Main normalizer transforming raw input into game-ready NormalizedGameData
    */
   public static normalize(
-    sourceType: 'profile' | 'repository' | 'chaos',
+    sourceType: 'profile' | 'repository' | 'chaos' | 'citadel',
     targetIdentifier: string,
     authorName: string,
     repoName: string,
@@ -185,7 +185,7 @@ export class DataNormalizer {
     sampleIssues: SampleIssue[] = []
   ): NormalizedGameData {
     const threat = this.calculateThreat(metrics);
-    const totalWaves = sourceType === 'chaos' ? 6 : Math.min(5, Math.max(3, metrics.repoCount || 4));
+    const totalWaves = sourceType === 'chaos' ? 6 : sourceType === 'citadel' ? 4 : Math.min(5, Math.max(3, metrics.repoCount || 4));
     const formations = this.determineFormations(totalWaves, metrics);
     const bossBlueprint = this.generateBossBlueprint(repoName, metrics, threat.level);
 

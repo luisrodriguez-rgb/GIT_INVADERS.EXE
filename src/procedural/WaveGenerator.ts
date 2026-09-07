@@ -6,7 +6,37 @@ export interface EnemySpawnPoint {
   type: 'commit' | 'pr' | 'issue';
 }
 
+export interface LanguageGameplayModifiers {
+  speedMultiplier: number; // e.g., 1.15 for JavaScript / TypeScript
+  hasDroneSupport: boolean; // e.g., true for Python
+  armorBonus: number; // e.g., +1 for C++ / Rust
+  bunkerIntegrityRatio: number; // e.g., 1.3 for HTML / CSS
+  primaryLanguage: string;
+}
+
 export class WaveGenerator {
+  /**
+   * Translates the repository tech stack directly into gameplay dynamics:
+   * JavaScript / TypeScript -> Speed & projectile cadence boost
+   * Python -> Contributor drone swarm escort
+   * C++ / Rust -> Armored hulls and kinetic shield reinforcement
+   * HTML / CSS -> Fortified defensive bunker structures
+   */
+  public static getLanguageModifiers(primaryLang: string): LanguageGameplayModifiers {
+    const l = (primaryLang || '').toLowerCase();
+    const isScript = l.includes('javascript') || l.includes('typescript') || l.includes('js') || l.includes('ts');
+    const isPython = l.includes('python');
+    const isCompiled = l.includes('c++') || l.includes('rust') || l.includes('c');
+    const isWebMarkup = l.includes('html') || l.includes('css');
+
+    return {
+      speedMultiplier: isScript ? 1.15 : 1.0,
+      hasDroneSupport: isPython,
+      armorBonus: isCompiled ? 1 : 0,
+      bunkerIntegrityRatio: isWebMarkup ? 1.3 : 1.0,
+      primaryLanguage: primaryLang || 'TypeScript',
+    };
+  }
   /**
    * Generates procedural formation positions for a wave based on repo activity
    */

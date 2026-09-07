@@ -67,8 +67,8 @@ export interface BossBlueprint {
 }
 
 export interface NormalizedGameData {
-  sourceType: 'profile' | 'repository' | 'chaos';
-  targetIdentifier: string; // e.g. 'luisrodriguez-rgb' or 'luisrodriguez-rgb/sketion' or 'CHAOS // MATRIX'
+  sourceType: 'profile' | 'repository' | 'chaos' | 'citadel';
+  targetIdentifier: string; // e.g. 'luisrodriguez-rgb' or 'luisrodriguez-rgb/sketion' or 'CODEBASE.UNIVERSE'
   authorName: string;
   repoName: string;
   primaryLanguage: string;
@@ -97,4 +97,27 @@ export interface NormalizedGameData {
   issues: SampleIssue[];
 }
 
-export type GameMode = 'profile' | 'repository' | 'chaos';
+export interface LanguageBar {
+  name: string;
+  pct: number;
+  color: string;
+}
+
+export interface RepositoryDNA {
+  id: string;
+  name: string;
+  author: string;
+  description: string;
+  commits: number;
+  pullRequests: number;
+  issues: number;
+  contributors: number;
+  threatLevel: number;
+  threatRating: ThreatLevelRating;
+  languages: LanguageBar[];
+  primaryLanguage: string;
+  accentColor: string;
+  bossCoreName: string;
+}
+
+export type GameMode = 'profile' | 'repository' | 'chaos' | 'citadel';
