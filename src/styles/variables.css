@@ -1,0 +1,17 @@
+:root {
+  --bg-cabinet: #080c14;
+  --bg-bezel: #0f172a;
+  --bg-screen: #060913;
+  --bg-card: rgba(15, 23, 42, 0.94);
+  --border-primary: #00e5ff;
+  --border-secondary: #38bdf8;
+  --border-cyan: #00e5ff;
+  --border-green: #10b981;
+  --border-pink: #ff007f;
+  --border-purple: #a855f7;
+  --border-yellow: #ffd600;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --font-mono: 'JetBrains Mono', 'Share Tech Mono', monospace;
+}

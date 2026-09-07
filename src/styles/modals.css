@@ -1,0 +1,497 @@
+/* ===================================================
+   MODALS: PAUSE, GAME OVER, VICTORY, BOSS BLUEPRINT
+   =================================================== */
+
+.modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 30;
+  background: rgba(3, 7, 18, 0.93);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 580px;
+  background: #0b1120;
+  border: 2px solid var(--border-primary);
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.8);
+  animation: modalPop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-sizing: border-box;
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Pause Modal */
+.pause-modal {
+  border-color: #ffd600;
+  box-shadow: 0 0 30px rgba(255, 214, 0, 0.25);
+  text-align: center;
+}
+
+.pause-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pause-led {
+  width: 12px;
+  height: 12px;
+  background: #ffd600;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ffd600;
+  animation: pulseLed 1s infinite alternate;
+}
+
+.pause-header h2 {
+  color: #ffd600;
+  font-size: 1.3rem;
+  letter-spacing: 1px;
+}
+
+.pause-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.pause-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 6px 0;
+}
+
+.p-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.p-lbl {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.p-val {
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.val-green { color: #10b981; }
+.val-cyan { color: #00e5ff; }
+.val-purple { color: #c084fc; }
+.val-red { color: #ef4444; }
+.val-yellow { color: #ffd600; }
+
+.pause-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.store-nav-btn {
+  background: linear-gradient(135deg, #ffd600, #ff9100);
+  color: #000000;
+  border: none;
+  padding: 10px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.store-nav-btn:hover {
+  filter: brightness(1.1);
+}
+
+.abort-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+  padding: 8px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.abort-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+/* Victory Modal with Animated XP Counter */
+.victory-modal {
+  border-color: #10b981;
+  text-align: center;
+  box-shadow: 0 0 35px rgba(16, 185, 129, 0.4);
+}
+
+.victory-badge {
+  font-size: 1.8rem;
+}
+
+.rank-pulse {
+  animation: pulseLed 1.2s infinite alternate;
+}
+
+.xp-counter-card {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid #10b981;
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.xp-counter-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.xp-counter-number {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: #10b981;
+  letter-spacing: 1px;
+}
+
+.xp-progress-hint {
+  font-size: 0.7rem;
+  color: #ffd600;
+}
+
+.victory-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.victory-actions button {
+  flex: 1;
+}
+
+/* Defeat Modal with Glitch */
+.gameover-modal {
+  border-color: #ef4444;
+  text-align: center;
+}
+
+.gameover-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #ef4444;
+}
+
+.panic-terminal-log {
+  background: #030712;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 0.72rem;
+  color: #f87171;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+/* Mission Report Modal (Reference Panel 5) */
+.mission-report-card {
+  width: 100%;
+  max-width: 540px;
+  background: #090e1a;
+  border: 1px solid var(--border-primary);
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 0 45px rgba(0, 0, 0, 0.95);
+  box-sizing: border-box;
+}
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 4px;
+  font-size: 0.65rem;
+}
+
+.report-brand {
+  color: var(--border-primary);
+  font-weight: 800;
+}
+
+.report-status.status-cleared { color: #10b981; font-weight: 800; }
+.report-status.status-term { color: #ef4444; font-weight: 800; }
+
+.report-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.report-title-row h2 {
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.target-badge {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.report-grid-two-col {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.r-metric {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  margin-bottom: 4px;
+}
+
+.r-label {
+  color: var(--text-muted);
+}
+
+.r-val {
+  font-weight: 700;
+}
+
+.new-record-pill {
+  font-size: 0.58rem;
+  color: #ffd600;
+  font-weight: 800;
+  margin-left: 4px;
+}
+
+.r-subhead {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 2px;
+  margin-bottom: 4px;
+}
+
+.report-badges-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.badge-pill {
+  font-size: 0.58rem;
+  font-weight: 800;
+  padding: 3px 6px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+.badge-gold { background: rgba(255, 214, 0, 0.15); color: #ffd600; border: 1px solid #ffd600; }
+.badge-green { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid #10b981; }
+.badge-purple { background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid #a855f7; }
+
+.report-actions-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.primary-report-btn {
+  background: linear-gradient(135deg, #00e5ff, #0077ff);
+  color: #030712;
+  border: none;
+  font-family: var(--font-mono);
+  font-weight: 900;
+  font-size: 0.78rem;
+  padding: 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.primary-report-btn:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.secondary-report-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.secondary-report-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: #ffffff;
+}
+
+.report-footer-note {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Boss Detected Modal (Reference Panel 3) */
+.boss-blueprint-modal {
+  max-width: 560px;
+  background: #090c17;
+  border: 1px solid #ff0055;
+  box-shadow: 0 0 50px rgba(255, 0, 85, 0.35);
+  box-sizing: border-box;
+}
+
+.blueprint-header-warning {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  color: #ff0055;
+  font-weight: 900;
+}
+.blueprint-header-warning h2 {
+  font-size: 1.1rem;
+  margin: 0;
+  letter-spacing: 1.5px;
+}
+.warning-triangle {
+  font-size: 0.8rem;
+  animation: pulseLed 0.8s infinite alternate;
+}
+
+.boss-name-sub {
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: -2px;
+  margin-bottom: 4px;
+}
+
+.boss-briefing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 0, 85, 0.2);
+  border-radius: 6px;
+  padding: 10px;
+}
+
+.boss-stats-col, .boss-phases-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.65rem;
+}
+
+.b-stat-row {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+}
+.b-stat-row b {
+  color: #ffffff;
+}
+
+.boss-lang-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.l-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.58rem;
+}
+.l-name { width: 26px; color: var(--text-muted); font-weight: 700; }
+.l-track { flex: 1; height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px; }
+.l-fill { height: 100%; border-radius: 2px; }
+
+.phase-item {
+  color: #e2e8f0;
+  font-weight: 700;
+}
+.phase-item span { color: #ff0055; margin-right: 4px; }
+
+.boss-health-preview {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.hp-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+.hp-track-preview {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 0, 85, 0.4);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.hp-fill-preview {
+  width: 100%;
+  height: 100%;
+  background: #ff0055;
+  box-shadow: 0 0 8px #ff0055;
+}
+
+.boss-briefing-alert {
+  font-size: 0.58rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+  margin-top: 4px;
+  border-top: 1px dashed rgba(255, 0, 85, 0.3);
+  padding-top: 4px;
+}

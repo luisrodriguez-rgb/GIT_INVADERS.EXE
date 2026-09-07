@@ -1,0 +1,235 @@
+/* In-Game HUD */
+.hud-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+  padding: 10px 14px;
+  box-sizing: border-box;
+}
+
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(6, 9, 19, 0.88);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 6px 14px;
+  backdrop-filter: blur(4px);
+}
+
+.hud-brand-repo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.hud-brand-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+}
+
+.hud-repo-tag {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.hud-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hud-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.hud-val {
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.hud-cyan { color: #00e5ff; }
+.hud-green { color: #10b981; }
+.hud-yellow { color: #ffd600; }
+.hud-pink { color: #ff007f; }
+
+.hud-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(4, 7, 15, 0.65);
+  border: 1px solid var(--border-primary);
+  border-radius: 6px;
+  padding: 4px 10px;
+  backdrop-filter: blur(6px);
+  gap: 10px;
+}
+
+.hud-stats-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-stat {
+  font-size: 0.8rem;
+}
+
+.rank-badge-tag {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+  color: #10b981;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.hud-powers-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.power-slot {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+
+.power-key {
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.power-val {
+  color: #ffffff;
+}
+
+.power-slot.power-ready {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+}
+
+.power-slot.power-active {
+  border-color: #ffd600;
+  background: rgba(255, 214, 0, 0.25);
+  color: #ffd600;
+  animation: pulseLed 0.6s infinite alternate;
+}
+
+.overdrive-meter-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 140px;
+}
+
+.overdrive-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #ff007f;
+}
+
+.overdrive-track {
+  width: 100%;
+  height: 7px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 0, 127, 0.3);
+}
+
+.overdrive-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a855f7, #ff007f);
+  transition: width 0.15s ease-out;
+}
+
+.overdrive-fill.overdrive-ready {
+  background: #ff007f;
+  box-shadow: 0 0 10px #ff007f;
+  animation: pulseGlow 0.8s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.4); }
+}
+
+.ready-pulse {
+  animation: textFlash 0.5s infinite alternate;
+}
+
+@keyframes textFlash {
+  from { color: #ff007f; }
+  to { color: #ffffff; }
+}
+
+/* Boss HUD Bar */
+.boss-hud-bar {
+  margin: 10px auto 0 auto;
+  width: 70%;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 6px;
+  padding: 6px 12px;
+  text-align: center;
+}
+
+.boss-hud-title {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
+
+.boss-phase-badge {
+  color: #ffd600;
+  font-size: 0.7rem;
+}
+
+.boss-hp-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.boss-hp-fill {
+  height: 100%;
+  transition: width 0.15s ease;
+}
+
+.boss-hp-text {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}

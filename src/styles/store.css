@@ -1,0 +1,532 @@
+/* Store Panel - GIT_STORE.EXE & Engineering Bay */
+.panel-store-window {
+  width: 740px;
+  max-width: 96%;
+  max-height: 590px;
+  background: rgba(5, 9, 20, 0.95);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 35px rgba(0, 229, 255, 0.2);
+  border-radius: 8px;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+  font-family: var(--font-mono);
+}
+
+.store-panel-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  padding-bottom: 8px;
+}
+
+.store-panel-tabs-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.store-octo-icon {
+  color: #00e5ff;
+  display: flex;
+  align-items: center;
+}
+
+.store-header-tab {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.store-header-tab:hover {
+  border-color: rgba(0, 229, 255, 0.5);
+  color: #00e5ff;
+}
+
+.store-header-tab.tab-active {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00e5ff;
+  color: #00e5ff;
+}
+
+.store-credits-display {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+}
+
+.store-credits-display .credits-label {
+  color: var(--text-muted);
+}
+
+.store-credits-display .credits-amount {
+  color: #10b981;
+  font-weight: 800;
+}
+
+.store-sub-nav {
+  display: flex;
+  gap: 6px;
+}
+
+.sub-nav-chip {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sub-nav-chip:hover,
+.sub-nav-chip.chip-active {
+  background: rgba(0, 229, 255, 0.2);
+  border-color: #00e5ff;
+  color: #00e5ff;
+}
+
+.store-panel-body {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 14px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.store-catalog-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 380px;
+  padding-right: 4px;
+}
+
+.store-item-card {
+  display: flex;
+  align-items: center;
+  background: rgba(10, 16, 30, 0.7);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 6px;
+  padding: 8px 12px;
+  gap: 10px;
+  transition: border-color 0.2s;
+}
+
+.store-item-card:hover {
+  border-color: rgba(0, 229, 255, 0.4);
+}
+
+.store-item-icon {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+}
+
+.store-item-icon.cyan-tint { border-color: #00e5ff; color: #00e5ff; background: rgba(0, 229, 255, 0.1); }
+.store-item-icon.green-tint { border-color: #10b981; color: #10b981; background: rgba(16, 185, 129, 0.1); }
+.store-item-icon.purple-tint { border-color: #a855f7; color: #a855f7; background: rgba(168, 85, 247, 0.1); }
+.store-item-icon.blue-tint { border-color: #3b82f6; color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+.store-item-icon.pink-tint { border-color: #ec4899; color: #ec4899; background: rgba(236, 72, 153, 0.1); }
+
+.store-item-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.store-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.store-item-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.store-item-level {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.store-item-desc {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.store-action-btn {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.store-action-btn.btn-buy {
+  background: rgba(16, 185, 129, 0.15);
+  border-color: #10b981;
+  color: #10b981;
+}
+
+.store-action-btn.btn-buy:hover {
+  background: #10b981;
+  color: #000000;
+}
+
+.store-action-btn.btn-max,
+.store-action-btn.btn-equipped {
+  background: rgba(0, 229, 255, 0.15);
+  border-color: #00e5ff;
+  color: #00e5ff;
+  cursor: default;
+}
+
+.store-action-btn.btn-locked {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.store-showcase-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.store-ship-card {
+  background: rgba(10, 16, 30, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 6px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ship-card-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #00e5ff;
+  letter-spacing: 0.5px;
+}
+
+.ship-card-viewport {
+  width: 180px;
+  height: 150px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.ship-card-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ship-stat-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+}
+
+.ship-stat-row .stat-name {
+  color: var(--text-muted);
+}
+
+.ship-stat-row .stat-val {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.store-equip-badge {
+  width: 100%;
+  margin-top: 4px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+  color: #10b981;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 5px;
+  border-radius: 4px;
+  cursor: default;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.dot-equipped {
+  color: #10b981;
+  font-size: 0.6rem;
+}
+
+/* Ship Engineering Bay */
+.engineering-bay-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.bay-carousel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 8px;
+}
+
+.bay-nav-btn {
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 4px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.bay-nav-btn:hover {
+  background: rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+}
+
+.bay-hologram-title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.bay-hologram-label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+}
+
+.bay-ship-name {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+}
+
+.bay-ship-tag {
+  font-size: 0.62rem;
+  color: #00e5ff;
+  letter-spacing: 1px;
+}
+
+.bay-hologram-viewport {
+  width: 100%;
+  max-width: 360px;
+  height: 155px;
+  background: radial-gradient(circle at center, rgba(0, 229, 255, 0.08) 0%, rgba(5, 9, 20, 0.8) 75%);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.15);
+}
+
+.bay-stats-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(10, 16, 30, 0.8);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 6px;
+  padding: 6px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bay-stat-line {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+}
+
+.bay-stat-name {
+  color: var(--text-muted);
+  width: 90px;
+}
+
+.bay-stat-blocks {
+  color: #00e5ff;
+  letter-spacing: 1px;
+  font-weight: 700;
+}
+
+.bay-stat-val {
+  color: #ffffff;
+  font-weight: 700;
+  width: 35px;
+  text-align: right;
+}
+
+.bay-ability-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 6px;
+  padding: 6px 12px;
+  text-align: left;
+}
+
+.bay-ability-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.bay-ability-title {
+  color: #10b981;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.bay-ability-key {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid #10b981;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.62rem;
+  font-weight: 800;
+}
+
+.bay-ability-desc {
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  line-height: 1.25;
+}
+
+.bay-actions-row {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 440px;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.bay-action-primary {
+  flex: 1;
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 800;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.bay-action-upgrade {
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  border-radius: 4px;
+  cursor: pointer;
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.4);
+  color: #00e5ff;
+  transition: all 0.2s;
+}
+
+.bay-action-upgrade:hover {
+  background: rgba(0, 229, 255, 0.25);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.3);
+}
+
+.store-panel-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(0, 229, 255, 0.15);
+  padding-top: 8px;
+}
+
+.footer-tagline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.store-exit-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.store-exit-btn:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+}

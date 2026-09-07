@@ -1,0 +1,187 @@
+/* ===================================================
+   THEME PALETTES
+   =================================================== */
+
+/* 1. Matrix Phosphor (Oscuro) */
+body[data-theme="matrix"] {
+  --bg-cabinet: #020b04;
+  --bg-bezel: #031407;
+  --bg-screen: #010903;
+  --border-primary: #00ff66;
+  --border-secondary: #10b981;
+  --text-main: #e6ffed;
+  --text-muted: #4ade80;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(0, 255, 102, 0.1) 0%, transparent 60%),
+    linear-gradient(to bottom, #010602, #020e05);
+}
+body[data-theme="matrix"] .header-title,
+body[data-theme="matrix"] .hud-cyan {
+  color: #00ff66;
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
+}
+
+/* 2. Modo Claro (GitHub Light) */
+body[data-theme="light"] {
+  --bg-cabinet: #eaeff5;
+  --bg-bezel: #ffffff;
+  --bg-screen: #f6f8fa;
+  --bg-card: rgba(255, 255, 255, 0.96);
+  --border-primary: #1a7f37;
+  --border-secondary: #0969da;
+  --text-main: #1f2328;
+  --text-muted: #656d76;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(26, 127, 55, 0.08) 0%, transparent 60%),
+    linear-gradient(to bottom, #e1e7ed, #f6f8fa);
+}
+body[data-theme="light"] .arcade-header,
+body[data-theme="light"] .monitor-wrapper,
+body[data-theme="light"] .terminal-card,
+body[data-theme="light"] .modal-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+body[data-theme="light"] .header-title {
+  color: #1a7f37;
+  text-shadow: none;
+}
+body[data-theme="light"] .hud-top,
+body[data-theme="light"] .hud-bottom {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: #d0d7de;
+  color: #1f2328;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+body[data-theme="light"] .hud-label,
+body[data-theme="light"] .hud-tag,
+body[data-theme="light"] .power-key {
+  color: #57606a;
+}
+body[data-theme="light"] .hud-val,
+body[data-theme="light"] .hud-stat b,
+body[data-theme="light"] .power-val {
+  color: #1f2328;
+}
+body[data-theme="light"] .power-slot {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .power-slot.power-ready {
+  background: rgba(9, 105, 218, 0.12);
+  border-color: #0969da;
+  color: #0969da;
+}
+body[data-theme="light"] .theme-dropdown {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+body[data-theme="light"] .theme-dropdown option {
+  background: #ffffff;
+  color: #1f2328;
+}
+body[data-theme="light"] .control-chip {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: #d0d7de;
+  color: #57606a;
+}
+body[data-theme="light"] .control-chip.active {
+  background: rgba(26, 127, 55, 0.12);
+  border-color: #1a7f37;
+  color: #1a7f37;
+}
+body[data-theme="light"] .overdrive-label {
+  color: #1f2328;
+}
+body[data-theme="light"] .overdrive-track {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: #d0d7de;
+}
+
+/* Light Theme overrides for Lobby */
+body[data-theme="light"] .lobby-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.12);
+}
+body[data-theme="light"] .lobby-title {
+  color: #1a7f37;
+}
+body[data-theme="light"] .hangar-bay-panel,
+body[data-theme="light"] .pilot-ops-panel,
+body[data-theme="light"] .xp-balance-banner,
+body[data-theme="light"] .career-stats-box {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #1f2328;
+}
+body[data-theme="light"] .ship-viewport-box {
+  background: #eaeff5;
+  border-color: #1a7f37;
+}
+body[data-theme="light"] .spec-cell {
+  background: #ffffff;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .lobby-skin-chip {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+}
+body[data-theme="light"] .primary-deploy-btn {
+  background: linear-gradient(135deg, #1a7f37, #0969da);
+  color: #ffffff;
+}
+
+/* 3. Cyberpunk Neon (Fucsia) */
+body[data-theme="cyberpunk"] {
+  --bg-cabinet: #0d061a;
+  --bg-bezel: #190933;
+  --bg-screen: #07030e;
+  --border-primary: #ff007f;
+  --border-secondary: #00f0ff;
+  --text-main: #fdf2f8;
+  --text-muted: #f472b6;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(255, 0, 127, 0.15) 0%, transparent 60%),
+    linear-gradient(to bottom, #07030e, #130626);
+}
+body[data-theme="cyberpunk"] .header-title {
+  color: #ff007f;
+  text-shadow: 0 0 12px rgba(255, 0, 127, 0.7);
+}
+
+/* 4. Cyber Cyan (Azul) - Default */
+body[data-theme="cyan"] {
+  --bg-cabinet: #040b17;
+  --bg-bezel: #0a1628;
+  --bg-screen: #030813;
+  --border-primary: #00e5ff;
+  --border-secondary: #38bdf8;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.12) 0%, transparent 60%),
+    linear-gradient(to bottom, #020611, #081122);
+}
+
+/* 5. Amber CRT (Terminal) */
+body[data-theme="amber"] {
+  --bg-cabinet: #140800;
+  --bg-bezel: #240f02;
+  --bg-screen: #0a0400;
+  --border-primary: #ffb000;
+  --border-secondary: #ea580c;
+  --text-main: #fffbeb;
+  --text-muted: #f59e0b;
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(255, 176, 0, 0.12) 0%, transparent 60%),
+    linear-gradient(to bottom, #090300, #170901);
+}
+body[data-theme="amber"] .header-title {
+  color: #ffb000;
+  text-shadow: 0 0 10px rgba(255, 176, 0, 0.6);
+}
