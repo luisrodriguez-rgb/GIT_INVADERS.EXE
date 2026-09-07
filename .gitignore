@@ -45,3 +45,5 @@ temp/
 # Astro Build Cache
 .astro/
 
+# Pnpm Store
+.pnpm-store/
