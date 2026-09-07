@@ -16,44 +16,16 @@ export class Sprites {
     glowColor: string = '#38bdf8',
     time: number = 0,
     hpRatio: number = 1.0,
-    isThrusting: boolean = false
+    isThrusting: boolean = false,
+    shipId: string = 'compiler_delta'
   ): void {
-    // Generate dynamic design reflecting skin colors
+    const baseDesign = ShipComposer.createPreset(shipId);
     const design: ShipDesign = {
-      name: 'VECTOR_FALCON',
+      ...baseDesign,
       hull: {
-        noseSweep: 0.32,
-        waistIndent: 0.22,
-        platingPanels: 4,
-        primaryColor: hullColor,
-        accentColor: glowColor,
-        armorTint: '#0369a1',
-      },
-      wings: {
-        span: 1.0,
-        sweepAngle: 0.58,
-        wingtipCannons: true,
-        stabilizerFins: true,
-        accentStripeColor: glowColor,
-      },
-      cockpit: {
-        visorColor: glowColor,
-        glowIntensity: 1.0,
-        corePulseSpeed: 4,
-      },
-      engines: {
-        nozzleCount: 2,
-        heatColor: hullColor,
-        trailColor: glowColor,
-        flickerRate: 14,
-      },
-      weapons: {
-        hardpointPositions: [
-          { x: -0.5, y: 0.18 },
-          { x: 0.5, y: 0.18 },
-        ],
-        barrelLength: 8,
-        muzzleColor: hullColor,
+        ...baseDesign.hull,
+        primaryColor: hullColor || baseDesign.hull.primaryColor,
+        accentColor: glowColor || baseDesign.hull.accentColor,
       },
     };
 

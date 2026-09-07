@@ -1,12 +1,33 @@
-export interface ShipSkin {
+export interface ShipStats {
+  armor: number; // 0 - 100
+  speed: number; // 0 - 100
+  fireRate: number; // 0 - 100
+  shield: number; // 0 - 100
+}
+
+export interface ShipAbility {
   id: string;
   name: string;
+  triggerKey: string; // 'SPACE', 'Q', 'E', 'SHIFT', 'PASSIVE'
+  description: string;
+  mechanic: string;
+}
+
+export interface ShipModel {
+  id: string;
+  name: string;
+  classTag: string;
   hullColor: string;
   glowColor: string;
   cost: number;
   unlocked: boolean;
-  description?: string;
+  stats: ShipStats;
+  ability: ShipAbility;
+  description: string;
 }
+
+// Backward-compatible alias
+export type ShipSkin = ShipModel;
 
 export interface PlayerProfile {
   totalXp: number;
@@ -36,17 +57,155 @@ export class Store {
     quantumPiercing: false,
     startingShield: false,
     rebaseSlowMoUnlocked: false,
-    activeSkinId: 'cyan',
-    unlockedSkins: ['cyan'],
+    activeSkinId: 'compiler_delta',
+    unlockedSkins: ['compiler_delta', 'cyan'],
   };
 
-  public readonly SKINS: ShipSkin[] = [
-    { id: 'cyan', name: 'Compiler Delta', hullColor: '#00e5ff', glowColor: '#38bdf8', cost: 0, unlocked: true, description: 'Interceptor balanceado con reactores de plasma gemelos.' },
-    { id: 'purple', name: 'Phantom Violet', hullColor: '#c084fc', glowColor: '#a855f7', cost: 400, unlocked: false, description: 'Caza de sigilo con envergadura extendida y canones de antimateria.' },
-    { id: 'amber', name: 'Solar Gold', hullColor: '#fbbf24', glowColor: '#f59e0b', cost: 600, unlocked: false, description: 'Acorazado pesado de triple tobera con blindaje reforzado.' },
-    { id: 'matrix', name: 'Emerald Glitch', hullColor: '#00ff66', glowColor: '#10b981', cost: 800, unlocked: false, description: 'Caza experimental de ala invertida con estabilizadores de flujo.' },
-    { id: 'cyberpunk', name: 'Neon Overdrive', hullColor: '#ff007f', glowColor: '#ec4899', cost: 1000, unlocked: false, description: 'Nave de asalto rapido con cuatro puntos duros de anclaje frontal.' },
-    { id: 'quantum_citadel', name: 'Quantum Citadel', hullColor: '#6366f1', glowColor: '#22d3ee', cost: 1500, unlocked: false, description: 'Fortaleza orbital con ocho paneles de titanio y deflectores pesados.' },
+  public readonly SKINS: ShipModel[] = [
+    {
+      id: 'compiler_delta',
+      name: 'Compiler Delta',
+      classTag: 'ENGINEERING // CORE DEV',
+      hullColor: '#00e5ff',
+      glowColor: '#38bdf8',
+      cost: 0,
+      unlocked: true,
+      stats: { armor: 60, speed: 60, fireRate: 60, shield: 50 },
+      ability: {
+        id: 'compiler_burst',
+        name: 'COMPILER BURST',
+        triggerKey: 'SPACE',
+        description: 'Fires a 3-round precision plasma burst with tight spread.',
+        mechanic: 'Tri-burst pulse cadence'
+      },
+      description: 'Fuselaje triangular con reactores duales cyan. La nave de ingenieria equilibrada.'
+    },
+    {
+      id: 'phantom_violet',
+      name: 'Phantom Violet',
+      classTag: 'STEALTH // RECONNAISSANCE',
+      hullColor: '#c084fc',
+      glowColor: '#a855f7',
+      cost: 400,
+      unlocked: false,
+      stats: { armor: 40, speed: 100, fireRate: 70, shield: 30 },
+      ability: {
+        id: 'git_stash',
+        name: 'GIT STASH',
+        triggerKey: 'E',
+        description: 'Temporal phase cloak: intangible to bullets, cannot shoot while stashed.',
+        mechanic: 'Phase intangibility 3.5s'
+      },
+      description: 'Silueta delgada y aerodinamica con baja firma termica. Ideal para infiltracion y evasivas.'
+    },
+    {
+      id: 'merge_hammer',
+      name: 'Merge Hammer',
+      classTag: 'HEAVY SIEGE TANK',
+      hullColor: '#fbbf24',
+      glowColor: '#f59e0b',
+      cost: 600,
+      unlocked: false,
+      stats: { armor: 100, speed: 30, fireRate: 40, shield: 80 },
+      ability: {
+        id: 'merge_shield',
+        name: 'MERGE SHIELD / BURST',
+        triggerKey: 'E',
+        description: 'Frontal shield absorbs hits. When charged, releases massive MERGE BURST shockwave.',
+        mechanic: 'Kinetic absorption wave'
+      },
+      description: 'Armadura de asedio reforzada y triple tobera pesada. Tanque espacial impenetrable.'
+    },
+    {
+      id: 'branch_runner',
+      name: 'Branch Runner',
+      classTag: 'MULTI-VECTOR TACTICAL',
+      hullColor: '#10b981',
+      glowColor: '#34d399',
+      cost: 800,
+      unlocked: false,
+      stats: { armor: 50, speed: 80, fireRate: 60, shield: 50 },
+      ability: {
+        id: 'branch_split',
+        name: 'BRANCH SPLIT',
+        triggerKey: 'E',
+        description: 'Spawns 2 drone clones flanking the ship that mirror weapon fire, then branch merges back.',
+        mechanic: 'Dual support drones 5s'
+      },
+      description: 'Fuselaje trifurcado con tres estelas vectoriales independientes. Domina el espacio con ramas simultaneas.'
+    },
+    {
+      id: 'rebase_01',
+      name: 'Rebase-01',
+      classTag: 'AGGRESSIVE INTERCEPTOR',
+      hullColor: '#ff0055',
+      glowColor: '#ff3366',
+      cost: 1000,
+      unlocked: false,
+      stats: { armor: 40, speed: 90, fireRate: 90, shield: 20 },
+      ability: {
+        id: 'git_rebase',
+        name: 'GIT REBASE',
+        triggerKey: 'Q',
+        description: 'Accumulates energy during slow-motion, then executes an ultra-velocity penetrating dash.',
+        mechanic: 'Piercing hyper-dash'
+      },
+      description: 'Nariz afilada con tobera central de sobreaceleracion. Ataque veloz y demoledor.'
+    },
+    {
+      id: 'quantum_wing',
+      name: 'Quantum Wing',
+      classTag: 'EXPERIMENTAL WARPING CRAFT',
+      hullColor: '#22d3ee',
+      glowColor: '#6366f1',
+      cost: 1200,
+      unlocked: false,
+      stats: { armor: 50, speed: 70, fireRate: 60, shield: 60 },
+      ability: {
+        id: 'quantum_pierce',
+        name: 'QUANTUM PIERCE',
+        triggerKey: 'PASSIVE',
+        description: 'Plasma shots pierce clean through entire columns of enemies without dissipating.',
+        mechanic: 'Infinite laser penetration'
+      },
+      description: 'Geometria asimetrica con puntas de ala flotantes y reactor gravitacional desvinculado.'
+    },
+    {
+      id: 'octo_core',
+      name: 'Octo-Core',
+      classTag: 'LEGENDARY GUARDIAN',
+      hullColor: '#38bdf8',
+      glowColor: '#0284c7',
+      cost: 1500,
+      unlocked: false,
+      stats: { armor: 70, speed: 60, fireRate: 70, shield: 90 },
+      ability: {
+        id: 'octo_protocol',
+        name: 'OCTO PROTOCOL',
+        triggerKey: 'E',
+        description: 'Summons up to 8 rotating micro-drones around the ship that intercept incoming enemy projectiles.',
+        mechanic: '8 orbital defense drones'
+      },
+      description: 'Nucleo circular con 8 nodos de contencion y alerones en forma de tentaculos. El bastion de GitHub.'
+    },
+    {
+      id: 'codebreaker_x',
+      name: 'Codebreaker // X',
+      classTag: 'ULTIMATE DREADNOUGHT',
+      hullColor: '#a855f7',
+      glowColor: '#c084fc',
+      cost: 2500,
+      unlocked: false,
+      stats: { armor: 100, speed: 60, fireRate: 100, shield: 90 },
+      ability: {
+        id: 'force_push',
+        name: 'FORCE PUSH',
+        triggerKey: 'SHIFT',
+        description: 'Wipes remote history with a colossal screen-clearing beam obliterating enemy waves.',
+        mechanic: 'Colossal compiler beam'
+      },
+      description: 'Placas de aleacion oscura, 6 puntos de anclaje y reactor hipercuantico. Una maquina de guerra total.'
+    },
   ];
 
   private constructor() {
