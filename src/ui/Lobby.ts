@@ -465,17 +465,17 @@ export class Lobby {
       <div class="lobby-subview-container">
         <div class="subview-header">
           <span class="subview-title">PILOT DOSSIER // SERVICE RECORD</span>
-          <span class="subview-desc">CALL SIGN: PILOT_DEV // ACTIVE DEPLOYMENT</span>
+          <span class="subview-desc">CALL SIGN: @luisrodriguez-rgb // LEAD ARCHITECT</span>
         </div>
 
         <div class="profile-dossier-layout">
           <!-- Left: Pilot Status & Hardware -->
           <div class="profile-identity-box">
             <div class="profile-rank-header">
-              <div class="profile-rank-badge">[ ${prof.level} ]</div>
+              <img src="https://github.com/luisrodriguez-rgb.png" class="profile-pilot-avatar" alt="Luis Rodriguez" />
               <div class="profile-rank-info">
-                <span class="profile-callsign">PILOT_01 // ARCHITECT</span>
-                <span class="profile-rank-title">${Security.escapeHtml(prof.rankName.toUpperCase())}</span>
+                <span class="profile-callsign">LUIS RODRIGUEZ // @luisrodriguez-rgb</span>
+                <span class="profile-rank-title">CLEARANCE LVL ${prof.level} • ${Security.escapeHtml(prof.rankName.toUpperCase())}</span>
               </div>
             </div>
 

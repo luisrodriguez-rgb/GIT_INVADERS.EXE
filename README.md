@@ -20,18 +20,23 @@
 ## Galeria Visual de la Suite Arcade
 
 ### Panel 1: Hangar, Telemetria de Repository DNA y Selector de Modo
+
 ![Panel 1: Hangar Telemetria y Dossier de Piloto](docs/screenshots/hangar_panel1.png)
 
 ### Panel 2: Arena de Combate, Tactical HUD y Matriz Deflectora de Boss
+
 ![Panel 2: Arena de Combate y HUD Tactico](docs/screenshots/combat_hud_panel2.png)
 
 ### Panel 4: Terminal BIOS, Logs de Eventos Git en Tiempo Real
+
 ![Panel 4: Terminal BIOS y Diagnosticos](docs/screenshots/terminal_bios_panel4.png)
 
 ### Panel 5: Mision Terminada, Debriefing de Combate y Progresion
+
 ![Panel 5: Debriefing de Mision y Estadisticas](docs/screenshots/mission_terminated_panel5.png)
 
 ### Panel 6: Arsenal Cibernetico, Overclocks de Firmware y Hangares de Naves
+
 ![Panel 6: Tienda Cibernetica y Hangar de Naves](docs/screenshots/git_store_panel6.png)
 
 ---
@@ -106,6 +111,7 @@ El motor evalua la composicion de lenguajes del repositorio analizado y altera l
 ## Sistema de Naves: Ship DNA y Arquetipos Vectoriales
 
 El subsistema `ShipComposer` desacopla la geometria fisica de la nave en 8 capas vectoriales renderizadas a 60 FPS sin imagenes rasterizadas:
+
 1. **Engines Flares:** Gradiente radial con fulgor dinamico y toberas mecanicas.
 2. **Wings & Stabilizers:** Geometria alar con franjas de telemetria y cañones alares.
 3. **Armored Hull Plating:** Casco central con nervadura dorsal y biseles.
@@ -116,6 +122,7 @@ El subsistema `ShipComposer` desacopla la geometria fisica de la nave en 8 capas
 8. **Kinetic Shield Bubble:** Campo de fuerza radial con efecto Fresnel y absorcion de impacto.
 
 ### Arquetipos de Naves en el Hangar
+
 1. **CYBER FALCON / COMPILER DELTA:** Caza interceptor balanceado con doble tobera de plasma cian (`#00e5ff`) y alas en flecha moderada.
 2. **PHANTOM VIOLET:** Nave de sigilo con envergadura extendida (1.15x), cañones dobles de antimateria magenta y toberas purpuras (`#c084fc`).
 3. **SOLAR GOLD:** Acorazado pesado de tres toberas de reaccion ambar (`#fbbf24`), cinco paneles blindados y blasters gemelos reforzados.
@@ -140,6 +147,7 @@ El subsistema `ShipComposer` desacopla la geometria fisica de la nave en 8 capas
 ## Biblioteca Vectorial SVG (`SvgAssets`)
 
 El motor incluye primitivas vectoriales de precision cero dependencias para su proyeccion tanto en Canvas2D mediante `Path2D` como en el DOM:
+
 - `OCTOCAT_PATH`: Silueta oficial del Octocat de GitHub para naves misteriosas e insignias.
 - `GIT_PULL_REQUEST_PATH`: Glifo de bifurcacion y union de ramas PR.
 - `GIT_COMMIT_PATH`: Nodo individual de historial con lineas de enlace.
@@ -151,6 +159,7 @@ El motor incluye primitivas vectoriales de precision cero dependencias para su p
 ## Formaciones y Estrategias de Movimiento
 
 ### Formaciones de Oleadas (`WaveGenerator`)
+
 - `GRID`: Formacion clasica Space Invaders (10 columnas x 5 filas) para la primera oleada limpia.
 - `V_CHEVRON / DELTA_WING`: Formacion piramidal con cruceros PR en los flancos y bugs en vanguardia.
 - `DIAMOND`: Rombo concentrico con escolta pesada en el centro.
@@ -158,6 +167,7 @@ El motor incluye primitivas vectoriales de precision cero dependencias para su p
 - `PINCER / FLANKING_HELIX`: Dos columnas blindadas en las bandas con avanzadas rapidas de bugs.
 
 ### Estrategias de IA (`MovementStrategies`)
+
 - `FormationMovement`: Movimiento coordenado en rejilla con descenso al borde de pantalla.
 - `ZigZagMovement`: Oscilacion lateral senoidal para unidades agiles.
 - `DiveAttack`: Aceleracion en picada hacia las coordenadas exactas del jugador.
@@ -170,6 +180,7 @@ El motor incluye primitivas vectoriales de precision cero dependencias para su p
 ## Maquina de Estados del Boss (`BossStateMachine`)
 
 El combate contra el Code Boss responde de forma dinamica al comportamiento del jugador:
+
 - `ENTER`: Incursion hiperespacial descendente hacia la cota de combate.
 - `ATTACK`: Salvas calibradas segun el numero de contribuidores del repositorio.
 - `ENRAGED`: Activado por tiempo o dano rapido (+40% cadencia de fuego).
@@ -182,6 +193,7 @@ El combate contra el Code Boss responde de forma dinamica al comportamiento del 
 ## Sistema de Particulas Semanticas
 
 Las explosiones emiten tokens de desarrollo tipados segun el enemigo purgado:
+
 - **Commits:** `commit`, `hash`, `#`, `git`, `0x7F`, `diff`, `HEAD`
 - **Pull Requests:** `PR`, `merge`, `< >`, `{ }`, `branch`, `approve`, `rebase`
 - **Issues:** `BUG`, `404`, `!`, `null`, `void`, `ERR`, `panic`
@@ -201,6 +213,7 @@ Las explosiones emiten tokens de desarrollo tipados segun el enemigo purgado:
 ## Tienda y Progresion (`GIT_STORE.EXE`)
 
 Acumula XP y creditos en combate para desbloquear mejoras persistentes en `localStorage`:
+
 - **Blaster Overclock (Lvl 1 - 5):** Reduce el tiempo de recarga del disparo principal (+12% por nivel).
 - **Thrust Velocity (Lvl 1 - 5):** Aumenta la velocidad de maniobra de la nave (+15% por nivel).
 - **Quantum Piercing Lasers:** Los blasters perforan el primer invasor impactando objetivos posteriores.
@@ -246,4 +259,14 @@ pnpm build
 
 ## Licencia
 
-MIT (c) 2026 Luis Felipe Rodriguez - Disenado como motor interactivo de datos y simulacion arcade procedural.
+Desarrollado y mantenido por **Luis Rodriguez** ([@luisrodriguez-rgb](https://github.com/luisrodriguez-rgb)).
+
+<div align="center">
+  <a href="https://github.com/luisrodriguez-rgb">
+    <img src="https://github.com/luisrodriguez-rgb.png" width="90" height="90" style="border-radius: 50%; border: 3px solid #2563eb;" alt="Luis Rodriguez" />
+    <br/>
+    <strong>Luis Rodriguez (luisrodriguez-rgb)</strong>
+  </a>
+</div>
+
+MIT (c) 2026 - Disenado como motor interactivo de datos y simulacion arcade procedural.
