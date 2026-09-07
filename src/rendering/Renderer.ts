@@ -5,6 +5,7 @@ import { Bunker } from '../entities/Bunker';
 import { Boss } from '../entities/Boss';
 import { ParticleSystem } from './Particles';
 import { CRTEffects } from './CRT';
+import { ThemeManager } from '../themes/ThemeManager';
 
 interface Star {
   x: number;
@@ -90,7 +91,7 @@ export class Renderer {
     }
 
     // 1. Deep Space Void Background
-    this.ctx.fillStyle = '#060913';
+    this.ctx.fillStyle = ThemeManager.getInstance().currentTheme.bgScreen;
     this.ctx.fillRect(0, 0, this.width, this.height);
 
     // 2. Stars
