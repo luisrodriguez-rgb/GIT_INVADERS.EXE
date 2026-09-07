@@ -1644,3 +1644,279 @@ body[data-theme="light"] .keybinds-table td:last-child {
   color: #0969da;
 }
 
+/* ===================================================
+   HANGAR V2 — 3-COLUMN LAYOUT
+   =================================================== */
+
+.hangar-tri-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  flex: 1;
+  min-height: 0;
+}
+
+.hangar-col {
+  background: rgba(8, 14, 26, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hcol-label {
+  font-size: 0.58rem;
+  font-weight: 900;
+  color: var(--border-primary);
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  padding-bottom: 5px;
+  flex-shrink: 0;
+}
+
+.hangar-col-left .ship-hologram-stage {
+  height: 140px;
+  flex-shrink: 0;
+}
+
+.hangar-col-left .stage-canvas {
+  width: 100%;
+  height: 140px;
+}
+
+/* Hardware bars */
+.hw-bars-block {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.hw-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6rem;
+}
+
+.hw-bar-label {
+  width: 52px;
+  color: var(--text-muted);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.hw-bar-track {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hw-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.5s ease;
+}
+
+.hw-bar-fill.accent-cyan   { background: #00e5ff; box-shadow: 0 0 6px rgba(0,229,255,0.5); }
+.hw-bar-fill.accent-yellow { background: #ffd600; box-shadow: 0 0 6px rgba(255,214,0,0.4); }
+.hw-bar-fill.accent-green  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+
+.hw-bar-val {
+  width: 28px;
+  text-align: right;
+  color: #ffffff;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.lang-pct {
+  width: 28px;
+  text-align: right;
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ===================================================
+   SCAN ANIMATION
+   =================================================== */
+
+.scan-target-zone {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+}
+
+.scan-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+  overflow: hidden;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.scan-target-zone.scanning .scan-overlay {
+  opacity: 1;
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00e5ff 30%, #00e5ff 70%, transparent);
+  box-shadow: 0 0 12px 4px rgba(0, 229, 255, 0.6);
+  top: 0;
+}
+
+.scan-target-zone.scanning .scan-line {
+  animation: scanSweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes scanSweep {
+  0%   { top: 0%; opacity: 0; }
+  5%   { opacity: 1; }
+  90%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+.scan-corner {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-color: #00e5ff;
+  border-style: solid;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.scan-target-zone.scanning .scan-corner {
+  opacity: 1;
+  animation: cornerPulse 1.2s ease forwards;
+}
+
+.scan-corner.tl { top: 2px; left: 2px;   border-width: 2px 0 0 2px; }
+.scan-corner.tr { top: 2px; right: 2px;  border-width: 2px 2px 0 0; }
+.scan-corner.bl { bottom: 2px; left: 2px;  border-width: 0 0 2px 2px; }
+.scan-corner.br { bottom: 2px; right: 2px; border-width: 0 2px 2px 0; }
+
+@keyframes cornerPulse {
+  0%, 100% { box-shadow: none; }
+  50%       { box-shadow: 0 0 8px rgba(0,229,255,0.8); }
+}
+
+.scan-target-zone.scanning {
+  animation: scanTint 1.2s ease forwards;
+}
+
+@keyframes scanTint {
+  0%   { background: rgba(0,229,255,0); }
+  20%  { background: rgba(0,229,255,0.04); }
+  80%  { background: rgba(0,229,255,0.04); }
+  100% { background: rgba(0,229,255,0); }
+}
+
+/* ===================================================
+   BOSS ENCOUNTER COLUMN
+   =================================================== */
+
+.boss-identity-plate {
+  background: rgba(255, 0, 85, 0.06);
+  border: 1px solid rgba(255, 0, 85, 0.28);
+  border-radius: 5px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.boss-code-number {
+  font-size: 0.58rem;
+  font-weight: 900;
+  color: #ff0055;
+  letter-spacing: 0.8px;
+}
+
+.boss-encounter-title {
+  font-size: 0.82rem;
+  font-weight: 900;
+  color: #ffffff;
+  line-height: 1.1;
+}
+
+.boss-mutation-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.mutation-pill {
+  font-size: 0.58rem;
+  font-weight: 900;
+  color: #f43f5e;
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+}
+
+.boss-stat-pill {
+  font-size: 0.58rem;
+  color: #94a3b8;
+  font-family: var(--font-mono);
+}
+
+.boss-stat-pill b {
+  color: #c084fc;
+}
+
+.boss-quote {
+  font-size: 0.58rem;
+  color: #64748b;
+  font-style: italic;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
+.directives-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.directive-compact-item {
+  background: rgba(10, 16, 30, 0.7);
+  border: 1px solid rgba(0, 229, 255, 0.15);
+  border-radius: 4px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hangar-col-right .dominant-start-btn {
+  margin-top: auto;
+  width: 100%;
+}
+
+.hangar-col-right .inspect-genome-btn {
+  width: 100%;
+  justify-content: center;
+}
+

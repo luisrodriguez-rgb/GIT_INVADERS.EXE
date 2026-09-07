@@ -27,6 +27,7 @@ export class Lobby {
   private previewCtx: CanvasRenderingContext2D | null = null;
   private animTime: number = 0;
   private selectedRepoId: string = 'sketion';
+  private scanActive: boolean = false;
   public activeTab: LobbyTab = 'HANGAR';
 
   constructor(
@@ -187,10 +188,9 @@ export class Lobby {
     this.store.SKINS.forEach((skin) => {
       const isUnlocked = prof.unlockedSkins.includes(skin.id);
       const isEquipped = prof.activeSkinId === skin.id;
-
       skinsHtml += `
-        <button class="skin-chip-mini ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}" 
-                data-skin="${Security.escapeHtml(skin.id)}" 
+        <button class="skin-chip-mini ${isEquipped ? 'equipped' : ''} ${!isUnlocked ? 'locked' : ''}"
+                data-skin="${Security.escapeHtml(skin.id)}"
                 title="${Security.escapeHtml(skin.name)} ${isEquipped ? '(EQUIPPED)' : isUnlocked ? '(UNLOCKED)' : `(${skin.cost} XP)`}">
           <span class="dot" style="background: ${skin.hullColor};"></span>
           <span>${Security.escapeHtml(skin.name.toUpperCase())}</span>
@@ -200,184 +200,175 @@ export class Lobby {
 
     // Language bars
     let langBarsHtml = '';
-    dna.languages.forEach((l) => {
+    dna.languages.slice(0, 4).forEach((l) => {
       langBarsHtml += `
         <div class="dna-lang-row">
           <span class="lang-code">${Security.escapeHtml(l.name)}</span>
           <div class="lang-track">
             <div class="lang-fill" style="width: ${l.pct}%; background: ${l.color};"></div>
           </div>
+          <span class="lang-pct">${l.pct}%</span>
         </div>
       `;
     });
 
+    // Repo options
     const repoOptionsHtml = DataSynthesizer.REPO_PRESETS.map((r) => `
       <option value="${Security.escapeHtml(r.id)}" ${r.id === this.selectedRepoId ? 'selected' : ''}>
-        ${Security.escapeHtml(r.name)} (${r.threatLevel}% THREAT)
+        ${Security.escapeHtml(r.name)}
       </option>
     `).join('');
 
-    const langMods = WaveGenerator.getLanguageModifiers(dna.primaryLanguage);
     const bossBlueprint = BossGenerator.generateFromDNA(dna);
     const archetypeData = bossBlueprint.archetypeData;
     const mutation = bossBlueprint.mutation || 'STANDARD';
     const genome = bossBlueprint.genome;
-    const directives = bossBlueprint.directives;
-    const rewards = bossBlueprint.rewards;
+    const directives = bossBlueprint.directives.slice(0, 2);
+
+    // Hardware upgrade bars (visual progress based on level)
+    const maxLevel = 5;
+    const fireBar = Math.round((prof.fireRateLevel / maxLevel) * 100);
+    const thrustBar = Math.round((prof.thrusterLevel / maxLevel) * 100);
+    const shieldBar = prof.startingShield ? 100 : 0;
 
     return `
-      <!-- Upper Split: Pilot Console + Target Repo -->
-      <div class="deck-columns-split">
-        <!-- Center Column: Pilot Console & Ship Viewport -->
-        <div class="pilot-console-card">
-          <div class="section-badge">PILOT CONSOLE // ARSENAL</div>
+      <!-- 3-Column Hangar Deck -->
+      <div class="hangar-tri-layout">
 
+        <!-- LEFT: Pilot Console -->
+        <div class="hangar-col hangar-col-left">
+          <div class="hcol-label">PILOT CONSOLE</div>
+
+          <!-- Ship viewport -->
           <div class="ship-hologram-stage">
             <div class="stage-reticle tl"></div>
             <div class="stage-reticle tr"></div>
             <div class="stage-reticle bl"></div>
             <div class="stage-reticle br"></div>
-            <canvas id="lobbyShipCanvas" width="240" height="110" class="stage-canvas"></canvas>
+            <canvas id="lobbyShipCanvas" width="240" height="140" class="stage-canvas"></canvas>
           </div>
 
+          <!-- Ship identity -->
           <div class="ship-identity-line">
-            <div class="ship-callsign">${t.hangarShipCallout} ${Security.escapeHtml(activeSkin.name.toUpperCase())}</div>
-            <div class="pilot-level-tag">${t.storeLevel} ${prof.level} - ${Security.escapeHtml(prof.rankName.toUpperCase())}</div>
+            <div class="ship-callsign">${Security.escapeHtml(activeSkin.name.toUpperCase())}</div>
+            <div class="pilot-level-tag">LV${prof.level} ${Security.escapeHtml(prof.rankName.toUpperCase())}</div>
           </div>
 
-          <!-- Fast Skins Selector -->
-          <div class="fast-skins-row">
-            ${skinsHtml}
-          </div>
+          <!-- Skin selector chips -->
+          <div class="fast-skins-row">${skinsHtml}</div>
 
-          <!-- Hardware Upgrades Telemetry -->
-          <div class="pilot-hardware-strip">
-            <div class="hw-cell"><span>${t.hangarBlaster}</span> <b>${t.storeLevel} ${prof.fireRateLevel}</b></div>
-            <div class="hw-cell"><span>${t.hangarThruster}</span> <b>${t.storeLevel} ${prof.thrusterLevel}</b></div>
-            <div class="hw-cell"><span>${t.hangarDeflector}</span> <b>${prof.startingShield ? t.hangarOnline : t.hangarOffline}</b></div>
+          <!-- Hardware telemetry bars -->
+          <div class="hw-bars-block">
+            <div class="hw-bar-row">
+              <span class="hw-bar-label">${t.hangarBlaster}</span>
+              <div class="hw-bar-track"><div class="hw-bar-fill accent-cyan" style="width:${fireBar}%"></div></div>
+              <span class="hw-bar-val">L${prof.fireRateLevel}</span>
+            </div>
+            <div class="hw-bar-row">
+              <span class="hw-bar-label">${t.hangarThruster}</span>
+              <div class="hw-bar-track"><div class="hw-bar-fill accent-yellow" style="width:${thrustBar}%"></div></div>
+              <span class="hw-bar-val">L${prof.thrusterLevel}</span>
+            </div>
+            <div class="hw-bar-row">
+              <span class="hw-bar-label">${t.hangarDeflector}</span>
+              <div class="hw-bar-track"><div class="hw-bar-fill accent-green" style="width:${shieldBar}%"></div></div>
+              <span class="hw-bar-val">${prof.startingShield ? t.hangarOnline : t.hangarOffline}</span>
+            </div>
           </div>
         </div>
 
-        <!-- Right Column: Target Repository & DNA Matrix -->
-        <div class="target-repo-card">
-          <div class="section-badge">${t.hangarTargetRepo}</div>
+        <!-- CENTER: Target Acquisition -->
+        <div class="hangar-col hangar-col-center">
+          <div class="hcol-label">TARGET ACQUISITION</div>
 
-          <div class="repo-select-row">
-            <span class="octo-mini">
-              <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+          <!-- Repo selector with scan animation wrapper -->
+          <div class="scan-target-zone ${this.scanActive ? 'scanning' : ''}" id="scanTargetZone">
+            <div class="scan-overlay">
+              <div class="scan-line"></div>
+              <div class="scan-corner tl"></div>
+              <div class="scan-corner tr"></div>
+              <div class="scan-corner bl"></div>
+              <div class="scan-corner br"></div>
+            </div>
+
+            <!-- Repo dropdown header -->
+            <div class="repo-select-row">
+              <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="color:#94a3b8;flex-shrink:0">
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
               </svg>
-            </span>
-            <select class="repo-dropdown" id="lobbyRepoSelect">
-              ${repoOptionsHtml}
-            </select>
-          </div>
+              <select class="repo-dropdown" id="lobbyRepoSelect">${repoOptionsHtml}</select>
+            </div>
 
-          <div class="repo-metrics-grid">
-            <div class="m-cell"><span>${t.hangarCommits}</span> <b>${dna.commits.toLocaleString()}</b></div>
-            <div class="m-cell"><span>${t.hangarPrs}</span> <b>${dna.pullRequests}</b></div>
-            <div class="m-cell"><span>${t.hangarIssues}</span> <b>${dna.issues}</b></div>
-            <div class="m-cell"><span>${t.hangarContributors}</span> <b>${dna.contributors}</b></div>
-          </div>
+            <!-- DNA Stats grid -->
+            <div class="repo-metrics-grid">
+              <div class="m-cell"><span>${t.hangarCommits}</span><b>${dna.commits.toLocaleString()}</b></div>
+              <div class="m-cell"><span>${t.hangarPrs}</span><b>${dna.pullRequests}</b></div>
+              <div class="m-cell"><span>${t.hangarIssues}</span><b>${dna.issues}</b></div>
+              <div class="m-cell"><span>${t.hangarContributors}</span><b>${dna.contributors}</b></div>
+            </div>
 
-          <div class="dna-languages-block">
-            <div class="block-title">${t.hangarLanguages}</div>
-            <div class="lang-bars-stack">
-              ${langBarsHtml}
+            <!-- Language composition bars -->
+            <div class="dna-languages-block">
+              <div class="block-title">${t.hangarLanguages}</div>
+              <div class="lang-bars-stack">${langBarsHtml}</div>
             </div>
-          </div>
 
-          <div class="dna-threat-block">
-            <div class="threat-title-row">
-              <span>${t.hangarThreatLevel}</span>
-              <span class="threat-val text-red">${dna.threatLevel}% (${dna.threatRating})</span>
-            </div>
-            <div class="threat-track">
-              <div class="threat-fill" style="width: ${dna.threatLevel}%;"></div>
-            </div>
-          </div>
-
-          <!-- Code Boss DNA Classification -->
-          <div class="dna-boss-classification" style="background: rgba(255, 0, 85, 0.08); border: 1px solid rgba(255, 0, 85, 0.35); border-radius: 4px; padding: 6px 10px; margin-top: 8px; font-family: var(--font-mono);">
-            <div style="font-size: 0.65rem; color: #ff0055; font-weight: 800; display: flex; justify-content: space-between;">
-              <span>CODE BOSS // ENCOUNTER</span>
-              <span>[#${archetypeData.codeNumber}]</span>
-            </div>
-            <div style="font-size: 0.82rem; font-weight: 900; color: #ffffff; margin: 2px 0;">
-              ${archetypeData.title}
-            </div>
-            <div style="font-size: 0.64rem; color: #38bdf8; margin-bottom: 2px;">
-              MUTATION: <b style="color: #f43f5e;">${mutation}</b> // STAT: <b style="color: #c084fc;">${archetypeData.specialStatName} ${archetypeData.specialStatValue}%</b>
-            </div>
-            <div style="font-size: 0.62rem; color: #94a3b8; font-style: italic;">
-              "${archetypeData.conceptQuote}"
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Middle Section: Tactical Mission Directives & Dynamic Bounties -->
-      <div class="tactical-intel-card mission-directives-card">
-        <div class="tactical-card-header">
-          <div class="tac-header-left">
-            <span class="tac-status-indicator"></span>
-            <span class="tac-title">DIRECTIVAS DE MISIÓN // ${Security.escapeHtml(dna.name.toUpperCase())}</span>
-          </div>
-          <div class="tac-header-right" style="display: flex; align-items: center; gap: 8px;">
-            <button class="inspect-genome-btn" id="lobbyInspectGenomeBtn" title="Inspeccionar Genoma y Matriz de Comportamiento del Boss">
-              <span class="seed-chip">SEED #${genome.seed}</span>
-              <span class="btn-text">INSPECCIONAR BOSS GENOME</span>
-            </button>
-            <span class="tac-meta">AMENAZA: <b style="color: #ef4444;">${dna.threatRating}</b></span>
-          </div>
-        </div>
-
-        <!-- 3 Dynamic Directives Grid with concrete objectives & rewards -->
-        <div class="tactical-directives-grid">
-          ${directives.map(d => `
-            <div class="directive-card">
-              <div class="directive-header">
-                <span class="directive-badge ${d.waveTarget === 'BOSS' ? 'boss' : ''}">${d.waveTarget}</span>
-                <span class="directive-title">${d.title}</span>
+            <!-- Threat meter -->
+            <div class="dna-threat-block">
+              <div class="threat-title-row">
+                <span>${t.hangarThreatLevel}</span>
+                <span class="threat-val text-red">${dna.threatLevel}% // ${dna.threatRating}</span>
               </div>
-              <div class="directive-desc">${d.description}</div>
-              <div class="directive-bounty">
-                <span class="bounty-label">RECOMPENSA:</span>
-                <span class="bounty-value">${d.rewardText}</span>
+              <div class="threat-track">
+                <div class="threat-fill" style="width: ${dna.threatLevel}%;"></div>
               </div>
             </div>
-          `).join('')}
+          </div>
         </div>
 
-        <!-- Mission Rewards & Active Modifiers Bar -->
-        <div class="tactical-sub-banner">
-          <div class="mod-pill-group">
-            <span class="pill-label">RECOMPENSAS DE MISIÓN:</span>
-            ${rewards.map(r => `
-              <span class="pill-badge text-cyan" title="${r.description}">${r.icon} ${r.value}</span>
+        <!-- RIGHT: Code Boss Encounter -->
+        <div class="hangar-col hangar-col-right">
+          <div class="hcol-label">CODE BOSS // ENCOUNTER</div>
+
+          <!-- Boss identity plate -->
+          <div class="boss-identity-plate">
+            <div class="boss-code-number">[#${archetypeData.codeNumber}]</div>
+            <div class="boss-encounter-title">${archetypeData.title}</div>
+            <div class="boss-mutation-row">
+              <span class="mutation-pill">${mutation}</span>
+              <span class="boss-stat-pill">${archetypeData.specialStatName}: <b>${archetypeData.specialStatValue}%</b></span>
+            </div>
+            <div class="boss-quote">"${archetypeData.conceptQuote}"</div>
+          </div>
+
+          <!-- Mission directives (compact, 2 max) -->
+          <div class="directives-compact-list">
+            ${directives.map(d => `
+              <div class="directive-compact-item">
+                <div class="directive-header">
+                  <span class="directive-badge ${d.waveTarget === 'BOSS' ? 'boss' : ''}">${d.waveTarget}</span>
+                  <span class="directive-title">${d.title}</span>
+                </div>
+                <div class="directive-bounty">
+                  <span class="bounty-label">REWARD:</span>
+                  <span class="bounty-value">${d.rewardText}</span>
+                </div>
+              </div>
             `).join('')}
           </div>
 
-          <div class="combat-keys-pill">
-            <span class="key-tag"><kbd>SPACE</kbd> FIRE</span>
-            <span class="key-tag"><kbd>Q</kbd> REBASE</span>
-            <span class="key-tag"><kbd>E</kbd> STASH</span>
-            <span class="key-tag"><kbd>SHIFT</kbd> PUSH</span>
-          </div>
+          <!-- Genome seed + inspect -->
+          <button class="inspect-genome-btn" id="lobbyInspectGenomeBtn" title="Inspect Boss Genome & Behavior Matrix">
+            <span class="seed-chip">SEED #${genome.seed}</span>
+            <span class="btn-text">INSPECT GENOME</span>
+          </button>
+
+          <!-- Launch CTA -->
+          <button class="dominant-start-btn" id="lobbyDominantStartBtn">
+            <span class="play-icon">&#9654;</span> ${t.hangarStartMission}
+          </button>
         </div>
 
-        <!-- Live Telemetry Stream Ticker -->
-        <div class="live-telemetry-strip">
-          <span class="ticker-prefix">[GIT_FEED]</span>
-          <span class="ticker-text">${dna.commits.toLocaleString()} Commits analizados • ${dna.pullRequests} PRs • Boss: ${archetypeData.title} (${mutation}) // Seed: #${genome.seed} • ${genome.behaviorMatrix.combat}</span>
-        </div>
-      </div>
-
-      <!-- Dominant Hero Action Button -->
-      <div class="hero-launch-section">
-        <button class="dominant-start-btn" id="lobbyDominantStartBtn">
-          <span class="play-icon">▶</span> ${t.hangarStartMission}
-        </button>
       </div>
     `;
   }
@@ -875,8 +866,17 @@ export class Lobby {
       const repoSelect = this.container.querySelector('#lobbyRepoSelect') as HTMLSelectElement | null;
       repoSelect?.addEventListener('change', (e) => {
         this.selectedRepoId = (e.target as HTMLSelectElement).value;
-        this.render();
-        this.startShipAnimation();
+        // Trigger scan animation before re-rendering
+        const scanZone = this.container.querySelector('#scanTargetZone');
+        if (scanZone) {
+          scanZone.classList.add('scanning');
+          SFX.playLaser('enemy');
+        }
+        setTimeout(() => {
+          this.scanActive = false;
+          this.render();
+          this.startShipAnimation();
+        }, 1200);
       });
 
       const inspectGenomeBtn = this.container.querySelector('#lobbyInspectGenomeBtn');
