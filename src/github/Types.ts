@@ -120,4 +120,42 @@ export interface RepositoryDNA {
   bossCoreName: string;
 }
 
+export interface WaveDNA {
+  totalWaves: number;
+  formations: FormationType[];
+  speedBase: number;
+  dropSpeed: number;
+  prRatio: number;
+  issueRatio: number;
+  conflictRatio: number;
+  dependencyRatio: number;
+}
+
+export interface AudioDNA {
+  bpm: number;
+  baseFrequency: number;
+  aggression: number;
+  scaleType: string;
+}
+
+export interface GameDNA {
+  version: string;
+  seed: string;
+  repository: RepositoryDNA;
+  ship: {
+    hullType: number;
+    wingType: number;
+    engineType: number;
+    armor: number;
+    speed: number;
+    fireRate: number;
+    primaryColor: string;
+    secondaryColor: string;
+    accentColor: string;
+  };
+  waves: WaveDNA;
+  boss: BossBlueprint;
+  audio: AudioDNA;
+}
+
 export type GameMode = 'profile' | 'repository' | 'chaos' | 'citadel';

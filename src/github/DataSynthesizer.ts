@@ -1,4 +1,4 @@
-import { NormalizedGameData, SampleCommit, SamplePR, SampleIssue, GitHubMetrics, RepositoryDNA } from './Types';
+import { NormalizedGameData, SampleCommit, SamplePR, SampleIssue, GitHubMetrics, RepositoryDNA, GameDNA } from './Types';
 import { DataNormalizer } from './Normalizer';
 
 export class DataSynthesizer {
@@ -435,6 +435,49 @@ export class DataSynthesizer {
     ];
 
     return data;
+  }
+
+  /**
+   * Synthesizes unified GameDNA - the central single source of truth
+   * connecting RepositoryDNA -> ShipDNA -> WaveDNA -> BossDNA -> AudioDNA
+   */
+  public static synthesizeGameDNA(repo: RepositoryDNA): GameDNA {
+    const threatRatio = repo.threatLevel / 100;
+    const waveData = DataSynthesizer.generateFromDNA(repo);
+
+    return {
+      version: '2.0.0',
+      seed: `${repo.author}/${repo.name}@${repo.commits}`,
+      repository: repo,
+      ship: {
+        hullType: (repo.commits + repo.pullRequests) % 4,
+        wingType: (repo.issues + repo.contributors) % 4,
+        engineType: Math.min(3, Math.max(1, (repo.contributors % 3) + 1)),
+        armor: Math.min(6, Math.max(2, Math.floor(repo.pullRequests / 5) + 2)),
+        speed: Math.min(100, Math.max(40, Math.round(50 + (repo.commits / 200) * 20))),
+        fireRate: Math.min(100, Math.max(50, Math.round(60 + threatRatio * 35))),
+        primaryColor: repo.accentColor || '#00e5ff',
+        secondaryColor: repo.languages[0]?.color || '#38bdf8',
+        accentColor: repo.languages[1]?.color || '#0369a1',
+      },
+      waves: {
+        totalWaves: waveData.totalWaves,
+        formations: waveData.waveFormations,
+        speedBase: waveData.enemySpeedBase,
+        dropSpeed: waveData.enemyDropSpeed,
+        prRatio: waveData.prArmoredRatio,
+        issueRatio: waveData.issueBomberRatio,
+        conflictRatio: 0.1,
+        dependencyRatio: 0.15,
+      },
+      boss: waveData.bossBlueprint,
+      audio: {
+        bpm: Math.round(105 + threatRatio * 25),
+        baseFrequency: 120 + threatRatio * 40,
+        aggression: repo.threatLevel,
+        scaleType: repo.primaryLanguage === 'Python' ? 'dorian' : 'minor_pentatonic',
+      },
+    };
   }
 
   private static hashString(str: string): number {

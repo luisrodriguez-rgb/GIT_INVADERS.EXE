@@ -6,6 +6,8 @@ import { Boss } from '../entities/Boss';
 import { Invader } from '../entities/Invader';
 import { ArmoredPR } from '../entities/ArmoredPR';
 import { IssueBomber } from '../entities/IssueBomber';
+import { MergeConflict, ConflictFragment } from '../entities/MergeConflict';
+import { DependencyDrone } from '../entities/DependencyDrone';
 import { ParticleSystem } from '../rendering/Particles';
 import { CRTEffects } from '../rendering/CRT';
 import { SFX } from '../audio/SFX';
@@ -146,6 +148,50 @@ export class CollisionSystem {
               particles.emitCodeFragments(enemy.centerX, enemy.centerY, enemy.color, 5, 'commit');
               particles.emitText(enemy.centerX, enemy.centerY, `${enemy.commitSha} +25 XP`, enemy.color);
             }
+          } else if (enemy instanceof MergeConflict) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, '#fbbf24', 12);
+            particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#00e5ff', 3, 'commit');
+
+            if (destroyed) {
+              SFX.playExplosion('medium');
+              gameState.addScore(enemy.scoreValue);
+              gameState.incrementStreak();
+              player.addOverdriveCharge(8);
+              particles.emitText(enemy.centerX, enemy.centerY, 'CONFLICT: HEAD vs BRANCH!', '#fbbf24');
+              const [f1, f2] = enemy.split();
+              enemies.push(f1, f2);
+            }
+          } else if (enemy instanceof ConflictFragment) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, enemy.color, 8);
+
+            if (destroyed) {
+              SFX.playExplosion('small');
+              gameState.addScore(enemy.scoreValue);
+              gameState.incrementStreak();
+              particles.emitText(enemy.centerX, enemy.centerY, `${enemy.branchName} RESOLVED`, enemy.color);
+            }
+          } else if (enemy instanceof DependencyDrone) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, '#38bdf8', 10);
+
+            if (destroyed) {
+              SFX.playExplosion(enemy.isRoot ? 'medium' : 'small');
+              gameState.addScore(enemy.scoreValue);
+              gameState.incrementStreak();
+
+              if (enemy.isRoot) {
+                particles.emitText(enemy.centerX, enemy.centerY, 'DEPENDENCY CHAIN BROKEN!', '#f59e0b');
+                for (const child of enemy.children) {
+                  if (child.isAlive) {
+                    child.isAlive = false;
+                    particles.emitExplosion(child.centerX, child.centerY, '#38bdf8', 12);
+                    gameState.addScore(child.scoreValue);
+                  }
+                }
+              }
+            }
           }
           break;
         }
@@ -157,6 +203,11 @@ export class CollisionSystem {
       if (!proj.isAlive || proj.owner === 'player') continue;
 
       if (this.checkAABB(proj, player)) {
+        if (player.isStashed) {
+          // Phantom Violet: bullets pass clean through during STASH phase
+          continue;
+        }
+
         proj.isAlive = false;
         particles.emitExplosion(proj.centerX, proj.centerY, '#ff0055', 18);
         const lostLife = player.hit();
@@ -175,6 +226,20 @@ export class CollisionSystem {
       if (!enemy.isAlive) continue;
 
       if (this.checkAABB(enemy, player)) {
+        if (player.isRebaseDashing) {
+          // Rebase-01 hyper-dash penetrates through hostiles
+          enemy.isAlive = false;
+          particles.emitExplosion(enemy.centerX, enemy.centerY, '#ff0055', 20);
+          particles.emitText(enemy.centerX, enemy.centerY, 'REBASE PIERCE // 150 DMG', '#ff0055');
+          SFX.playExplosion('small');
+          gameState.addScore(enemy.scoreValue);
+          continue;
+        }
+
+        if (player.isStashed) {
+          continue;
+        }
+
         enemy.isAlive = false;
         player.hit();
         SFX.playExplosion('medium');

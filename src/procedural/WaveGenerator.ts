@@ -3,7 +3,7 @@ import { FormationType, NormalizedGameData } from '../github/Types';
 export interface EnemySpawnPoint {
   x: number;
   y: number;
-  type: 'commit' | 'pr' | 'issue';
+  type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency';
 }
 
 export interface LanguageGameplayModifiers {
@@ -144,11 +144,13 @@ export class WaveGenerator {
             const x = startX + c * spacingX;
             const y = startY + r * spacingY;
 
-            let type: 'commit' | 'pr' | 'issue' = 'commit';
+            let type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency' = 'commit';
             if (r === 0) {
-              type = 'issue'; // Top row: Bug Bombers
+              type = c === 4 || c === 5 ? 'conflict' : 'issue';
             } else if (r === 1) {
               type = 'pr'; // Row 2: Armored PRs
+            } else if (r === 2 && (c === 2 || c === 7)) {
+              type = 'dependency'; // Networked Dependency Drones
             }
 
             points.push({ x, y, type });

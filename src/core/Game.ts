@@ -185,15 +185,30 @@ export class Game {
             }
           }
         } else if (e.code === 'KeyQ') {
-          const rebasing = this.player.activateRebaseSlowMo();
+          const rebasing = this.player.triggerAbilityQ();
           if (rebasing) {
-            this.crt.addTrauma(0.2);
-            this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT REBASE: SLOW-MO (4s)', '#00e5ff');
+            this.crt.addTrauma(0.25);
+            const msg = this.player.isRebaseDashing
+              ? 'GIT REBASE: HYPER-DASH ENGAGED!'
+              : 'GIT REBASE: SLOW-MO (3.5s)';
+            this.particles.emitText(this.player.centerX, this.player.y - 30, msg, '#ff0055');
           }
         } else if (e.code === 'KeyE') {
-          const stashed = this.player.activateStashShield();
-          if (stashed) {
-            this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT STASH SHIELD ENGAGED', '#10b981');
+          const res = this.player.triggerAbilityE();
+          if (res) {
+            if (res.type === 'stash_active') {
+              this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT STASH: INTANGIBLE PHASE (3.5s)', '#c084fc');
+            } else if (res.type === 'merge_burst' && res.projectile) {
+              this.projectiles.push(res.projectile);
+              this.crt.addTrauma(0.4);
+              this.particles.emitText(this.player.centerX, this.player.y - 35, 'MERGE BURST // KINETIC SHOCKWAVE', '#fbbf24');
+            } else if (res.type === 'branch_split') {
+              this.particles.emitText(this.player.centerX, this.player.y - 30, 'BRANCH SPLIT: DUAL DRONES DEPLOYED', '#10b981');
+            } else if (res.type === 'octo_protocol') {
+              this.particles.emitText(this.player.centerX, this.player.y - 30, 'OCTO PROTOCOL: 8 DEFENSE DRONES ACTIVE', '#38bdf8');
+            } else if (res.type === 'shield_up') {
+              this.particles.emitText(this.player.centerX, this.player.y - 30, 'STASH SHIELD ENGAGED', '#10b981');
+            }
           }
         }
       }
