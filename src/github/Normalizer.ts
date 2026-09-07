@@ -79,21 +79,24 @@ export class DataNormalizer {
    */
   public static determineFormations(waveCount: number, metrics: GitHubMetrics): FormationType[] {
     const formations: FormationType[] = [];
-    const pool: FormationType[] = ['commit_grid'];
+    const pool: FormationType[] = ['grid'];
 
-    if (metrics.totalCommits > 100 || metrics.pullRequests > 10) {
-      pool.push('delta_wing');
+    if (metrics.totalCommits > 50 || metrics.pullRequests > 5) {
+      pool.push('v_chevron');
     }
-    if (metrics.openIssues > 8 || metrics.contributors > 2) {
-      pool.push('constellation_scatter');
+    if (metrics.openIssues > 5 || metrics.contributors > 2) {
+      pool.push('diamond');
     }
-    if (metrics.pullRequests > 20) {
-      pool.push('flanking_helix');
+    if (metrics.streakDays > 3 || metrics.totalCommits > 120) {
+      pool.push('swarm');
+    }
+    if (metrics.pullRequests > 15 || metrics.recentActivityScore > 50) {
+      pool.push('pincer');
     }
 
     for (let i = 0; i < waveCount; i++) {
       if (i === 0) {
-        formations.push('commit_grid'); // Wave 1 always clean grid
+        formations.push('grid'); // Wave 1 always clean classic Space Invaders grid
       } else {
         formations.push(pool[i % pool.length]);
       }
@@ -125,11 +128,26 @@ export class DataNormalizer {
     // Fire rate in seconds (faster for higher threat)
     const fireRateSeconds = Number(this.clamp(2.2 - (threatLevel / 100) * 1.1, 0.9, 2.2).toFixed(2));
 
+    let chassisType: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel' = 'octo_destroyer';
+    const repoLower = repoName.toLowerCase();
+    if (repoLower.includes('citadel') || metrics.languages.length >= 4) {
+      chassisType = 'quantum_citadel';
+    } else if (metrics.totalCommits > 300 || metrics.pullRequests > 20) {
+      chassisType = 'dreadnought_carrier';
+    } else if (metrics.openIssues > 10 || threatLevel >= 75) {
+      chassisType = 'titan_skull';
+    } else if (repoLower.includes('sketion') || repoLower.includes('git') || metrics.contributors >= 3) {
+      chassisType = 'octo_destroyer';
+    } else {
+      chassisType = 'cyber_sentinel';
+    }
+
     return {
       repoName,
       coreName: `${repoName.toUpperCase()} // CORE`,
       language: lang,
       languageColor: langColor,
+      chassisType,
       threatIndex: threatLevel,
       maxHp,
       cannons,

@@ -16,7 +16,16 @@ export interface GitHubMetrics {
   stars: number;
 }
 
-export type FormationType = 'commit_grid' | 'delta_wing' | 'constellation_scatter' | 'flanking_helix';
+export type FormationType =
+  | 'grid'
+  | 'v_chevron'
+  | 'diamond'
+  | 'swarm'
+  | 'pincer'
+  | 'commit_grid'
+  | 'delta_wing'
+  | 'constellation_scatter'
+  | 'flanking_helix';
 
 export type ThreatLevelRating = 'LOW' | 'GUARDED' | 'ELEVATED' | 'HIGH' | 'CRITICAL' | 'CHAOS_MAX';
 
@@ -51,6 +60,7 @@ export interface BossBlueprint {
   coreName: string;
   language: string;
   languageColor: string;
+  chassisType?: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel';
   threatIndex: number; // 0 - 100
   maxHp: number;
   cannons: number;

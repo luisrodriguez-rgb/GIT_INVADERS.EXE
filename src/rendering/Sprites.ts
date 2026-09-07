@@ -118,15 +118,11 @@ export class Sprites {
     ctx.save();
     ctx.translate(x + width / 2, y + height / 2);
 
-    // Tactical PR Code Card above ship
-    ctx.font = 'bold 7px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#a855f7';
+    // Compact Tactical PR Code Badge (Single line to prevent row bleed)
+    ctx.font = 'bold 7.5px "JetBrains Mono", monospace';
+    ctx.fillStyle = '#c084fc';
     ctx.textAlign = 'center';
-    ctx.fillText(`<< PR #${prNumber} >>`, 0, -height / 2 - 14);
-
-    // Status pill
-    ctx.fillStyle = status === 'MERGED' ? '#10b981' : '#38bdf8';
-    ctx.fillText(`STATUS: ${status}`, 0, -height / 2 - 7);
+    ctx.fillText(`#PR ${prNumber}`, 0, -height / 2 - 6);
 
     // Segmented Shield Bar
     if (shields > 0) {
@@ -135,7 +131,7 @@ export class Sprites {
       const gap = 2;
       const totalW = maxShields * segW + (maxShields - 1) * gap;
       const startX = -totalW / 2;
-      const barY = -height / 2 - 2;
+      const barY = -height / 2 - 1;
 
       for (let s = 0; s < maxShields; s++) {
         if (s < shields) {
@@ -148,13 +144,13 @@ export class Sprites {
       }
     }
 
-    // Shield Halo
+    // Shield Halo (Strictly contained within cruiser footprint)
     if (shields > 0) {
       const shieldRatio = shields / maxShields;
       ctx.strokeStyle = shieldRatio > 0.6 ? '#c084fc' : '#ec4899';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
-      ctx.arc(0, 0, width * 0.65, 0, Math.PI * 2);
+      ctx.arc(0, 0, width * 0.46, 0, Math.PI * 2);
       ctx.stroke();
     }
 
@@ -236,7 +232,12 @@ export class Sprites {
   }
 
   /**
-   * Draws the Colossal CODE BOSS (Titan Sketion Core matching Reference Panel 3)
+   * Draws Procedural CODE BOSS with 5 Distinct Visual Chassis Archetypes:
+   * 1. 'octo_destroyer': Octocat Mothership Carrier with mechanical tendrils & singularity core
+   * 2. 'dreadnought_carrier': Heavy military battleship with dual railgun prows & engine bays
+   * 3. 'quantum_citadel': Geometric diamond fortress with rotating orbital prism drones
+   * 4. 'titan_skull': Biomechanical dread-skull with hydraulic mandibles & laser claws
+   * 5. 'cyber_sentinel': Supersonic stealth interceptor flagship with plasma edge wings
    */
   public static drawBoss(
     ctx: CanvasRenderingContext2D,
@@ -246,7 +247,8 @@ export class Sprites {
     height: number,
     phase: number,
     time: number,
-    coreColor: string = '#00e5ff'
+    coreColor: string = '#00e5ff',
+    chassisType: string = 'octo_destroyer'
   ): void {
     ctx.save();
     ctx.translate(x + width / 2, y + height / 2);
@@ -255,7 +257,7 @@ export class Sprites {
     const primaryColor = isRage ? '#ff0055' : coreColor;
     const secondaryColor = isRage ? '#f43f5e' : '#a855f7';
 
-    // Phase 2+: Deflector Energy Matrix
+    // Phase 2+: Universal Rotating Deflector Matrix
     if (phase >= 2) {
       ctx.save();
       ctx.rotate(time * 1.8);
@@ -263,85 +265,288 @@ export class Sprites {
       ctx.lineWidth = 2.5;
       ctx.setLineDash([14, 10]);
       ctx.beginPath();
-      ctx.arc(0, 0, width * 0.62, 0, Math.PI * 2);
+      ctx.arc(0, 0, width * 0.64, 0, Math.PI * 2);
       ctx.stroke();
       ctx.restore();
     }
 
-    // Floating Articulated Claws (Left and Right)
-    const clawBob = Math.sin(time * 4) * 6;
-    [-1, 1].forEach((dir) => {
-      ctx.save();
-      ctx.translate(dir * width * 0.52, clawBob);
-      ctx.fillStyle = '#090d16';
-      ctx.strokeStyle = secondaryColor;
-      ctx.lineWidth = 2;
+    switch (chassisType) {
+      // ==========================================
+      // CHASSIS 1: OCTO DESTROYER (Flagship Mothership)
+      // ==========================================
+      case 'octo_destroyer': {
+        // Swept Cyber Tendrils (6 lateral mechanical arms)
+        [-1, 1].forEach((dir) => {
+          [0.2, 0.4, 0.6].forEach((offset, idx) => {
+            const wave = Math.sin(time * 3 + idx) * 8;
+            ctx.strokeStyle = secondaryColor;
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(dir * width * 0.2, -height * 0.1 + idx * 12);
+            ctx.quadraticCurveTo(
+              dir * (width * 0.45 + wave),
+              height * 0.1 + idx * 10,
+              dir * (width * 0.55 + wave * 1.2),
+              height * 0.45 + idx * 6
+            );
+            ctx.stroke();
+          });
+        });
 
-      ctx.beginPath();
-      ctx.moveTo(0, -height * 0.3);
-      ctx.lineTo(dir * 18, -height * 0.1);
-      ctx.lineTo(dir * 12, height * 0.35);
-      ctx.lineTo(0, height * 0.2);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
+        // Main Octo Fuselage Hull
+        ctx.fillStyle = '#060a14';
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.4);
+        ctx.lineTo(width * 0.35, height * 0.15);
+        ctx.lineTo(width * 0.4, -height * 0.25);
+        ctx.lineTo(width * 0.2, -height * 0.45);
+        ctx.lineTo(0, -height * 0.35);
+        ctx.lineTo(-width * 0.2, -height * 0.45);
+        ctx.lineTo(-width * 0.4, -height * 0.25);
+        ctx.lineTo(-width * 0.35, height * 0.15);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-      // Energy conduit on claw
-      ctx.fillStyle = primaryColor;
-      ctx.fillRect(dir * 2, -height * 0.1, 4, 16);
-      ctx.restore();
-    });
+        // Pulsing Singularity Quantum Core
+        const corePulse = 0.8 + Math.sin(time * 6) * 0.25;
+        const coreGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 24 * corePulse);
+        coreGrad.addColorStop(0, '#ffffff');
+        coreGrad.addColorStop(0.4, primaryColor);
+        coreGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(0, 0, 22 * corePulse, 0, Math.PI * 2);
+        ctx.fill();
 
-    // Boss Main Torso / Titan Skull
-    ctx.fillStyle = '#080d1a';
-    ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 3;
+        // Dual Command Bridge Visors
+        ctx.fillStyle = isRage ? '#ff0055' : '#38bdf8';
+        ctx.fillRect(-width * 0.22, -height * 0.2, width * 0.16, 5);
+        ctx.fillRect(width * 0.06, -height * 0.2, width * 0.16, 5);
+        break;
+      }
 
-    ctx.beginPath();
-    ctx.moveTo(0, height * 0.45); // Jaw
-    ctx.lineTo(width * 0.3, height * 0.2);
-    ctx.lineTo(width * 0.36, -height * 0.15); // Cheek
-    ctx.lineTo(width * 0.22, -height * 0.45); // Brow
-    ctx.lineTo(-width * 0.22, -height * 0.45);
-    ctx.lineTo(-width * 0.36, -height * 0.15);
-    ctx.lineTo(-width * 0.3, height * 0.2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+      // ==========================================
+      // CHASSIS 2: DREADNOUGHT CARRIER (Heavy Battleship)
+      // ==========================================
+      case 'dreadnought_carrier': {
+        // Dual Forward Railgun Prow Prongs
+        ctx.fillStyle = '#0b1329';
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 2.5;
 
-    // Skull Eye Visor Slits
-    ctx.fillStyle = isRage ? '#ff0055' : '#38bdf8';
-    ctx.beginPath();
-    ctx.moveTo(-width * 0.18, -height * 0.15);
-    ctx.lineTo(-width * 0.05, -height * 0.1);
-    ctx.lineTo(-width * 0.15, -height * 0.05);
-    ctx.closePath();
-    ctx.fill();
+        // Left Railgun Prong
+        ctx.fillRect(-width * 0.38, -height * 0.4, width * 0.18, height * 0.85);
+        ctx.strokeRect(-width * 0.38, -height * 0.4, width * 0.18, height * 0.85);
+        // Right Railgun Prong
+        ctx.fillRect(width * 0.2, -height * 0.4, width * 0.18, height * 0.85);
+        ctx.strokeRect(width * 0.2, -height * 0.4, width * 0.18, height * 0.85);
 
-    ctx.beginPath();
-    ctx.moveTo(width * 0.18, -height * 0.15);
-    ctx.lineTo(width * 0.05, -height * 0.1);
-    ctx.lineTo(width * 0.15, -height * 0.05);
-    ctx.closePath();
-    ctx.fill();
+        // Central Super-Structure
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = secondaryColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.45);
+        ctx.lineTo(width * 0.25, height * 0.2);
+        ctx.lineTo(width * 0.2, -height * 0.3);
+        ctx.lineTo(-width * 0.2, -height * 0.3);
+        ctx.lineTo(-width * 0.25, height * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-    // Glowing Central Reactor Core
-    const corePulse = 0.85 + Math.sin(time * 6) * 0.25;
-    const coreGrad = ctx.createRadialGradient(0, height * 0.08, 3, 0, height * 0.08, 22 * corePulse);
-    coreGrad.addColorStop(0, '#ffffff');
-    coreGrad.addColorStop(0.5, primaryColor);
-    coreGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-    ctx.fillStyle = coreGrad;
-    ctx.beginPath();
-    ctx.arc(0, height * 0.08, 20 * corePulse, 0, Math.PI * 2);
-    ctx.fill();
+        // Railgun Plasma Conduits
+        ctx.fillStyle = primaryColor;
+        ctx.fillRect(-width * 0.32, -height * 0.35, 6, height * 0.7);
+        ctx.fillRect(width * 0.26, -height * 0.35, 6, height * 0.7);
 
-    // Quad heavy cannons
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(-width * 0.25, height * 0.18, 6, 14);
-    ctx.fillRect(-width * 0.1, height * 0.32, 6, 16);
-    ctx.fillRect(width * 0.1 - 6, height * 0.32, 6, 16);
-    ctx.fillRect(width * 0.25 - 6, height * 0.18, 6, 14);
+        // Glowing Engine Nacelles
+        ctx.fillStyle = '#00f0ff';
+        const thrustPulse = Math.sin(time * 12) * 4;
+        ctx.fillRect(-width * 0.15, height * 0.45, 12, 10 + thrustPulse);
+        ctx.fillRect(width * 0.05, height * 0.45, 12, 10 + thrustPulse);
+        break;
+      }
+
+      // ==========================================
+      // CHASSIS 3: QUANTUM CITADEL (Geometric Monolith)
+      // ==========================================
+      case 'quantum_citadel': {
+        // Outer Rotating Diamond Lattice
+        ctx.save();
+        ctx.rotate(time * 1.2);
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(0, -height * 0.55);
+        ctx.lineTo(width * 0.45, 0);
+        ctx.lineTo(0, height * 0.55);
+        ctx.lineTo(-width * 0.45, 0);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+
+        // Inner Counter-Rotating Hexagon
+        ctx.save();
+        ctx.rotate(-time * 1.5);
+        ctx.strokeStyle = secondaryColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2;
+          const px = Math.cos(a) * (width * 0.28);
+          const py = Math.sin(a) * (height * 0.32);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+
+        // 4 Orbiting Prism Drone Satellites
+        for (let p = 0; p < 4; p++) {
+          const prismAngle = time * 2.2 + (p * Math.PI) / 2;
+          const px = Math.cos(prismAngle) * (width * 0.5);
+          const py = Math.sin(prismAngle) * (height * 0.4);
+          ctx.fillStyle = '#ffffff';
+          ctx.strokeStyle = primaryColor;
+          ctx.lineWidth = 1.5;
+          ctx.fillRect(px - 5, py - 5, 10, 10);
+          ctx.strokeRect(px - 5, py - 5, 10, 10);
+        }
+
+        // Central Monolithic Core
+        ctx.fillStyle = '#0a0f1d';
+        ctx.beginPath();
+        ctx.arc(0, 0, 26, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = primaryColor;
+        ctx.beginPath();
+        ctx.arc(0, 0, 14, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+
+      // ==========================================
+      // CHASSIS 4: TITAN SKULL (Biomechanical Warlord)
+      // ==========================================
+      case 'titan_skull': {
+        // Floating Articulated Laser Claws
+        const clawBob = Math.sin(time * 4) * 6;
+        [-1, 1].forEach((dir) => {
+          ctx.save();
+          ctx.translate(dir * width * 0.52, clawBob);
+          ctx.fillStyle = '#090d16';
+          ctx.strokeStyle = secondaryColor;
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(0, -height * 0.3);
+          ctx.lineTo(dir * 18, -height * 0.1);
+          ctx.lineTo(dir * 12, height * 0.35);
+          ctx.lineTo(0, height * 0.2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+          ctx.restore();
+        });
+
+        // Titan Skull Torso
+        ctx.fillStyle = '#080d1a';
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.45);
+        ctx.lineTo(width * 0.3, height * 0.2);
+        ctx.lineTo(width * 0.36, -height * 0.15);
+        ctx.lineTo(width * 0.22, -height * 0.45);
+        ctx.lineTo(-width * 0.22, -height * 0.45);
+        ctx.lineTo(-width * 0.36, -height * 0.15);
+        ctx.lineTo(-width * 0.3, height * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Skull Eye Visor Slits
+        ctx.fillStyle = isRage ? '#ff0055' : '#38bdf8';
+        [-1, 1].forEach((dir) => {
+          ctx.beginPath();
+          ctx.moveTo(dir * width * 0.18, -height * 0.15);
+          ctx.lineTo(dir * width * 0.05, -height * 0.1);
+          ctx.lineTo(dir * width * 0.15, -height * 0.05);
+          ctx.closePath();
+          ctx.fill();
+        });
+
+        // Pulsing Core
+        const corePulse = 0.85 + Math.sin(time * 6) * 0.25;
+        ctx.fillStyle = primaryColor;
+        ctx.beginPath();
+        ctx.arc(0, height * 0.08, 16 * corePulse, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+      }
+
+      // ==========================================
+      // CHASSIS 5: CYBER SENTINEL (Supersonic Interceptor)
+      // ==========================================
+      case 'cyber_sentinel':
+      default: {
+        // Forward-Swept Razor Wings
+        ctx.fillStyle = '#050a17';
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 2.5;
+
+        ctx.beginPath();
+        ctx.moveTo(0, height * 0.4); // Tail
+        ctx.lineTo(width * 0.48, height * 0.05); // Wingtip right
+        ctx.lineTo(width * 0.35, -height * 0.35); // Leading edge
+        ctx.lineTo(0, -height * 0.48); // Nose
+        ctx.lineTo(-width * 0.35, -height * 0.35);
+        ctx.lineTo(-width * 0.48, height * 0.05);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Razor Plasma Edge Lines
+        ctx.strokeStyle = '#00ffff';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(-width * 0.46, height * 0.03);
+        ctx.lineTo(-width * 0.33, -height * 0.33);
+        ctx.lineTo(0, -height * 0.45);
+        ctx.lineTo(width * 0.33, -height * 0.33);
+        ctx.lineTo(width * 0.46, height * 0.03);
+        ctx.stroke();
+
+        // Twin Stealth Cockpits
+        ctx.fillStyle = isRage ? '#ff0055' : '#38bdf8';
+        ctx.beginPath();
+        ctx.moveTo(-width * 0.12, -height * 0.2);
+        ctx.lineTo(-width * 0.06, -height * 0.05);
+        ctx.lineTo(-width * 0.16, -height * 0.05);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(width * 0.12, -height * 0.2);
+        ctx.lineTo(width * 0.16, -height * 0.05);
+        ctx.lineTo(width * 0.06, -height * 0.05);
+        ctx.closePath();
+        ctx.fill();
+
+        // Quad Blaster Cannon Barrels
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(-width * 0.3, height * 0.1, 5, 14);
+        ctx.fillRect(-width * 0.12, height * 0.25, 5, 16);
+        ctx.fillRect(width * 0.12 - 5, height * 0.25, 5, 16);
+        ctx.fillRect(width * 0.3 - 5, height * 0.1, 5, 14);
+        break;
+      }
+    }
 
     ctx.restore();
   }

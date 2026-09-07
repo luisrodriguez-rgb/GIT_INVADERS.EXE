@@ -79,7 +79,8 @@ export class Boss extends Entity {
       this.height,
       this.currentPhase,
       this.time,
-      this.blueprint.languageColor
+      this.blueprint.languageColor,
+      this.blueprint.chassisType || 'octo_destroyer'
     );
   }
 

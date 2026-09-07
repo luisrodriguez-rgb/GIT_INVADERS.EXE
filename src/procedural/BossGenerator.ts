@@ -78,11 +78,27 @@ export class BossGenerator {
       },
     ];
 
+    // Derive boss chassis archetype
+    let chassisType: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel' = 'octo_destroyer';
+    const nameLower = dna.name.toLowerCase();
+    if (nameLower.includes('citadel') || dna.languages.length >= 4) {
+      chassisType = 'quantum_citadel';
+    } else if (dna.commits > 400 || dna.pullRequests > 25) {
+      chassisType = 'dreadnought_carrier';
+    } else if (dna.issues > 15 || dna.threatLevel >= 80) {
+      chassisType = 'titan_skull';
+    } else if (nameLower.includes('sketion') || nameLower.includes('git') || dna.contributors >= 3) {
+      chassisType = 'octo_destroyer';
+    } else {
+      chassisType = 'cyber_sentinel';
+    }
+
     return {
       repoName: dna.name,
       coreName: `${dna.name.toUpperCase()} CORE`,
       language: primaryLang.name,
       languageColor: primaryLang.color,
+      chassisType,
       threatIndex: dna.threatLevel,
       maxHp: baseHp,
       cannons,

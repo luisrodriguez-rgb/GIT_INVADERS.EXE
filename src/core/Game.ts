@@ -149,79 +149,165 @@ export class Game {
       if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
         if (e.code === 'Space') {
           e.preventDefault();
-          const shots = this.player.tryShoot();
-          this.projectiles.push(...shots);
+          this.fireBlaster();
         } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
-          const activated = this.player.activateOverdrive();
-          if (activated) {
-            this.crt.addTrauma(0.9);
-            this.crt.triggerFlash('rgba(255, 0, 128, 0.75)', 0.35);
-            SFX.playExplosion('boss');
-            this.particles.emitText(this.player.centerX, this.player.y - 45, '> git push --force origin main', '#ff007f');
-            this.particles.emitText(this.player.centerX, this.player.y - 25, 'FORCE PUSH ACCEPTED // REWRITING REMOTE HISTORY', '#ffffff');
-
-            // Screen clearing compiler wipe
-            for (const enemy of this.enemies) {
-              if (enemy.isAlive) {
-                enemy.isAlive = false;
-                this.particles.emitExplosion(enemy.centerX, enemy.centerY, '#ff007f', 16);
-                this.state.addScore(enemy.scoreValue);
-                this.state.commitsPurged++;
-                this.state.incrementStreak();
-              }
-            }
-
-            if (this.boss && this.boss.isAlive) {
-              this.boss.takeDamage(200);
-              this.particles.emitExplosion(this.boss.centerX, this.boss.centerY, '#ff007f', 35);
-            }
-
-            // Clear all enemy bullets
-            for (const p of this.projectiles) {
-              if (p.owner === 'enemy') {
-                p.isAlive = false;
-                this.particles.emitExplosion(p.centerX, p.centerY, '#00e5ff', 4);
-              }
-            }
-          }
+          this.triggerOverdrive();
         } else if (e.code === 'KeyQ') {
-          const rebasing = this.player.triggerAbilityQ();
-          if (rebasing) {
-            this.crt.addTrauma(0.25);
-            const msg = this.player.isRebaseDashing
-              ? 'GIT REBASE: HYPER-DASH ENGAGED!'
-              : 'GIT REBASE: SLOW-MO (3.5s)';
-            this.particles.emitText(this.player.centerX, this.player.y - 30, msg, '#ff0055');
-          }
+          this.triggerRebase();
         } else if (e.code === 'KeyE') {
-          const res = this.player.triggerAbilityE();
-          if (res) {
-            if (res.type === 'stash_active') {
-              this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT STASH: INTANGIBLE PHASE (3.5s)', '#c084fc');
-            } else if (res.type === 'merge_burst' && res.projectile) {
-              this.projectiles.push(res.projectile);
-              this.crt.addTrauma(0.4);
-              this.particles.emitText(this.player.centerX, this.player.y - 35, 'MERGE BURST // KINETIC SHOCKWAVE', '#fbbf24');
-            } else if (res.type === 'branch_split') {
-              this.particles.emitText(this.player.centerX, this.player.y - 30, 'BRANCH SPLIT: DUAL DRONES DEPLOYED', '#10b981');
-            } else if (res.type === 'octo_protocol') {
-              this.particles.emitText(this.player.centerX, this.player.y - 30, 'OCTO PROTOCOL: 8 DEFENSE DRONES ACTIVE', '#38bdf8');
-            } else if (res.type === 'shield_up') {
-              this.particles.emitText(this.player.centerX, this.player.y - 30, 'STASH SHIELD ENGAGED', '#10b981');
-            }
-          }
+          this.triggerStash();
+        }
+
+        // Tactical combat test keys
+        if (e.shiftKey && e.code === 'KeyB' && this.state.phase === 'PLAYING') {
+          this.triggerBossAlert();
+        } else if (e.shiftKey && e.code === 'KeyK' && this.state.phase === 'BOSS_FIGHT' && this.boss) {
+          this.boss.takeDamage(999999);
         }
       }
+
+      // Visual feedback on arcade footer buttons
+      this.updateKeyFeedback(e.code, true);
     });
 
     window.addEventListener('keyup', (e) => {
       this.keys[e.code] = false;
+      this.updateKeyFeedback(e.code, false);
+    });
+
+    // Wire interactive click events for footer arcade buttons
+    document.getElementById('cmdFire')?.addEventListener('click', () => this.fireBlaster());
+    document.getElementById('cmdRebase')?.addEventListener('click', () => this.triggerRebase());
+    document.getElementById('cmdStash')?.addEventListener('click', () => this.triggerStash());
+    document.getElementById('cmdPush')?.addEventListener('click', () => this.triggerOverdrive());
+    document.getElementById('cmdPause')?.addEventListener('click', () => this.togglePause());
+
+    // Wire delegation for in-game canvas HUD power buttons
+    const hudContainer = document.getElementById('hudContainer');
+    hudContainer?.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('#hudBtnRebase')) {
+        this.triggerRebase();
+      } else if (target.closest('#hudBtnStash')) {
+        this.triggerStash();
+      } else if (target.closest('#hudBtnPush')) {
+        this.triggerOverdrive();
+      }
     });
 
     // Resize listener
     window.addEventListener('resize', () => {
       this.renderer.resize();
     });
+  }
+
+  private updateKeyFeedback(code: string, isPressed: boolean): void {
+    const keyMap: Record<string, string> = {
+      Space: 'cmdFire',
+      KeyQ: 'cmdRebase',
+      KeyE: 'cmdStash',
+      ShiftLeft: 'cmdPush',
+      ShiftRight: 'cmdPush',
+      Escape: 'cmdPause',
+      KeyP: 'cmdPause',
+      KeyA: 'cmdMove',
+      KeyD: 'cmdMove',
+      ArrowLeft: 'cmdMove',
+      ArrowRight: 'cmdMove',
+    };
+    const btnId = keyMap[code];
+    if (btnId) {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        if (isPressed) {
+          btn.classList.add('key-pressed');
+        } else {
+          btn.classList.remove('key-pressed');
+        }
+      }
+    }
+  }
+
+  public fireBlaster(): void {
+    if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
+      AudioEngine.getInstance().init();
+      const shots = this.player.tryShoot();
+      this.projectiles.push(...shots);
+    }
+  }
+
+  public triggerOverdrive(): void {
+    if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
+      AudioEngine.getInstance().init();
+      const activated = this.player.activateOverdrive();
+      if (activated) {
+        this.crt.addTrauma(0.9);
+        this.crt.triggerFlash('rgba(255, 0, 128, 0.75)', 0.35);
+        SFX.playExplosion('boss');
+        this.particles.emitText(this.player.centerX, this.player.y - 45, '> git push --force origin main', '#ff007f');
+        this.particles.emitText(this.player.centerX, this.player.y - 25, 'FORCE PUSH ACCEPTED // REWRITING REMOTE HISTORY', '#ffffff');
+
+        // Screen clearing compiler wipe
+        for (const enemy of this.enemies) {
+          if (enemy.isAlive) {
+            enemy.isAlive = false;
+            this.particles.emitExplosion(enemy.centerX, enemy.centerY, '#ff007f', 16);
+            this.state.addScore(enemy.scoreValue);
+            this.state.commitsPurged++;
+            this.state.incrementStreak();
+          }
+        }
+
+        if (this.boss && this.boss.isAlive) {
+          this.boss.takeDamage(200);
+          this.particles.emitExplosion(this.boss.centerX, this.boss.centerY, '#ff007f', 35);
+        }
+
+        // Clear all enemy bullets
+        for (const p of this.projectiles) {
+          if (p.owner === 'enemy') {
+            p.isAlive = false;
+            this.particles.emitExplosion(p.centerX, p.centerY, '#00e5ff', 4);
+          }
+        }
+      }
+    }
+  }
+
+  public triggerRebase(): void {
+    if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
+      AudioEngine.getInstance().init();
+      const rebasing = this.player.triggerAbilityQ();
+      if (rebasing) {
+        this.crt.addTrauma(0.25);
+        const msg = this.player.isRebaseDashing
+          ? 'GIT REBASE: HYPER-DASH ENGAGED!'
+          : 'GIT REBASE: SLOW-MO (3.5s)';
+        this.particles.emitText(this.player.centerX, this.player.y - 30, msg, '#ff0055');
+      }
+    }
+  }
+
+  public triggerStash(): void {
+    if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
+      AudioEngine.getInstance().init();
+      const res = this.player.triggerAbilityE();
+      if (res) {
+        if (res.type === 'stash_active') {
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT STASH: INTANGIBLE PHASE (3.5s)', '#c084fc');
+        } else if (res.type === 'merge_burst' && res.projectile) {
+          this.projectiles.push(res.projectile);
+          this.crt.addTrauma(0.4);
+          this.particles.emitText(this.player.centerX, this.player.y - 35, 'MERGE BURST // KINETIC SHOCKWAVE', '#fbbf24');
+        } else if (res.type === 'branch_split') {
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'BRANCH SPLIT: DUAL DRONES DEPLOYED', '#10b981');
+        } else if (res.type === 'octo_protocol') {
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'OCTO PROTOCOL: 8 DEFENSE DRONES ACTIVE', '#38bdf8');
+        } else if (res.type === 'shield_up') {
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'STASH SHIELD ENGAGED', '#10b981');
+        }
+      }
+    }
   }
 
   public togglePause(): void {
@@ -385,6 +471,11 @@ export class Game {
     });
   }
 
+  public triggerBossFight(): void {
+    if (!this.gameData) return;
+    this.engageBossFight();
+  }
+
   private engageBossFight(): void {
     if (!this.gameData) return;
     this.state.phase = 'BOSS_FIGHT';
@@ -448,23 +539,6 @@ export class Game {
       if (bossShots.length > 0) {
         this.projectiles.push(...bossShots);
       }
-
-      // Check Boss Defeat
-      if (!this.boss.isAlive) {
-        this.state.phase = 'VICTORY';
-        Music.stop();
-        Store.getInstance().addXp(this.state.xp);
-        this.modals.showVictory(
-          this.state,
-          this.boss.blueprint,
-          () => {
-            this.returnToLobby();
-          },
-          () => {
-            this.openStore();
-          }
-        );
-      }
     }
 
     // 5. Collision Resolution
@@ -478,6 +552,45 @@ export class Game {
       this.crt,
       this.state
     );
+
+    // Check Boss Defeat (Triggered when boss HP drops to 0)
+    if (this.state.phase === 'BOSS_FIGHT' && this.boss && !this.boss.isAlive) {
+      this.state.phase = 'VICTORY';
+      Music.stop();
+      SFX.playExplosion('boss');
+      SFX.playPowerup();
+
+      // Emit dramatic celebratory fireworks and screen shake
+      const bossCenterX = this.boss.centerX;
+      const bossCenterY = this.boss.centerY;
+      const bossBlueprint = this.boss.blueprint;
+
+      for (let ring = 0; ring < 3; ring++) {
+        setTimeout(() => {
+          this.particles.emitExplosion(
+            bossCenterX + (Math.random() * 50 - 25),
+            bossCenterY + (Math.random() * 30 - 15),
+            ring % 2 === 0 ? '#00e5ff' : '#ff0055',
+            45
+          );
+        }, ring * 220);
+      }
+
+      Store.getInstance().addXp(this.state.xp);
+
+      setTimeout(() => {
+        this.modals.showVictory(
+          this.state,
+          bossBlueprint,
+          () => {
+            this.returnToLobby();
+          },
+          () => {
+            this.openStore();
+          }
+        );
+      }, 750);
+    }
 
     // 6. Check Player Death
     if (!this.player.isAlive && this.state.phase !== 'GAMEOVER') {
@@ -520,6 +633,10 @@ export class Game {
 
     let hitEdge = false;
     for (const enemy of aliveEnemies) {
+      if (enemy instanceof IssueBomber) {
+        enemy.targetPlayerX = this.player.centerX;
+        enemy.targetPlayerY = this.player.centerY;
+      }
       enemy.vx = currentSpeed * this.waveMovementDirection;
       enemy.update(dt, { width: this.renderer.width, height: this.renderer.height });
 
