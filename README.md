@@ -1,5 +1,9 @@
 # GIT_INVADERS.EXE
 
+<p align="center">
+  <img src="docs/logo.png" width="200" height="200" alt="GIT_INVADERS.EXE Official Emblem" />
+</p>
+
 ```text
  ██████╗ ██╗████████╗   ██╗███╗   ██╗██╗   ██╗ █████╗ ██████╗ ███████╗██████╗ ███████╗
 ██╔════╝ ██║╚══██╔══╝   ██║████╗  ██║██║   ██║██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝
