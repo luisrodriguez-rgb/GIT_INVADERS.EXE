@@ -69,25 +69,25 @@ export class Store {
     const xp = this.profile.totalXp;
     if (xp >= 16000) {
       this.profile.level = 7;
-      this.profile.rankName = '10X MERGE LEGEND';
+      this.profile.rankName = 'System Overlord';
     } else if (xp >= 10500) {
       this.profile.level = 6;
-      this.profile.rankName = 'Principal Code Master';
+      this.profile.rankName = 'Architect';
     } else if (xp >= 6500) {
       this.profile.level = 5;
-      this.profile.rankName = 'Staff Systems Architect';
+      this.profile.rankName = 'Tech Lead';
     } else if (xp >= 3500) {
       this.profile.level = 4;
-      this.profile.rankName = 'Senior Fullstack Lead';
+      this.profile.rankName = 'Senior Developer';
     } else if (xp >= 1500) {
       this.profile.level = 3;
-      this.profile.rankName = 'Mid Systems Engineer';
+      this.profile.rankName = 'Developer';
     } else if (xp >= 500) {
       this.profile.level = 2;
       this.profile.rankName = 'Junior Developer';
     } else {
       this.profile.level = 1;
-      this.profile.rankName = 'Junior Contributor';
+      this.profile.rankName = 'Intern';
     }
   }
 

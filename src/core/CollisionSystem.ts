@@ -60,11 +60,14 @@ export class CollisionSystem {
 
         const bossDied = boss.takeDamage(proj.damage);
         particles.emitExplosion(proj.centerX, proj.centerY, boss.blueprint.languageColor, 12);
+        particles.emitCodeFragments(proj.centerX, proj.centerY, boss.blueprint.languageColor, 4, 'boss');
         crt.addTrauma(0.15);
 
         if (bossDied) {
           SFX.playExplosion('boss');
           particles.emitExplosion(boss.centerX, boss.centerY, '#ff007f', 60);
+          particles.emitCodeFragments(boss.centerX, boss.centerY, '#ff007f', 16, 'boss');
+          particles.emitDebris(boss.centerX, boss.centerY, '#ff007f', 12);
           particles.emitText(boss.centerX, boss.centerY, `BOSS PURGED! +1500 XP`, '#ff007f');
           crt.addTrauma(0.8);
           crt.triggerFlash('rgba(255, 0, 128, 0.5)', 0.2);
@@ -89,6 +92,7 @@ export class CollisionSystem {
           if (enemy instanceof ArmoredPR) {
             const destroyed = enemy.takeDamage(proj.damage);
             particles.emitExplosion(enemy.centerX, enemy.centerY, '#a855f7', 14);
+            particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#c084fc', 4, 'pr');
 
             if (destroyed) {
               SFX.playExplosion('medium');
@@ -96,6 +100,8 @@ export class CollisionSystem {
               gameState.prsMerged++;
               gameState.incrementStreak();
               player.addOverdriveCharge(15);
+              particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#a855f7', 8, 'pr');
+              particles.emitDebris(enemy.centerX, enemy.centerY, '#c084fc', 6);
               particles.emitText(enemy.centerX, enemy.centerY, `MERGED PR #${enemy.prNumber}!`, '#a855f7');
               crt.addTrauma(0.12);
 
@@ -113,6 +119,7 @@ export class CollisionSystem {
           } else if (enemy instanceof IssueBomber) {
             const destroyed = enemy.takeDamage(proj.damage);
             particles.emitExplosion(enemy.centerX, enemy.centerY, '#ef4444', 16);
+            particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#ef4444', 4, 'issue');
 
             if (destroyed) {
               SFX.playExplosion('medium');
@@ -120,12 +127,15 @@ export class CollisionSystem {
               gameState.issuesClosed++;
               gameState.incrementStreak();
               player.addOverdriveCharge(10);
+              particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#ef4444', 7, 'issue');
+              particles.emitDebris(enemy.centerX, enemy.centerY, '#ef4444', 5);
               particles.emitText(enemy.centerX, enemy.centerY, `FIXED #${enemy.issueNumber}!`, '#ef4444');
               crt.addTrauma(0.1);
             }
           } else if (enemy instanceof Invader) {
             const destroyed = enemy.takeDamage(proj.damage);
             particles.emitExplosion(enemy.centerX, enemy.centerY, enemy.color, 10);
+            particles.emitCodeFragments(enemy.centerX, enemy.centerY, enemy.color, 3, 'commit');
 
             if (destroyed) {
               SFX.playExplosion('small');
@@ -133,6 +143,7 @@ export class CollisionSystem {
               gameState.commitsPurged++;
               gameState.incrementStreak();
               player.addOverdriveCharge(5);
+              particles.emitCodeFragments(enemy.centerX, enemy.centerY, enemy.color, 5, 'commit');
               particles.emitText(enemy.centerX, enemy.centerY, `${enemy.commitSha} +25 XP`, enemy.color);
             }
           }

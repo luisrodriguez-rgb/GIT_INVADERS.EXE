@@ -10,10 +10,11 @@ import { Renderer } from '../rendering/Renderer';
 import { GameState } from './GameState';
 import { GameLoop } from './GameLoop';
 import { CollisionSystem } from './CollisionSystem';
-import { NormalizedGameData, GameMode } from '../github/Types';
+import { NormalizedGameData, GameMode, RepositoryDNA } from '../github/Types';
 import { GitHubClient } from '../github/GitHubClient';
 import { DataSynthesizer } from '../github/DataSynthesizer';
 import { EnemyFactory } from '../procedural/EnemyFactory';
+import { Lobby } from '../ui/Lobby';
 import { Terminal } from '../ui/Terminal';
 import { HUD } from '../ui/HUD';
 import { Modals } from '../ui/Modals';
@@ -39,6 +40,7 @@ export class Game {
 
   public gameData: NormalizedGameData | null = null;
 
+  public lobby: Lobby;
   public terminal: Terminal;
   public hud: HUD;
   public modals: Modals;
@@ -56,6 +58,7 @@ export class Game {
 
   constructor(
     canvas: HTMLCanvasElement,
+    lobbyContainer: HTMLElement,
     terminalContainer: HTMLElement,
     hudContainer: HTMLElement,
     modalContainer: HTMLElement
@@ -66,9 +69,35 @@ export class Game {
     this.particles = new ParticleSystem();
     this.crt = new CRTEffects();
 
-    this.player = new Player(this.renderer.width / 2 - 20, this.renderer.height - 54);
+    this.player = new Player(this.renderer.width / 2 - 22, 505);
 
-    this.terminal = new Terminal(terminalContainer, this.onLaunchGame.bind(this));
+    this.lobby = new Lobby(
+      lobbyContainer,
+      (targetMode?: GameMode, dna?: RepositoryDNA) => {
+        if (dna) {
+          this.gameData = DataSynthesizer.generateFromDNA(dna);
+          this.lobby.hide();
+          this.startCampaign();
+        } else {
+          this.openMissionSelect(targetMode);
+        }
+      },
+      () => {
+        this.openStore();
+      },
+      () => {
+        this.openMissionSelect();
+      }
+    );
+
+    this.terminal = new Terminal(
+      terminalContainer,
+      this.onLaunchGame.bind(this),
+      () => {
+        this.returnToLobby();
+      }
+    );
+
     this.hud = new HUD(hudContainer);
     this.modals = new Modals(modalContainer);
     this.storeModal = new StoreModal(modalContainer);
@@ -78,21 +107,25 @@ export class Game {
     this.bindInputs();
     this.initBunkers();
 
-    // Start in terminal boot mode
-    this.state.phase = 'BOOT';
-    this.terminal.show();
+    // Start in Pilot Lobby / Dashboard mode
+    this.state.phase = 'LOBBY';
+    this.terminal.hide();
+    this.lobby.show();
     this.loop.start();
   }
 
   private initBunkers(): void {
     this.bunkers = [];
-    const labels = ['.gitignore', 'docs/', 'lockfile', 'tests/'];
+    const isCitadel = this.gameData?.sourceType === 'citadel';
+    const labels = isCitadel
+      ? ['STORAGE', 'POWER', 'API HUB', 'CORE']
+      : ['.gitignore', 'docs/', 'lockfile', 'tests/'];
     const count = 4;
     const spacing = this.renderer.width / (count + 1);
 
     for (let i = 1; i <= count; i++) {
       const bx = i * spacing - 32;
-      const by = this.renderer.height - 130;
+      const by = 430; // Elevated so bunkers don't crowd the player
       this.bunkers.push(new Bunker(bx, by, labels[i - 1]));
     }
   }
@@ -121,8 +154,35 @@ export class Game {
         } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
           const activated = this.player.activateOverdrive();
           if (activated) {
-            this.crt.addTrauma(0.4);
-            this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT PUSH --FORCE ACTIVATED!', '#ff007f');
+            this.crt.addTrauma(0.9);
+            this.crt.triggerFlash('rgba(255, 0, 128, 0.75)', 0.35);
+            SFX.playExplosion('boss');
+            this.particles.emitText(this.player.centerX, this.player.y - 45, '> git push --force origin main', '#ff007f');
+            this.particles.emitText(this.player.centerX, this.player.y - 25, 'FORCE PUSH ACCEPTED // REWRITING REMOTE HISTORY', '#ffffff');
+
+            // Screen clearing compiler wipe
+            for (const enemy of this.enemies) {
+              if (enemy.isAlive) {
+                enemy.isAlive = false;
+                this.particles.emitExplosion(enemy.centerX, enemy.centerY, '#ff007f', 16);
+                this.state.addScore(enemy.scoreValue);
+                this.state.commitsPurged++;
+                this.state.incrementStreak();
+              }
+            }
+
+            if (this.boss && this.boss.isAlive) {
+              this.boss.takeDamage(200);
+              this.particles.emitExplosion(this.boss.centerX, this.boss.centerY, '#ff007f', 35);
+            }
+
+            // Clear all enemy bullets
+            for (const p of this.projectiles) {
+              if (p.owner === 'enemy') {
+                p.isAlive = false;
+                this.particles.emitExplosion(p.centerX, p.centerY, '#00e5ff', 4);
+              }
+            }
           }
         } else if (e.code === 'KeyQ') {
           const rebasing = this.player.activateRebaseSlowMo();
@@ -164,13 +224,19 @@ export class Game {
         },
         () => {
           this.isPaused = false;
-          this.returnToTerminal();
+          this.returnToLobby();
         }
       );
     } else {
       this.modals.hide();
       Music.start();
     }
+  }
+
+  public openMissionSelect(mode?: GameMode): void {
+    this.lobby.hide();
+    this.state.phase = 'BOOT';
+    this.terminal.show(mode);
   }
 
   public openStore(): void {
@@ -182,7 +248,9 @@ export class Game {
 
     this.storeModal.show(() => {
       this.player.applyStoreUpgrades();
-      if (wasPlaying && this.isPaused) {
+      if (this.state.phase === 'LOBBY') {
+        this.lobby.render();
+      } else if (wasPlaying && this.isPaused) {
         this.togglePause(); // Resume
       }
     });
@@ -194,13 +262,24 @@ export class Game {
     this.terminal.addLog(`ANALYZING GITHUB REPOSITORY TELEMETRY...`, 'text-cyan');
 
     try {
-      if (mode === 'chaos') {
+      if (mode === 'citadel') {
+        this.terminal.addLog(`CONNECTING TO CODEBASE.UNIVERSE ARCHITECTURAL BRIDGE...`, 'text-cyan');
+        this.terminal.addLog(`INGESTING 8 BIOMES // TREE-SITTER AST PARSER ACTIVE...`, 'text-cyan');
+        this.terminal.addLog(`CODEBASE-MEMORY-MCP: 90%+ TOKEN REDUCTION SYNCHRONIZED`, 'text-green');
+        this.terminal.addLog(`CITADELA STATUS: 88% [HEALTHY] // SCANNING GOD-CLASSES...`, 'text-green');
+        this.gameData = DataSynthesizer.generateCitadelUniverseMode();
+      } else if (mode === 'chaos') {
         this.terminal.addLog(`SYNTHESIZING CHAOS PROTOCOL (9999 COMMITS)...`, 'text-pink');
         this.gameData = DataSynthesizer.generateChaosMode();
       } else if (mode === 'repository') {
-        this.gameData = await GitHubClient.fetchRepository(input || 'luisrodriguez-rgb/sketion', (msg) => {
-          this.terminal.addLog(msg);
-        });
+        if (input.toLowerCase().includes('codebase.universe')) {
+          this.terminal.addLog(`RECOGNIZED TARGET: CODEBASE.UNIVERSE CITADEL REPO!`, 'text-cyan');
+          this.gameData = DataSynthesizer.generateCitadelUniverseMode();
+        } else {
+          this.gameData = await GitHubClient.fetchRepository(input || 'luisrodriguez-rgb/CODEBASE.UNIVERSE', (msg) => {
+            this.terminal.addLog(msg);
+          });
+        }
       } else {
         this.gameData = await GitHubClient.fetchProfile(input || 'luisrodriguez-rgb', (msg) => {
           this.terminal.addLog(msg);
@@ -234,7 +313,7 @@ export class Game {
     this.state.phase = 'PLAYING';
     this.isPaused = false;
 
-    this.player.reset(this.renderer.width / 2 - 20, this.renderer.height - 54);
+    this.player.reset(this.renderer.width / 2 - 22, 505);
     this.initBunkers();
     this.projectiles = [];
     this.particles.clear();
@@ -257,10 +336,21 @@ export class Game {
     this.waveDropPending = false;
     this.invaderFireTimer = 1.8;
 
+    const isCitadel = this.gameData.sourceType === 'citadel';
+    const citadelBiomeNames = [
+      'BIOME 01: STORAGE BUNKER & PERSISTENCE',
+      'BIOME 02: POWER GRID & EVENT BUS',
+      'BIOME 03: UI METROPOLIS [DOM TREES]',
+      'BIOME 04: CORE CITADEL [GOD-CLASS ALERT]',
+    ];
+    const waveTitle = isCitadel
+      ? (citadelBiomeNames[waveNum - 1] || `BIOME 0${waveNum}: CITADELA SECTOR`)
+      : `WAVE 0${waveNum}: ${this.gameData.repoName.toUpperCase()}`;
+
     this.particles.emitText(
       this.renderer.width / 2 - 50,
       140,
-      `WAVE 0${waveNum}: ${this.gameData.repoName.toUpperCase()}`,
+      waveTitle,
       this.gameData.languageColor
     );
   }
@@ -295,7 +385,7 @@ export class Game {
     this.renderer.updateStars(dt);
     this.particles.update(dt);
 
-    if (this.state.phase === 'BOOT' || this.isPaused) return;
+    if (this.state.phase === 'BOOT' || this.state.phase === 'LOBBY' || this.isPaused) return;
 
     // Tactical slow-mo factor from GIT REBASE
     const enemyDt = this.player.isRebasing ? dt * 0.35 : dt;
@@ -349,7 +439,7 @@ export class Game {
           this.state,
           this.boss.blueprint,
           () => {
-            this.returnToTerminal();
+            this.returnToLobby();
           },
           () => {
             this.openStore();
@@ -375,9 +465,15 @@ export class Game {
       this.state.phase = 'GAMEOVER';
       Music.stop();
       Store.getInstance().addXp(this.state.xp);
-      this.modals.showGameOver(this.state, () => {
-        this.startCampaign();
-      });
+      this.modals.showGameOver(
+        this.state,
+        () => {
+          this.startCampaign();
+        },
+        () => {
+          this.returnToLobby();
+        }
+      );
     }
 
     // 7. Update HUD
@@ -417,7 +513,7 @@ export class Game {
 
       // Only marching formation invaders breach the defense line
       const isDivingBug = enemy instanceof IssueBomber && enemy.isDiving;
-      if (!isDivingBug && enemy.y + enemy.height >= this.player.y) {
+      if (!isDivingBug && enemy.y + enemy.height >= this.player.y + this.player.height) {
         this.player.lives = 0;
         this.player.isAlive = false;
       }
@@ -466,10 +562,18 @@ export class Game {
     );
   }
 
-  public returnToTerminal(): void {
-    this.state.phase = 'BOOT';
+  public returnToLobby(): void {
+    Music.stop();
     this.isPaused = false;
-    this.terminal.show();
+    this.state.phase = 'LOBBY';
+    this.terminal.hide();
     this.modals.hide();
+    this.storeModal.hide();
+    this.player.applyStoreUpgrades();
+    this.lobby.show();
+  }
+
+  public returnToTerminal(): void {
+    this.returnToLobby();
   }
 }

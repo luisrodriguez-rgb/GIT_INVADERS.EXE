@@ -38,7 +38,7 @@ export const THEMES: Record<ThemeId, ThemeColors> = {
     id: 'light',
     name: 'Modo Claro (GitHub Light)',
     bgCabinet: '#f0f2f5',
-    bgScreen: '#ffffff',
+    bgScreen: '#0d1117',
     primaryAccent: '#1a7f37',
     secondaryAccent: '#0969da',
     playerColor: '#0969da',
@@ -120,6 +120,7 @@ export class ThemeManager {
     if (!THEMES[themeId]) return;
     this.currentTheme = THEMES[themeId];
     document.body.setAttribute('data-theme', themeId);
+    document.documentElement.style.setProperty('--scanline-opacity', String(this.currentTheme.crtScanlineOpacity));
     try {
       localStorage.setItem(ThemeManager.STORAGE_KEY, themeId);
     } catch {}
@@ -133,5 +134,6 @@ export class ThemeManager {
       }
     } catch {}
     document.body.setAttribute('data-theme', this.currentTheme.id);
+    document.documentElement.style.setProperty('--scanline-opacity', String(this.currentTheme.crtScanlineOpacity));
   }
 }

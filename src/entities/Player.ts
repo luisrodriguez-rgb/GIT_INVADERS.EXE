@@ -27,7 +27,7 @@ export class Player extends Entity {
   private shootCooldown: number = 0;
 
   constructor(x: number, y: number) {
-    super(x, y, 40, 32);
+    super(x, y, 44, 34);
     this.applyStoreUpgrades();
   }
 
@@ -78,9 +78,10 @@ export class Player extends Entity {
   public render(ctx: CanvasRenderingContext2D): void {
     if (!this.isAlive) return;
 
-    // Blink when invulnerable
-    if (this.invulnerableTimer > 0 && Math.floor(this.invulnerableTimer * 10) % 2 === 0) {
-      return;
+    ctx.save();
+    // Holographic shimmer during invulnerability instead of vanishing
+    if (this.invulnerableTimer > 0) {
+      ctx.globalAlpha = Math.floor(this.invulnerableTimer * 10) % 2 === 0 ? 0.45 : 0.9;
     }
 
     const activeSkin = Store.getInstance().getActiveSkin();
@@ -94,8 +95,12 @@ export class Player extends Entity {
       this.hasShield,
       this.overdriveCharge >= 100 || this.isOverdriving,
       activeSkin.hullColor,
-      activeSkin.glowColor
+      activeSkin.glowColor,
+      Date.now() * 0.003,
+      this.lives / 3,
+      Math.abs(this.vx) > 10
     );
+    ctx.restore();
   }
 
   public tryShoot(): Projectile[] {

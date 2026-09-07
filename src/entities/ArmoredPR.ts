@@ -3,6 +3,7 @@ import { Sprites } from '../rendering/Sprites';
 import { SFX } from '../audio/SFX';
 
 export type PowerUpType = 'multi_shot' | 'stash_shield' | 'xp_boost';
+export type PRStatus = 'OPEN' | 'MERGING' | 'MERGED';
 
 export class ArmoredPR extends Entity {
   public prNumber: number;
@@ -10,6 +11,7 @@ export class ArmoredPR extends Entity {
   public author: string;
   public shields: number = 3;
   public maxShields: number = 3;
+  public status: PRStatus = 'OPEN';
   public scoreValue: number = 150;
   public xpValue: number = 150;
   public powerUpDrop: PowerUpType;
@@ -21,7 +23,7 @@ export class ArmoredPR extends Entity {
     prTitle: string = 'PR: Update branch',
     author: string = 'dev'
   ) {
-    super(x, y, 36, 28);
+    super(x, y, 38, 30);
     this.prNumber = prNumber;
     this.prTitle = prTitle;
     this.author = author;
@@ -36,19 +38,31 @@ export class ArmoredPR extends Entity {
   }
 
   public render(ctx: CanvasRenderingContext2D): void {
-    if (!this.isAlive) return;
-    Sprites.drawArmoredPR(ctx, this.x, this.y, this.width, this.height, this.shields, this.maxShields);
+    if (!this.isAlive && this.status !== 'MERGED') return;
+    Sprites.drawArmoredPR(
+      ctx,
+      this.x,
+      this.y,
+      this.width,
+      this.height,
+      this.shields,
+      this.maxShields,
+      this.prNumber,
+      this.status
+    );
   }
 
   public takeDamage(amount: number): boolean {
     if (this.shields > 1) {
-      this.shields--;
+      this.shields -= amount;
+      this.status = 'OPEN';
       SFX.playShieldHit();
       return false; // Still shielded
     }
 
     this.shields = 0;
+    this.status = 'MERGED';
     this.isAlive = false;
-    return true; // Destroyed
+    return true; // Broken & merged
   }
 }

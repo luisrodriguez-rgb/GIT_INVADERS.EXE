@@ -1,5 +1,6 @@
 export type GamePhase =
   | 'BOOT'
+  | 'LOBBY'
   | 'MENU'
   | 'PLAYING'
   | 'BOSS_ALERT'
@@ -8,7 +9,7 @@ export type GamePhase =
   | 'VICTORY';
 
 export class GameState {
-  public phase: GamePhase = 'BOOT';
+  public phase: GamePhase = 'LOBBY';
   public score: number = 0;
   public highScore: number = 0;
   public xp: number = 0;
