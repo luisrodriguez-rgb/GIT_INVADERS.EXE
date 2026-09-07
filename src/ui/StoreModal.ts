@@ -1,4 +1,4 @@
-import { Store } from '../store/Store';
+import { Store, ShipSkin } from '../store/Store';
 import { SFX } from '../audio/SFX';
 import { Sprites } from '../rendering/Sprites';
 
@@ -55,7 +55,7 @@ export class StoreModal {
 
     if (this.activeStoreTab === 'SKINS') {
       let skinsHtml = '';
-      this.store.SKINS.forEach((skin) => {
+      this.store.SKINS.forEach((skin: ShipSkin) => {
         const isUnlocked = prof.unlockedSkins.includes(skin.id);
         const isEquipped = prof.activeSkinId === skin.id;
 

@@ -5,6 +5,7 @@ export interface ShipSkin {
   glowColor: string;
   cost: number;
   unlocked: boolean;
+  description?: string;
 }
 
 export interface PlayerProfile {
@@ -40,11 +41,12 @@ export class Store {
   };
 
   public readonly SKINS: ShipSkin[] = [
-    { id: 'cyan', name: 'Compiler Delta', hullColor: '#00e5ff', glowColor: '#38bdf8', cost: 0, unlocked: true },
-    { id: 'purple', name: 'Phantom Violet', hullColor: '#c084fc', glowColor: '#a855f7', cost: 400, unlocked: false },
-    { id: 'amber', name: 'Solar Gold', hullColor: '#fbbf24', glowColor: '#f59e0b', cost: 600, unlocked: false },
-    { id: 'matrix', name: 'Emerald Glitch', hullColor: '#00ff66', glowColor: '#10b981', cost: 800, unlocked: false },
-    { id: 'cyberpunk', name: 'Neon Overdrive', hullColor: '#ff007f', glowColor: '#ec4899', cost: 1000, unlocked: false },
+    { id: 'cyan', name: 'Compiler Delta', hullColor: '#00e5ff', glowColor: '#38bdf8', cost: 0, unlocked: true, description: 'Interceptor balanceado con reactores de plasma gemelos.' },
+    { id: 'purple', name: 'Phantom Violet', hullColor: '#c084fc', glowColor: '#a855f7', cost: 400, unlocked: false, description: 'Caza de sigilo con envergadura extendida y canones de antimateria.' },
+    { id: 'amber', name: 'Solar Gold', hullColor: '#fbbf24', glowColor: '#f59e0b', cost: 600, unlocked: false, description: 'Acorazado pesado de triple tobera con blindaje reforzado.' },
+    { id: 'matrix', name: 'Emerald Glitch', hullColor: '#00ff66', glowColor: '#10b981', cost: 800, unlocked: false, description: 'Caza experimental de ala invertida con estabilizadores de flujo.' },
+    { id: 'cyberpunk', name: 'Neon Overdrive', hullColor: '#ff007f', glowColor: '#ec4899', cost: 1000, unlocked: false, description: 'Nave de asalto rapido con cuatro puntos duros de anclaje frontal.' },
+    { id: 'quantum_citadel', name: 'Quantum Citadel', hullColor: '#6366f1', glowColor: '#22d3ee', cost: 1500, unlocked: false, description: 'Fortaleza orbital con ocho paneles de titanio y deflectores pesados.' },
   ];
 
   private constructor() {
@@ -167,6 +169,20 @@ export class Store {
     }
 
     return false;
+  }
+
+  public equipSkin(skinId: string): boolean {
+    return this.buyOrEquipSkin(skinId);
+  }
+
+  public get upgrades() {
+    return {
+      blasterLevel: this.profile.fireRateLevel,
+      speedLevel: this.profile.thrusterLevel,
+      piercingLasers: this.profile.quantumPiercing,
+      startingShield: this.profile.startingShield,
+      rebaseUnlocked: this.profile.rebaseSlowMoUnlocked,
+    };
   }
 
   public getActiveSkin(): ShipSkin {

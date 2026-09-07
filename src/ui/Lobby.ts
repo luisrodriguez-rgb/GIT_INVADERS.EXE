@@ -2,6 +2,7 @@ import { Store } from '../store/Store';
 import { Sprites } from '../rendering/Sprites';
 import { GameMode, RepositoryDNA } from '../github/Types';
 import { DataSynthesizer } from '../github/DataSynthesizer';
+import { WaveGenerator } from '../procedural/WaveGenerator';
 
 export class Lobby {
   private container: HTMLElement;
@@ -95,6 +96,8 @@ export class Lobby {
       </option>
     `).join('');
 
+    const langMods = WaveGenerator.getLanguageModifiers(dna.primaryLanguage);
+
     this.container.innerHTML = `
       <div class="lobby-frame-window">
         <!-- Top App Bar -->
@@ -145,17 +148,18 @@ export class Lobby {
 
           <!-- Central + Right Work Area -->
           <div class="lobby-main-deck">
+            <!-- Upper Split: Pilot Console + Target Repo -->
             <div class="deck-columns-split">
               <!-- Center Column: Pilot Console & Ship Viewport -->
               <div class="pilot-console-card">
-                <div class="section-badge">PILOT CONSOLE</div>
+                <div class="section-badge">PILOT CONSOLE // ARSENAL</div>
 
                 <div class="ship-hologram-stage">
                   <div class="stage-reticle tl"></div>
                   <div class="stage-reticle tr"></div>
                   <div class="stage-reticle bl"></div>
                   <div class="stage-reticle br"></div>
-                  <canvas id="lobbyShipCanvas" width="220" height="120" class="stage-canvas"></canvas>
+                  <canvas id="lobbyShipCanvas" width="240" height="120" class="stage-canvas"></canvas>
                 </div>
 
                 <div class="ship-identity-line">
@@ -167,11 +171,18 @@ export class Lobby {
                 <div class="fast-skins-row">
                   ${skinsHtml}
                 </div>
+
+                <!-- Hardware Upgrades Telemetry -->
+                <div class="pilot-hardware-strip">
+                  <div class="hw-cell"><span>BLASTER:</span> <b>LVL ${this.store.upgrades.blasterLevel}</b></div>
+                  <div class="hw-cell"><span>THRUSTER:</span> <b>LVL ${this.store.upgrades.speedLevel}</b></div>
+                  <div class="hw-cell"><span>DEFLECTOR:</span> <b>${prof.startingShield ? 'ONLINE' : 'OFFLINE'}</b></div>
+                </div>
               </div>
 
               <!-- Right Column: Target Repository & DNA Matrix -->
               <div class="target-repo-card">
-                <div class="section-badge">TARGET REPOSITORY</div>
+                <div class="section-badge">TARGET REPOSITORY // DNA</div>
 
                 <div class="repo-select-row">
                   <span class="octo-mini">
@@ -201,14 +212,80 @@ export class Lobby {
                 <div class="dna-threat-block">
                   <div class="threat-title-row">
                     <span>THREAT LEVEL</span>
-                    <span class="threat-val text-red">${dna.threatLevel}%</span>
+                    <span class="threat-val text-red">${dna.threatLevel}% (${dna.threatRating})</span>
                   </div>
                   ${threatBarHtml}
                 </div>
               </div>
             </div>
 
-            <!-- Dominant Hero Action Button -->
+            <!-- Middle Section: Tactical Mission Intelligence & Encounter Roadmap -->
+            <div class="tactical-intel-card">
+              <div class="tactical-card-header">
+                <div class="tac-header-left">
+                  <span class="tac-status-indicator"></span>
+                  <span class="tac-title">TACTICAL MISSION BRIEFING</span>
+                </div>
+                <span class="tac-meta">ENCOUNTER ROADMAP & TECH DIRECTIVES</span>
+              </div>
+
+              <div class="tactical-roadmap-grid">
+                <div class="roadmap-node active">
+                  <div class="node-badge">W1</div>
+                  <div class="node-details">
+                    <span class="node-title">COMMIT SQUADRON</span>
+                    <span class="node-sub">FORMATION: GRID</span>
+                  </div>
+                </div>
+                <div class="roadmap-node">
+                  <div class="node-badge">W2</div>
+                  <div class="node-details">
+                    <span class="node-title">ARMORED PR FLANK</span>
+                    <span class="node-sub">FORMATION: DELTA WING</span>
+                  </div>
+                </div>
+                <div class="roadmap-node">
+                  <div class="node-badge">W3</div>
+                  <div class="node-details">
+                    <span class="node-title">ISSUE BUG BOMBERS</span>
+                    <span class="node-sub">FORMATION: DIVE ATTACK</span>
+                  </div>
+                </div>
+                <div class="roadmap-node boss-node">
+                  <div class="node-badge">BOSS</div>
+                  <div class="node-details">
+                    <span class="node-title">${dna.bossCoreName}</span>
+                    <span class="node-sub">TITAN BREACH // ${dna.contributors} DRONES</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Active Stack Modifiers & Keybindings Banner -->
+              <div class="tactical-sub-banner">
+                <div class="mod-pill-group">
+                  <span class="pill-label">TECH MODIFIERS:</span>
+                  <span class="pill-badge text-cyan">${dna.primaryLanguage.toUpperCase()} // ${langMods.speedMultiplier > 1 ? '+15% SPD & FIRE' : 'STANDARD SPEED'}</span>
+                  ${langMods.hasDroneSupport ? '<span class="pill-badge text-green">PYTHON // DRONE SWARM</span>' : ''}
+                  ${langMods.armorBonus > 0 ? '<span class="pill-badge text-yellow">C++/RUST // +1 SHIELD</span>' : ''}
+                  ${langMods.bunkerIntegrityRatio > 1 ? '<span class="pill-badge text-purple">HTML/CSS // +30% BUNKERS</span>' : ''}
+                </div>
+
+                <div class="combat-keys-pill">
+                  <span class="key-tag"><kbd>SPACE</kbd> FIRE</span>
+                  <span class="key-tag"><kbd>Q</kbd> REBASE</span>
+                  <span class="key-tag"><kbd>E</kbd> STASH</span>
+                  <span class="key-tag"><kbd>SHIFT</kbd> PUSH</span>
+                </div>
+              </div>
+
+              <!-- Live Telemetry Stream Ticker -->
+              <div class="live-telemetry-strip">
+                <span class="ticker-prefix">[GIT_FEED]</span>
+                <span class="ticker-text">${dna.commits.toLocaleString()} Commits synthesized • ${dna.pullRequests} Pull Requests converted to Armored Cruisers • Target Boss: ${dna.bossCoreName}</span>
+              </div>
+            </div>
+
+            <!-- Bottom: Dominant Hero Action Button -->
             <div class="hero-launch-section">
               <button class="dominant-start-btn" id="lobbyDominantStartBtn">
                 <span class="play-icon">▶</span> START MISSION

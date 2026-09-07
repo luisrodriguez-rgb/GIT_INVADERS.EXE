@@ -1765,8 +1765,9 @@ kbd {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 8px 12px;
-  gap: 6px;
+  justify-content: space-between;
+  padding: 10px 14px 8px 14px;
+  gap: 8px;
   overflow-y: auto;
   box-sizing: border-box;
 }
@@ -1876,6 +1877,28 @@ kbd {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+}
+
+.pilot-hardware-strip {
+  display: flex;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 4px 8px;
+  margin-top: 2px;
+}
+
+.hw-cell {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.58rem;
+  color: var(--text-muted);
+}
+
+.hw-cell b {
+  color: #00e5ff;
 }
 
 /* Target Repo Card */
@@ -2002,6 +2025,198 @@ kbd {
   height: 100%;
   background: linear-gradient(90deg, #f59e0b, #ef4444);
   box-shadow: 0 0 6px #ef4444;
+}
+
+/* Middle Section: Tactical Intel Card */
+.tactical-intel-card {
+  background: rgba(8, 14, 26, 0.75);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  border-radius: 6px;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.04);
+}
+
+.tactical-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 4px;
+}
+
+.tac-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tac-status-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e5ff;
+  box-shadow: 0 0 6px #00e5ff;
+  animation: pulseLed 1.5s infinite alternate;
+}
+
+.tac-title {
+  font-size: 0.65rem;
+  font-weight: 900;
+  color: #ffffff;
+  letter-spacing: 0.8px;
+}
+
+.tac-meta {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+.tactical-roadmap-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+
+.roadmap-node {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 5px 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.roadmap-node.active {
+  border-color: rgba(0, 229, 255, 0.5);
+  background: rgba(0, 229, 255, 0.08);
+}
+
+.roadmap-node.boss-node {
+  border-color: rgba(255, 0, 127, 0.4);
+  background: rgba(255, 0, 127, 0.06);
+}
+
+.node-badge {
+  font-size: 0.58rem;
+  font-weight: 900;
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.boss-node .node-badge {
+  color: #ff007f;
+  background: rgba(255, 0, 127, 0.15);
+  border-color: rgba(255, 0, 127, 0.4);
+}
+
+.node-details {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.node-title {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-sub {
+  font-size: 0.5rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.tactical-sub-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  padding: 4px 8px;
+  gap: 8px;
+}
+
+.mod-pill-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill-label {
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+.pill-badge {
+  font-size: 0.55rem;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.combat-keys-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.key-tag {
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.key-tag kbd {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+  padding: 0 3px;
+  font-family: var(--font-mono);
+  font-size: 0.52rem;
+  color: #ffffff;
+}
+
+.live-telemetry-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.55rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 3px;
+  font-family: var(--font-mono);
+}
+
+.ticker-prefix {
+  color: #10b981;
+  font-weight: 800;
+}
+
+.ticker-text {
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Dominant Hero Action Button */

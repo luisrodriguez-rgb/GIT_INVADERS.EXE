@@ -2,6 +2,7 @@ import { BossBlueprint } from '../github/Types';
 import { GameState } from '../core/GameState';
 import { Store } from '../store/Store';
 import { SFX } from '../audio/SFX';
+import { Sprites } from '../rendering/Sprites';
 
 export class Modals {
   private overlay: HTMLElement;

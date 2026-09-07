@@ -1,4 +1,4 @@
-import { NormalizedGameData, SampleCommit, SamplePR, SampleIssue, GitHubMetrics } from './Types';
+import { NormalizedGameData, SampleCommit, SamplePR, SampleIssue, GitHubMetrics, RepositoryDNA } from './Types';
 import { DataNormalizer } from './Normalizer';
 
 export class DataSynthesizer {
@@ -388,7 +388,7 @@ export class DataSynthesizer {
       pullRequests: dna.pullRequests,
       openIssues: dna.issues,
       contributors: dna.contributors,
-      languages: dna.languages.map(l => l.name),
+      languages: dna.languages.map((l: { name: string }) => l.name),
       primaryLanguage: dna.primaryLanguage,
       streakDays: 45,
       recentActivityScore: dna.threatLevel,

@@ -6,6 +6,7 @@ export abstract class Entity {
   public width: number;
   public height: number;
   public isAlive: boolean = true;
+  public scoreValue: number = 50;
 
   constructor(x: number, y: number, width: number, height: number) {
     this.x = x;
