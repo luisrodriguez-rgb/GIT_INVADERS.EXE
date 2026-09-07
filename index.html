@@ -7,7 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
+  <link rel="alternate icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 </head>
 <body data-theme="cyan">
@@ -15,7 +16,7 @@
     <!-- Top Header Bar with Theme Selector, Controls, Pause and Store -->
     <header class="arcade-header">
       <div class="header-brand">
-        <img src="/logo-256.png" alt="Logo" class="brand-logo-img" />
+        <img src="/logo.svg" alt="GIT_INVADERS" class="brand-logo-img" />
         <span class="pulse-led"></span>
         <span class="header-title">GIT_INVADERS.EXE</span>
         <span class="header-badge">v2.5 PRO</span>
@@ -24,8 +25,14 @@
       <div class="header-controls">
         <!-- In-Combat Session Controls (Visible only during active combat) -->
         <div id="combatControls" class="combat-controls-group" style="display: none;">
-          <button id="pauseBtn" class="control-chip" title="Pause / Resume Game">PAUSE [ESC]</button>
-          <button id="lobbyBtn" class="control-chip" title="Abort to Pilot Hangar">LOBBY</button>
+          <button id="pauseBtn" class="control-chip control-chip-pause" title="Pause / Resume Game">
+            <span class="chip-status-led cyan"></span>
+            <span id="pauseBtnText">PAUSE [ESC]</span>
+          </button>
+          <button id="lobbyBtn" class="control-chip control-chip-abort" title="Abort Mission to Pilot Hangar">
+            <span class="chip-status-led amber"></span>
+            <span id="lobbyBtnText">HANGAR [◀]</span>
+          </button>
         </div>
 
         <!-- Hardware & Cabinet Controls (Always accessible) -->
@@ -41,8 +48,17 @@
             </select>
           </div>
 
-          <button id="crtToggle" class="control-chip active" title="Toggle CRT Scanlines">CRT FX</button>
-          <button id="audioToggle" class="control-chip" title="Toggle Audio Synthesizer">AUDIO: ON</button>
+          <button id="crtToggle" class="control-chip active" title="Toggle CRT Scanlines">
+            <span class="chip-status-led cyan"></span>
+            <span>CRT FX</span>
+          </button>
+          <button id="audioToggle" class="control-chip" title="Toggle Audio Synthesizer">
+            <span class="chip-status-led green"></span>
+            <span id="audioToggleLabel">AUDIO: ON</span>
+          </button>
+          <button id="langToggleBtn" class="control-chip control-chip-lang" title="Toggle Language (EN / ES)">
+            <span id="langToggleText">[ EN | ES ]</span>
+          </button>
         </div>
       </div>
     </header>
@@ -86,14 +102,26 @@
       </div>
     </div>
 
-    <!-- Desktop Key Bindings Footer -->
-    <footer class="arcade-footer">
-      <div class="key-hint"><kbd>A</kbd> <kbd>D</kbd> or <kbd>←</kbd> <kbd>→</kbd> Move</div>
-      <div class="key-hint"><kbd>SPACE</kbd> Blaster Fire</div>
-      <div class="key-hint"><kbd>Q</kbd> Git Rebase (Slow-Mo)</div>
-      <div class="key-hint"><kbd>E</kbd> Git Stash (Shield)</div>
-      <div class="key-hint"><kbd>SHIFT</kbd> Git Push --Force</div>
-      <div class="key-hint"><kbd>ESC</kbd> / <kbd>P</kbd> Pause</div>
+    <!-- Desktop Key Bindings Footer: Interactive Hardware Command Keys -->
+    <footer class="arcade-footer" id="desktopControls">
+      <button class="arcade-cmd-btn" id="cmdMove" title="Navigate Lateral Thrusters">
+        <kbd>A</kbd> <kbd>D</kbd> <span id="lblKeyMove">Move</span>
+      </button>
+      <button class="arcade-cmd-btn" id="cmdFire" title="Fire Primary Blasters">
+        <kbd>SPACE</kbd> <span id="lblKeyFire">Blaster Fire</span>
+      </button>
+      <button class="arcade-cmd-btn" id="cmdRebase" title="Trigger Git Rebase Chrono Slow-Mo">
+        <kbd>Q</kbd> <span id="lblKeyRebase">Git Rebase</span>
+      </button>
+      <button class="arcade-cmd-btn" id="cmdStash" title="Deploy Stash Deflector Shield">
+        <kbd>E</kbd> <span id="lblKeyStash">Git Stash</span>
+      </button>
+      <button class="arcade-cmd-btn" id="cmdPush" title="Quantum Overdrive Screen Wipe">
+        <kbd>SHIFT</kbd> <span id="lblKeyPush">Git Push --Force</span>
+      </button>
+      <button class="arcade-cmd-btn" id="cmdPause" title="Tactical Pause & Terminal">
+        <kbd>ESC</kbd> <span id="lblKeyPause">Pause</span>
+      </button>
     </footer>
   </div>
 

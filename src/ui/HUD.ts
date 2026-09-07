@@ -3,6 +3,7 @@ import { Player } from '../entities/Player';
 import { Boss } from '../entities/Boss';
 import { NormalizedGameData } from '../github/Types';
 import { Store } from '../store/Store';
+import { I18n } from '../i18n/I18n';
 
 export class HUD {
   private container: HTMLElement;
@@ -17,6 +18,8 @@ export class HUD {
     boss: Boss | null,
     gameData: NormalizedGameData | null
   ): void {
+    const i18n = I18n.getInstance();
+    const t = i18n.t;
     const livesIcons = '▲ '.repeat(Math.max(0, player.lives));
     const overdrivePercent = Math.min(100, Math.round(player.overdriveCharge));
     const isOverdriveReady = overdrivePercent >= 100;
@@ -28,18 +31,18 @@ export class HUD {
     const hasRebase = prof.rebaseSlowMoUnlocked;
     const rebaseReady = hasRebase && player.rebaseCooldown <= 0;
     const rebaseStatusText = !hasRebase
-      ? 'STORE LOCKED'
+      ? t.hudRebaseLocked
       : player.isRebasing
-      ? `ACTIVE (${player.rebaseTimer.toFixed(1)}s)`
+      ? `${t.hudRebaseActive} (${player.rebaseTimer.toFixed(1)}s)`
       : rebaseReady
-      ? 'READY [Q]'
+      ? t.hudRebaseReady
       : `${Math.ceil(player.rebaseCooldown)}s`;
 
     const stashReady = player.stashCooldown <= 0 && !player.hasShield;
     const stashStatusText = player.hasShield
-      ? 'SHIELD ACTIVE'
+      ? t.hudShieldActive
       : stashReady
-      ? 'READY [E]'
+      ? t.hudStashReady
       : `${Math.ceil(player.stashCooldown)}s`;
 
     let bossHtml = '';
@@ -75,19 +78,19 @@ export class HUD {
           <div class="hud-repo-tag">REPO: <span class="hud-cyan">${gameData?.repoName || 'sketion'}</span></div>
         </div>
         <div class="hud-item">
-          <span class="hud-label">WAVE</span>
+          <span class="hud-label">${t.hudWave}</span>
           <span class="hud-val">${gameState.currentWave}/${gameState.totalWaves}</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label">SCORE</span>
+          <span class="hud-label">${t.hudScore}</span>
           <span class="hud-val hud-cyan">${paddedScore}</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label">STREAK</span>
+          <span class="hud-label">${t.hudStreak}</span>
           <span class="hud-val hud-yellow">${gameState.streakMultiplier.toFixed(1)}x</span>
         </div>
         <div class="hud-item">
-          <span class="hud-label">LIVES</span>
+          <span class="hud-label">${t.hudLives}</span>
           <span class="hud-val hud-cyan">${livesIcons}</span>
         </div>
       </div>
@@ -97,45 +100,45 @@ export class HUD {
       <div class="hud-bottom">
         <div class="hud-stats-group">
           <div class="hud-stat">
-            <span class="hud-tag">COMMITS:</span> <b>${gameState.commitsPurged}</b>
+            <span class="hud-tag">${t.hangarCommits}:</span> <b>${gameState.commitsPurged}</b>
           </div>
           <div class="hud-stat">
-            <span class="hud-tag">PRs:</span> <b>${gameState.prsMerged}</b>
+            <span class="hud-tag">${t.hangarPrs}:</span> <b>${gameState.prsMerged}</b>
           </div>
           <div class="hud-stat">
-            <span class="hud-tag">ISSUES:</span> <b>${gameState.issuesClosed}</b>
+            <span class="hud-tag">${t.hangarIssues}:</span> <b>${gameState.issuesClosed}</b>
           </div>
           <div class="hud-stat">
-            <span class="hud-tag">XP:</span> <b>${gameState.xp.toLocaleString()}</b>
+            <span class="hud-tag">${t.hangarXp}:</span> <b>${gameState.xp.toLocaleString()}</b>
           </div>
           <div class="hud-stat rank-badge-tag">
-            <span>LVL ${prof.level}</span>
+            <span>${t.storeLevel} ${prof.level}</span>
           </div>
         </div>
 
         <div class="hud-powers-group">
           <!-- Tactical Power [Q]: Rebase -->
-          <div class="power-slot ${rebaseReady ? 'power-ready' : ''} ${player.isRebasing ? 'power-active' : ''}">
+          <button class="power-slot ${rebaseReady ? 'power-ready' : ''} ${player.isRebasing ? 'power-active' : ''}" id="hudBtnRebase" title="Trigger Rebase Slow-Mo [Q]">
             <span class="power-key">[Q] REBASE:</span>
             <span class="power-val">${rebaseStatusText}</span>
-          </div>
+          </button>
 
           <!-- Tactical Power [E]: Stash -->
-          <div class="power-slot ${stashReady ? 'power-ready' : ''} ${player.hasShield ? 'power-active' : ''}">
+          <button class="power-slot ${stashReady ? 'power-ready' : ''} ${player.hasShield ? 'power-active' : ''}" id="hudBtnStash" title="Deploy Stash Shield [E]">
             <span class="power-key">[E] STASH:</span>
             <span class="power-val">${stashStatusText}</span>
-          </div>
+          </button>
 
           <!-- Overdrive Bar -->
-          <div class="overdrive-meter-box">
+          <button class="overdrive-meter-box ${isOverdriveReady ? 'overdrive-ready' : ''}" id="hudBtnPush" title="Trigger Git Push Overdrive [SHIFT]">
             <div class="overdrive-label">
               <span>GIT PUSH --FORCE</span>
-              <span class="${isOverdriveReady ? 'ready-pulse' : ''}">${isOverdriveReady ? 'READY [SHIFT]' : `${overdrivePercent}%`}</span>
+              <span class="${isOverdriveReady ? 'ready-pulse' : ''}">${isOverdriveReady ? t.hudOverdriveReady : `${overdrivePercent}%`}</span>
             </div>
             <div class="overdrive-track">
               <div class="overdrive-fill ${isOverdriveReady ? 'overdrive-ready' : ''}" style="width: ${overdrivePercent}%"></div>
             </div>
-          </div>
+          </button>
         </div>
       </div>
     `;

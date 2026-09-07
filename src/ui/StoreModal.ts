@@ -2,6 +2,7 @@ import { Store, ShipModel } from '../store/Store';
 import { SFX } from '../audio/SFX';
 import { Sprites } from '../rendering/Sprites';
 import { ThemeManager, THEMES, ThemeId } from '../themes/ThemeManager';
+import { I18n } from '../i18n/I18n';
 
 export class StoreModal {
   private overlay: HTMLElement;
@@ -19,6 +20,11 @@ export class StoreModal {
     this.overlay = overlay;
     this.store = Store.getInstance();
     this.themeManager = ThemeManager.getInstance();
+    I18n.getInstance().subscribe(() => {
+      if (this.overlay.style.display !== 'none') {
+        this.render();
+      }
+    });
   }
 
   public show(onClose?: () => void): void {
@@ -43,6 +49,8 @@ export class StoreModal {
   }
 
   public render(): void {
+    const i18n = I18n.getInstance();
+    const t = i18n.t;
     const prof = this.store.profile;
     const selectedShip = this.store.SKINS[this.selectedShipIndex] || this.store.SKINS[0];
     const isUnlocked = prof.unlockedSkins.includes(selectedShip.id);
@@ -64,12 +72,12 @@ export class StoreModal {
     if (this.activeStoreTab === 'SHIPS') {
       // Primary Request: Ship Engineering Bay Carousel
       const actionBtnText = isEquipped
-        ? '[ EQUIPPED ]'
+        ? t.storeEquipped
         : isUnlocked
-        ? '[ EQUIP SHIP ]'
+        ? t.storeEquipShip
         : prof.availableXp >= selectedShip.cost
-        ? `[ UNLOCK (${selectedShip.cost} XP) ]`
-        : `[ LOCKED (${selectedShip.cost} XP) ]`;
+        ? `${t.storeBuy} [ ${selectedShip.cost.toLocaleString()} XP ]`
+        : `${t.profileLocked} [ ${selectedShip.cost.toLocaleString()} XP ]`;
 
       const actionBtnClass = isEquipped
         ? 'btn-equipped'
@@ -254,19 +262,19 @@ export class StoreModal {
           <div class="store-panel-tabs-left">
             <div class="store-octo-icon">${octocatSvg}</div>
             <button class="store-header-tab" id="storeReturnHangarBtn">GIT_INVADERS.EXE</button>
-            <button class="store-header-tab tab-active">GIT_STORE.EXE // SHIP ENGINEERING BAY</button>
+            <button class="store-header-tab tab-active">${t.storeTitle} // ${t.storeEngineeringBay}</button>
           </div>
           <div class="store-credits-display">
-            <span class="credits-label">CREDITS</span>
+            <span class="credits-label">${t.hangarCredits}</span>
             <span class="credits-amount">${prof.availableXp.toLocaleString()} XP</span>
           </div>
         </div>
 
         <!-- Store Sub Navigation Tabs (SHIPS, MODULES, COSMETICS) -->
         <div class="store-sub-nav">
-          <button class="sub-nav-chip ${this.activeStoreTab === 'SHIPS' ? 'chip-active' : ''}" data-tab="SHIPS">[ SHIPS ]</button>
-          <button class="sub-nav-chip ${this.activeStoreTab === 'MODULES' ? 'chip-active' : ''}" data-tab="MODULES">[ MODULES ]</button>
-          <button class="sub-nav-chip ${this.activeStoreTab === 'COSMETICS' ? 'chip-active' : ''}" data-tab="COSMETICS">[ COSMETICS ]</button>
+          <button class="sub-nav-chip ${this.activeStoreTab === 'SHIPS' ? 'chip-active' : ''}" data-tab="SHIPS">${t.storeTabShips}</button>
+          <button class="sub-nav-chip ${this.activeStoreTab === 'MODULES' ? 'chip-active' : ''}" data-tab="MODULES">${t.storeTabModules}</button>
+          <button class="sub-nav-chip ${this.activeStoreTab === 'COSMETICS' ? 'chip-active' : ''}" data-tab="COSMETICS">${t.storeTabCosmetics}</button>
         </div>
 
         <!-- Main Body -->
@@ -278,9 +286,9 @@ export class StoreModal {
         <div class="store-panel-footer">
           <div class="footer-tagline">
             ${octocatSvg}
-            <span>UPGRADE. SURVIVE. COMMIT.</span>
+            <span>${t.storeFooterTagline}</span>
           </div>
-          <button class="store-exit-btn" id="closeStoreBtn">[ EXIT STORE ]</button>
+          <button class="store-exit-btn" id="closeStoreBtn">[ ${t.storeReturnHangar} ]</button>
         </div>
       </div>
     `;
@@ -325,8 +333,13 @@ export class StoreModal {
 
     ctx.clearRect(0, 0, w, h);
 
+    const isLight = this.themeManager.currentTheme.id === 'light';
+    const gridColor = isLight ? 'rgba(9, 105, 218, 0.08)' : 'rgba(0, 229, 255, 0.08)';
+    const beamColor = isLight ? 'rgba(9, 105, 218, 0.12)' : 'rgba(0, 229, 255, 0.12)';
+    const haloColor = isLight ? 'rgba(9, 105, 218, 0.18)' : 'rgba(0, 229, 255, 0.32)';
+
     // Wireframe hologram grid
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.08)';
+    ctx.strokeStyle = gridColor;
     ctx.lineWidth = 1;
     const gridSize = 14;
     for (let x = 0; x <= w; x += gridSize) {
@@ -344,7 +357,7 @@ export class StoreModal {
 
     // Holographic scanline beam
     const scanY = ((this.animTime * 35) % h);
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.12)';
+    ctx.fillStyle = beamColor;
     ctx.fillRect(0, scanY - 1, w, 2);
 
     const floatY = Math.sin(this.animTime * 2.5) * 4;
@@ -353,8 +366,8 @@ export class StoreModal {
 
     // Glowing core halo
     const grad = ctx.createRadialGradient(centerX, centerY, 4, centerX, centerY, 75);
-    grad.addColorStop(0, 'rgba(0, 229, 255, 0.32)');
-    grad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+    grad.addColorStop(0, haloColor);
+    grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.arc(centerX, centerY, 75, 0, Math.PI * 2);

@@ -111,11 +111,27 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.72rem;
+  font-family: var(--font-mono);
+  pointer-events: auto;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.power-slot:hover {
+  border-color: #00e5ff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  transform: translateY(-1px);
+}
+
+.power-slot:active {
+  transform: translateY(1px);
 }
 
 .power-key {
@@ -129,9 +145,9 @@
 
 .power-slot.power-ready {
   border-color: #00e5ff;
-  background: rgba(0, 229, 255, 0.15);
+  background: rgba(0, 229, 255, 0.2);
   color: #00e5ff;
-  box-shadow: 0 0 6px rgba(0, 229, 255, 0.3);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
 }
 
 .power-slot.power-active {
@@ -146,6 +162,22 @@
   flex-direction: column;
   gap: 2px;
   width: 140px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  pointer-events: auto;
+  cursor: pointer;
+  outline: none;
+  font-family: var(--font-mono);
+  transition: all 0.15s ease;
+}
+
+.overdrive-meter-box:hover {
+  transform: translateY(-1px);
+}
+
+.overdrive-meter-box:active {
+  transform: translateY(1px);
 }
 
 .overdrive-label {

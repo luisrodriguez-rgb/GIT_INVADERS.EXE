@@ -1092,21 +1092,64 @@
   font-weight: 700;
 }
 
-/* Light Theme overrides for Lobby */
+/* Light Theme overrides for Lobby - High Contrast GitHub Light */
 body[data-theme="light"] .lobby-frame-window {
   background: #f8fafc;
   border-color: #cbd5e1;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
 }
 
 body[data-theme="light"] .lobby-app-bar {
   background: #ffffff;
-  border-color: #e2e8f0;
+  border-color: #d0d7de;
 }
 
 body[data-theme="light"] .brand-title {
-  color: #0f172a;
+  color: #1f2328;
 }
 
+body[data-theme="light"] .brand-sub {
+  color: #57606a;
+}
+
+body[data-theme="light"] .meta-tag {
+  background: rgba(9, 105, 218, 0.08);
+  border-color: #0969da;
+  color: #0969da;
+}
+
+body[data-theme="light"] .meta-status {
+  color: #1a7f37;
+}
+
+/* Light Sidebar */
+body[data-theme="light"] .lobby-sidebar {
+  background: #f6f8fa;
+  border-right-color: #d0d7de;
+}
+
+body[data-theme="light"] .nav-tab-btn {
+  color: #24292f;
+  font-weight: 700;
+}
+
+body[data-theme="light"] .nav-tab-btn:hover {
+  background: #eaeef2;
+  color: #0969da;
+}
+
+body[data-theme="light"] .nav-tab-btn.active {
+  background: rgba(9, 105, 218, 0.1);
+  border-color: #0969da;
+  color: #0969da;
+  box-shadow: none;
+}
+
+body[data-theme="light"] .nav-tab-btn .tab-icon {
+  color: #0969da;
+}
+
+/* Light Cards */
 body[data-theme="light"] .pilot-console-card,
 body[data-theme="light"] .target-repo-card,
 body[data-theme="light"] .tactical-intel-card,
@@ -1116,16 +1159,378 @@ body[data-theme="light"] .profile-fleet-box,
 body[data-theme="light"] .stat-metric-card,
 body[data-theme="light"] .setting-card {
   background: #ffffff;
-  border-color: #e2e8f0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-color: #d0d7de;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
 
-body[data-theme="light"] .metric-number {
-  color: #0f172a;
+body[data-theme="light"] .section-badge {
+  color: #57606a;
 }
 
 body[data-theme="light"] .ship-callsign,
 body[data-theme="light"] .play-mode-name,
 body[data-theme="light"] .profile-callsign {
-  color: #0f172a;
+  color: #1f2328;
 }
+
+body[data-theme="light"] .pilot-level-tag {
+  color: #b45309;
+}
+
+body[data-theme="light"] .skin-chip-mini {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #1f2328;
+}
+
+body[data-theme="light"] .skin-chip-mini.equipped {
+  background: rgba(9, 105, 218, 0.1);
+  border-color: #0969da;
+  color: #0969da;
+}
+
+body[data-theme="light"] .pilot-hardware-strip {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body[data-theme="light"] .pilot-hardware-strip .hw-cell {
+  color: #57606a;
+}
+
+body[data-theme="light"] .pilot-hardware-strip .hw-cell b {
+  color: #0969da;
+}
+
+body[data-theme="light"] .repo-select-row {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body[data-theme="light"] .octo-mini {
+  color: #1f2328;
+}
+
+body[data-theme="light"] .repo-dropdown {
+  color: #1f2328;
+}
+
+body[data-theme="light"] .repo-dropdown option {
+  background: #ffffff;
+  color: #1f2328;
+}
+
+body[data-theme="light"] .m-cell {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  color: #57606a;
+}
+
+body[data-theme="light"] .m-cell b {
+  color: #1f2328;
+}
+
+body[data-theme="light"] .block-title,
+body[data-theme="light"] .threat-title-row,
+body[data-theme="light"] .dna-lang-row .lang-code {
+  color: #57606a;
+}
+
+body[data-theme="light"] .lang-track,
+body[data-theme="light"] .threat-track {
+  background: #e2e8f0;
+  border-color: #cbd5e1;
+}
+
+/* Light Tactical Intel & Roadmap */
+body[data-theme="light"] .tac-title {
+  color: #1f2328;
+}
+
+body[data-theme="light"] .tac-meta {
+  color: #57606a;
+}
+
+body[data-theme="light"] .tac-status-indicator {
+  background: #1a7f37;
+  box-shadow: 0 0 6px #1a7f37;
+}
+
+body[data-theme="light"] .roadmap-node {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body[data-theme="light"] .roadmap-node.active {
+  background: rgba(9, 105, 218, 0.08);
+  border-color: #0969da;
+}
+
+body[data-theme="light"] .roadmap-node.boss-node {
+  background: rgba(207, 34, 46, 0.08);
+  border-color: #cf222e;
+}
+
+body[data-theme="light"] .node-title {
+  color: #1f2328;
+  font-weight: 800;
+}
+
+body[data-theme="light"] .node-sub {
+  color: #57606a;
+}
+
+body[data-theme="light"] .node-badge {
+  background: rgba(9, 105, 218, 0.12);
+  color: #0969da;
+  border-color: #0969da;
+}
+
+body[data-theme="light"] .boss-node .node-badge {
+  background: rgba(207, 34, 46, 0.12);
+  color: #cf222e;
+  border-color: #cf222e;
+}
+
+body[data-theme="light"] .tactical-sub-banner {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body[data-theme="light"] .pill-label,
+body[data-theme="light"] .key-tag {
+  color: #57606a;
+}
+
+body[data-theme="light"] .pill-badge {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+}
+
+body[data-theme="light"] .pill-badge.text-cyan {
+  color: #0969da;
+  border-color: #0969da;
+  background: rgba(9, 105, 218, 0.08);
+}
+
+body[data-theme="light"] .pill-badge.text-green {
+  color: #1a7f37;
+  border-color: #1a7f37;
+  background: rgba(26, 127, 55, 0.08);
+}
+
+body[data-theme="light"] .pill-badge.text-yellow {
+  color: #b45309;
+  border-color: #b45309;
+  background: rgba(180, 83, 9, 0.08);
+}
+
+body[data-theme="light"] .pill-badge.text-purple {
+  color: #8250df;
+  border-color: #8250df;
+  background: rgba(130, 80, 223, 0.08);
+}
+
+body[data-theme="light"] .key-tag kbd {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+}
+
+body[data-theme="light"] .live-telemetry-strip {
+  border-top-color: #d0d7de;
+}
+
+body[data-theme="light"] .ticker-prefix {
+  color: #1a7f37;
+}
+
+body[data-theme="light"] .ticker-text {
+  color: #57606a;
+}
+
+/* Light Footer */
+body[data-theme="light"] .lobby-deck-footer {
+  border-top-color: #d0d7de;
+  color: #57606a;
+}
+
+body[data-theme="light"] .xp-track-label,
+body[data-theme="light"] .credits-badge,
+body[data-theme="light"] .connected-systems-badge {
+  color: #57606a;
+}
+
+body[data-theme="light"] .xp-mini-track {
+  background: #e2e8f0;
+}
+
+body[data-theme="light"] .xp-mini-fill {
+  background: #0969da;
+}
+
+body[data-theme="light"] .credits-badge b {
+  color: #b45309;
+  font-weight: 800;
+}
+
+body[data-theme="light"] .system-tag.text-cyan {
+  color: #0969da;
+}
+
+body[data-theme="light"] .system-status-indicator.text-green {
+  color: #1a7f37;
+}
+
+/* Light Subviews: Play, Profile, Stats, Settings */
+body[data-theme="light"] .subview-title {
+  color: #0969da;
+}
+
+body[data-theme="light"] .subview-desc {
+  color: #57606a;
+}
+
+body[data-theme="light"] .profile-rank-title {
+  color: #1a7f37;
+}
+
+body[data-theme="light"] .profile-pilot-avatar {
+  border-color: #0969da;
+  box-shadow: 0 0 10px rgba(9, 105, 218, 0.25);
+}
+
+body[data-theme="light"] .profile-xp-card {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+  color: #24292f;
+}
+
+body[data-theme="light"] .xp-bar-container {
+  background: #e2e8f0;
+}
+
+body[data-theme="light"] .xp-bar-fill {
+  background: linear-gradient(90deg, #0969da, #1a7f37);
+}
+
+body[data-theme="light"] .bay-ability-card {
+  background: rgba(26, 127, 55, 0.06);
+  border-color: #1a7f37;
+}
+
+body[data-theme="light"] .bay-ability-title {
+  color: #1a7f37;
+}
+
+body[data-theme="light"] .bay-ability-desc {
+  color: #24292f;
+}
+
+body[data-theme="light"] .bay-ability-key {
+  background: rgba(26, 127, 55, 0.12);
+  color: #1a7f37;
+  border-color: #1a7f37;
+}
+
+body[data-theme="light"] .fleet-ship-mini {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+
+body[data-theme="light"] .fleet-ship-mini b {
+  color: #1f2328;
+}
+
+body[data-theme="light"] .fleet-ship-mini div {
+  color: #57606a;
+}
+
+body[data-theme="light"] .fleet-ship-mini.equipped {
+  background: rgba(9, 105, 218, 0.08);
+  border-color: #0969da;
+}
+
+body[data-theme="light"] .fleet-ship-mini.equipped b {
+  color: #0969da;
+}
+
+body[data-theme="light"] .stat-metric-card .metric-label {
+  color: #57606a;
+}
+
+body[data-theme="light"] .stat-metric-card .metric-number.cyan {
+  color: #0969da;
+  text-shadow: none;
+}
+
+body[data-theme="light"] .stat-metric-card .metric-number.green {
+  color: #1a7f37;
+  text-shadow: none;
+}
+
+body[data-theme="light"] .stat-metric-card .metric-number.amber {
+  color: #b45309;
+  text-shadow: none;
+}
+
+body[data-theme="light"] .stat-metric-card .metric-number.purple {
+  color: #8250df;
+  text-shadow: none;
+}
+
+body[data-theme="light"] .play-mode-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+}
+
+body[data-theme="light"] .play-mode-card:hover {
+  background: #f6f8fa;
+  border-color: #0969da;
+  box-shadow: 0 4px 16px rgba(9, 105, 218, 0.15);
+}
+
+body[data-theme="light"] .play-mode-desc {
+  color: #57606a;
+}
+
+body[data-theme="light"] .play-mode-launch-btn {
+  background: rgba(9, 105, 218, 0.1);
+  border-color: #0969da;
+  color: #0969da;
+}
+
+body[data-theme="light"] .play-mode-card:hover .play-mode-launch-btn {
+  background: #0969da;
+  color: #ffffff;
+}
+
+body[data-theme="light"] .setting-card-title {
+  color: #1f2328;
+  border-bottom-color: #d0d7de;
+}
+
+body[data-theme="light"] .setting-row label {
+  color: #24292f;
+}
+
+body[data-theme="light"] .setting-select,
+body[data-theme="light"] .setting-range {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+}
+
+body[data-theme="light"] .keybinds-table tr {
+  border-bottom-color: #d0d7de;
+}
+
+body[data-theme="light"] .keybinds-table td {
+  color: #57606a;
+}
+
+body[data-theme="light"] .keybinds-table td:last-child {
+  color: #0969da;
+}
+

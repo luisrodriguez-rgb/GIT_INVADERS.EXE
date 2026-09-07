@@ -7,6 +7,7 @@ import { ThemeManager, THEMES, ThemeId } from '../themes/ThemeManager';
 import { AudioEngine } from '../audio/AudioEngine';
 import { SFX } from '../audio/SFX';
 import { Security } from '../utils/Security';
+import { I18n, LanguageCode } from '../i18n/I18n';
 
 export type LobbyTab = 'HANGAR' | 'PLAY' | 'STORE' | 'PROFILE' | 'STATS' | 'SETTINGS';
 
@@ -38,6 +39,11 @@ export class Lobby {
     this.store = Store.getInstance();
     this.themeManager = ThemeManager.getInstance();
     this.audioEngine = AudioEngine.getInstance();
+    I18n.getInstance().subscribe(() => {
+      if (this.container.style.display !== 'none') {
+        this.render();
+      }
+    });
     this.render();
   }
 
@@ -60,6 +66,7 @@ export class Lobby {
   }
 
   public render(): void {
+    const t = I18n.getInstance().t;
     const prof = this.store.profile;
 
     let centerDeckHtml = '';
@@ -89,13 +96,13 @@ export class Lobby {
           <div class="app-branding">
             <span class="status-dot"></span>
             <div class="brand-text">
-              <span class="brand-title">PILOT COMMAND // HANGAR DECK</span>
-              <span class="brand-sub">SUB-ORBITAL GITHUB TELEMETRY STATION • ACTIVE</span>
+              <span class="brand-title">${t.hangarPilotCommand}</span>
+              <span class="brand-sub">${t.hangarTelemetryActive}</span>
             </div>
           </div>
           <div class="app-meta">
-            <span class="meta-tag">STATION DOCKED</span>
-            <span class="meta-status"><span class="status-dot"></span> SYSTEMS READY</span>
+            <span class="meta-tag">${t.hangarStationDocked}</span>
+            <span class="meta-status"><span class="status-dot"></span> ${t.hangarSystemsReady}</span>
           </div>
         </div>
 
@@ -104,22 +111,22 @@ export class Lobby {
           <!-- Left Navigation Sidebar -->
           <div class="lobby-sidebar">
             <button class="nav-tab-btn ${this.activeTab === 'HANGAR' ? 'active' : ''}" id="navHangarBtn">
-              <span class="tab-icon">[H]</span> HANGAR
+              <span class="tab-icon">[H]</span> ${t.tabHangar}
             </button>
             <button class="nav-tab-btn ${this.activeTab === 'PLAY' ? 'active' : ''}" id="navPlayBtn">
-              <span class="tab-icon">[P]</span> PLAY
+              <span class="tab-icon">[P]</span> ${t.tabPlay}
             </button>
             <button class="nav-tab-btn ${this.activeTab === 'STORE' ? 'active' : ''}" id="navStoreBtn">
-              <span class="tab-icon">[$]</span> STORE
+              <span class="tab-icon">[$]</span> ${t.tabStore}
             </button>
             <button class="nav-tab-btn ${this.activeTab === 'PROFILE' ? 'active' : ''}" id="navProfileBtn">
-              <span class="tab-icon">[@]</span> PROFILE
+              <span class="tab-icon">[@]</span> ${t.tabProfile}
             </button>
             <button class="nav-tab-btn ${this.activeTab === 'STATS' ? 'active' : ''}" id="navStatsBtn">
-              <span class="tab-icon">[#]</span> STATS
+              <span class="tab-icon">[#]</span> ${t.tabStats}
             </button>
             <button class="nav-tab-btn ${this.activeTab === 'SETTINGS' ? 'active' : ''}" id="navSettingsBtn">
-              <span class="tab-icon">[*]</span> SETTINGS
+              <span class="tab-icon">[*]</span> ${t.tabSettings}
             </button>
           </div>
 
@@ -131,13 +138,13 @@ export class Lobby {
             <div class="lobby-deck-footer">
               <div class="xp-credits-group">
                 <div class="xp-track-label">
-                  <span>XP ${prof.totalXp.toLocaleString()} / ${((prof.level + 1) * 1000).toLocaleString()}</span>
+                  <span>${t.hangarXp} ${prof.totalXp.toLocaleString()} / ${((prof.level + 1) * 1000).toLocaleString()}</span>
                   <div class="xp-mini-track">
                     <div class="xp-mini-fill" style="width: ${Math.min(100, (prof.totalXp / ((prof.level + 1) * 1000)) * 100)}%;"></div>
                   </div>
                 </div>
                 <div class="credits-badge">
-                  CREDITS <b>${prof.availableXp.toLocaleString()} XP</b>
+                  ${t.hangarCredits} <b>${prof.availableXp.toLocaleString()} XP</b>
                 </div>
               </div>
 
@@ -162,11 +169,12 @@ export class Lobby {
      VIEW 1: HANGAR DECK
      ---------------------------------------------------- */
   private renderHangarView(): string {
+    const t = I18n.getInstance().t;
     const prof = this.store.profile;
     const activeSkin = this.store.getActiveSkin();
     const dna = this.getSelectedDNA();
 
-    // Fast Skin Chips
+    // Fast skin chips
     let skinsHtml = '';
     this.store.SKINS.forEach((skin) => {
       const isUnlocked = prof.unlockedSkins.includes(skin.id);
@@ -219,8 +227,8 @@ export class Lobby {
           </div>
 
           <div class="ship-identity-line">
-            <div class="ship-callsign">SHIP: ${Security.escapeHtml(activeSkin.name.toUpperCase())}</div>
-            <div class="pilot-level-tag">LVL ${prof.level} - ${Security.escapeHtml(prof.rankName.toUpperCase())}</div>
+            <div class="ship-callsign">${t.hangarShipCallout} ${Security.escapeHtml(activeSkin.name.toUpperCase())}</div>
+            <div class="pilot-level-tag">${t.storeLevel} ${prof.level} - ${Security.escapeHtml(prof.rankName.toUpperCase())}</div>
           </div>
 
           <!-- Fast Skins Selector -->
@@ -230,15 +238,15 @@ export class Lobby {
 
           <!-- Hardware Upgrades Telemetry -->
           <div class="pilot-hardware-strip">
-            <div class="hw-cell"><span>BLASTER:</span> <b>LVL ${prof.fireRateLevel}</b></div>
-            <div class="hw-cell"><span>THRUSTER:</span> <b>LVL ${prof.thrusterLevel}</b></div>
-            <div class="hw-cell"><span>DEFLECTOR:</span> <b>${prof.startingShield ? 'ONLINE' : 'OFFLINE'}</b></div>
+            <div class="hw-cell"><span>${t.hangarBlaster}</span> <b>${t.storeLevel} ${prof.fireRateLevel}</b></div>
+            <div class="hw-cell"><span>${t.hangarThruster}</span> <b>${t.storeLevel} ${prof.thrusterLevel}</b></div>
+            <div class="hw-cell"><span>${t.hangarDeflector}</span> <b>${prof.startingShield ? t.hangarOnline : t.hangarOffline}</b></div>
           </div>
         </div>
 
         <!-- Right Column: Target Repository & DNA Matrix -->
         <div class="target-repo-card">
-          <div class="section-badge">TARGET REPOSITORY // DNA</div>
+          <div class="section-badge">${t.hangarTargetRepo}</div>
 
           <div class="repo-select-row">
             <span class="octo-mini">
@@ -252,14 +260,14 @@ export class Lobby {
           </div>
 
           <div class="repo-metrics-grid">
-            <div class="m-cell"><span>COMMITS</span> <b>${dna.commits.toLocaleString()}</b></div>
-            <div class="m-cell"><span>PRs</span> <b>${dna.pullRequests}</b></div>
-            <div class="m-cell"><span>ISSUES</span> <b>${dna.issues}</b></div>
-            <div class="m-cell"><span>CONTRIBUTORS</span> <b>${dna.contributors}</b></div>
+            <div class="m-cell"><span>${t.hangarCommits}</span> <b>${dna.commits.toLocaleString()}</b></div>
+            <div class="m-cell"><span>${t.hangarPrs}</span> <b>${dna.pullRequests}</b></div>
+            <div class="m-cell"><span>${t.hangarIssues}</span> <b>${dna.issues}</b></div>
+            <div class="m-cell"><span>${t.hangarContributors}</span> <b>${dna.contributors}</b></div>
           </div>
 
           <div class="dna-languages-block">
-            <div class="block-title">LANGUAGES</div>
+            <div class="block-title">${t.hangarLanguages}</div>
             <div class="lang-bars-stack">
               ${langBarsHtml}
             </div>
@@ -267,7 +275,7 @@ export class Lobby {
 
           <div class="dna-threat-block">
             <div class="threat-title-row">
-              <span>THREAT LEVEL</span>
+              <span>${t.hangarThreatLevel}</span>
               <span class="threat-val text-red">${dna.threatLevel}% (${dna.threatRating})</span>
             </div>
             <div class="threat-track">
@@ -282,30 +290,30 @@ export class Lobby {
         <div class="tactical-card-header">
           <div class="tac-header-left">
             <span class="tac-status-indicator"></span>
-            <span class="tac-title">TACTICAL MISSION BRIEFING</span>
+            <span class="tac-title">${t.hangarBriefing}</span>
           </div>
-          <span class="tac-meta">ENCOUNTER ROADMAP & TECH DIRECTIVES</span>
+          <span class="tac-meta">${t.hangarRoadmap}</span>
         </div>
 
         <div class="tactical-roadmap-grid">
           <div class="roadmap-node active">
             <div class="node-badge">W1</div>
             <div class="node-details">
-              <span class="node-title">COMMIT SQUADRON</span>
-              <span class="node-sub">FORMATION: GRID</span>
+              <span class="node-title">${t.waveCommitSquadron}</span>
+              <span class="node-sub">${t.formationGrid}</span>
             </div>
           </div>
           <div class="roadmap-node">
             <div class="node-badge">W2</div>
             <div class="node-details">
-              <span class="node-title">ARMORED PR FLANK</span>
-              <span class="node-sub">FORMATION: DELTA WING</span>
+              <span class="node-title">${t.waveArmoredPr}</span>
+              <span class="node-sub">${t.formationVChevron}</span>
             </div>
           </div>
           <div class="roadmap-node">
             <div class="node-badge">W3</div>
             <div class="node-details">
-              <span class="node-title">ISSUE BUG BOMBERS</span>
+              <span class="node-title">${t.waveIssueBug}</span>
               <span class="node-sub">FORMATION: DIVE ATTACK</span>
             </div>
           </div>
@@ -313,7 +321,7 @@ export class Lobby {
             <div class="node-badge">BOSS</div>
             <div class="node-details">
               <span class="node-title">${Security.escapeHtml(dna.bossCoreName)}</span>
-              <span class="node-sub">TITAN BREACH // ${dna.contributors} DRONES</span>
+              <span class="node-sub">${t.waveTitanBreach} // ${dna.contributors} DRONES</span>
             </div>
           </div>
         </div>
@@ -321,7 +329,7 @@ export class Lobby {
         <!-- Active Stack Modifiers & Keybindings Banner -->
         <div class="tactical-sub-banner">
           <div class="mod-pill-group">
-            <span class="pill-label">TECH MODIFIERS:</span>
+            <span class="pill-label">${t.hangarTechModifiers}</span>
             <span class="pill-badge text-cyan">${Security.escapeHtml(dna.primaryLanguage.toUpperCase())} // ${langMods.speedMultiplier > 1 ? '+15% SPD & FIRE' : 'STANDARD'}</span>
             ${langMods.hasDroneSupport ? '<span class="pill-badge text-green">PYTHON // DRONES</span>' : ''}
             ${langMods.armorBonus > 0 ? '<span class="pill-badge text-yellow">C++/RUST // SHIELD+</span>' : ''}
@@ -346,7 +354,7 @@ export class Lobby {
       <!-- Dominant Hero Action Button -->
       <div class="hero-launch-section">
         <button class="dominant-start-btn" id="lobbyDominantStartBtn">
-          <span class="play-icon">▶</span> START MISSION
+          <span class="play-icon">▶</span> ${t.hangarStartMission}
         </button>
       </div>
     `;
@@ -357,11 +365,12 @@ export class Lobby {
      ---------------------------------------------------- */
   private renderPlayView(): string {
     const dna = this.getSelectedDNA();
+    const t = I18n.getInstance().t;
     return `
       <div class="lobby-subview-container">
         <div class="subview-header">
-          <span class="subview-title">MISSION DEPLOYMENT BAY</span>
-          <span class="subview-desc">SELECT OPERATIONAL VECTOR & TARGET REPOSITORY</span>
+          <span class="subview-title">${t.playModesTitle}</span>
+          <span class="subview-desc">${t.playModesSub}</span>
         </div>
 
         <div class="play-modes-grid">
@@ -371,11 +380,11 @@ export class Lobby {
               <span class="play-mode-tag cyan">CAMPAIGN</span>
               <span class="text-muted" style="font-size: 0.65rem;">TARGET: ${Security.escapeHtml(dna.name.toUpperCase())}</span>
             </div>
-            <div class="play-mode-name">REPOSITORY CAMPAIGN</div>
+            <div class="play-mode-name">${t.modeCampaignTitle}</div>
             <div class="play-mode-desc">
-              Procedural space assault generated directly from ${Security.escapeHtml(dna.name)}. Defend against commit squadrons, shield-bearing PRs, and neutralize ${Security.escapeHtml(dna.bossCoreName)}.
+              ${t.modeCampaignDesc.replace('{repo}', Security.escapeHtml(dna.name))}
             </div>
-            <button class="play-mode-launch-btn" id="btnLaunchRepoMode">[ LAUNCH CAMPAIGN ]</button>
+            <button class="play-mode-launch-btn" id="btnLaunchRepoMode">${t.btnLaunchOperation}</button>
           </div>
 
           <!-- Mode 2: Profile Arcade -->
@@ -386,9 +395,9 @@ export class Lobby {
             </div>
             <div class="play-mode-name">PROFILE ARCADE</div>
             <div class="play-mode-desc">
-              Convert your own GitHub profile commits, contribution graphs, and repositories into an endless arcade defense simulation with scalable waves.
+              Convert your own GitHub profile commits, contribution graphs, and repositories into an endless arcade defense simulation.
             </div>
-            <button class="play-mode-launch-btn" id="btnLaunchProfileMode">[ LAUNCH PROFILE ARCADE ]</button>
+            <button class="play-mode-launch-btn" id="btnLaunchProfileMode">${t.btnLaunchOperation}</button>
           </div>
 
           <!-- Mode 3: Chaos Max Mode -->
@@ -397,11 +406,11 @@ export class Lobby {
               <span class="play-mode-tag red">HARDCORE</span>
               <span class="text-muted" style="font-size: 0.65rem;">MAX THREAT LEVEL</span>
             </div>
-            <div class="play-mode-name">CHAOS MAX MODE</div>
+            <div class="play-mode-name">${t.modeChaosTitle}</div>
             <div class="play-mode-desc">
-              Hyper-accelerated bullet-storm environment. Hostiles move at +60% velocity with relentless firing cadences and unpredictable dive formations.
+              ${t.modeChaosDesc}
             </div>
-            <button class="play-mode-launch-btn" id="btnLaunchChaosMode">[ LAUNCH CHAOS MAX ]</button>
+            <button class="play-mode-launch-btn" id="btnLaunchChaosMode">${t.btnLaunchOperation}</button>
           </div>
 
           <!-- Mode 4: Citadel Universe Gauntlet -->
@@ -410,11 +419,11 @@ export class Lobby {
               <span class="play-mode-tag purple">GAUNTLET</span>
               <span class="text-muted" style="font-size: 0.65rem;">4 CITADEL BIOMES</span>
             </div>
-            <div class="play-mode-name">CITADEL UNIVERSE</div>
+            <div class="play-mode-name">${t.modeCitadelTitle}</div>
             <div class="play-mode-desc">
-              Assault the ultimate multi-language GitHub Citadel fortress. Defeat 4 procedural titan bosses back-to-back with persistent damage retention.
+              ${t.modeCitadelDesc}
             </div>
-            <button class="play-mode-launch-btn" id="btnLaunchCitadelMode">[ LAUNCH CITADEL GAUNTLET ]</button>
+            <button class="play-mode-launch-btn" id="btnLaunchCitadelMode">${t.btnLaunchOperation}</button>
           </div>
         </div>
 
@@ -435,6 +444,7 @@ export class Lobby {
     const activeSkin = this.store.getActiveSkin();
     const nextRankXp = (prof.level + 1) * 1000;
     const xpPct = Math.min(100, Math.round((prof.totalXp / nextRankXp) * 100));
+    const t = I18n.getInstance().t;
 
     let fleetMiniHtml = '';
     this.store.SKINS.forEach((skin) => {
@@ -452,9 +462,9 @@ export class Lobby {
           </div>
           <div>
             ${isEquipped 
-              ? '<span class="text-green" style="font-weight: 800; font-size: 0.6rem;">EQUIPPED</span>' 
+              ? `<span class="text-green" style="font-weight: 800; font-size: 0.6rem;">${t.storeEquipped}</span>` 
               : isUnlocked 
-              ? `<button class="sub-nav-chip btn-equip-ship" data-skin="${Security.escapeHtml(skin.id)}">EQUIP</button>` 
+              ? `<button class="sub-nav-chip btn-equip-ship" data-skin="${Security.escapeHtml(skin.id)}">${t.storeEquipShip}</button>` 
               : `<button class="sub-nav-chip" data-skin="${Security.escapeHtml(skin.id)}" style="color: var(--text-muted);">${skin.cost} XP</button>`}
           </div>
         </div>
@@ -464,8 +474,8 @@ export class Lobby {
     return `
       <div class="lobby-subview-container">
         <div class="subview-header">
-          <span class="subview-title">PILOT DOSSIER // SERVICE RECORD</span>
-          <span class="subview-desc">CALL SIGN: @luisrodriguez-rgb // LEAD ARCHITECT</span>
+          <span class="subview-title">${t.profileDossierTitle} // ${t.profileServiceRecord}</span>
+          <span class="subview-desc">${t.profileCallSign}: @luisrodriguez-rgb // ${t.profileLeadArchitect}</span>
         </div>
 
         <div class="profile-dossier-layout">
@@ -475,14 +485,14 @@ export class Lobby {
               <img src="https://github.com/luisrodriguez-rgb.png" class="profile-pilot-avatar" alt="Luis Rodriguez" />
               <div class="profile-rank-info">
                 <span class="profile-callsign">LUIS RODRIGUEZ // @luisrodriguez-rgb</span>
-                <span class="profile-rank-title">CLEARANCE LVL ${prof.level} • ${Security.escapeHtml(prof.rankName.toUpperCase())}</span>
+                <span class="profile-rank-title">${t.profileClearance} LVL ${prof.level} • ${Security.escapeHtml(prof.rankName.toUpperCase())}</span>
               </div>
             </div>
 
             <!-- XP Progress -->
             <div class="profile-xp-card">
               <div style="display: flex; justify-content: space-between; font-size: 0.65rem;">
-                <span style="color: var(--text-muted);">CAREER ADVANCEMENT:</span>
+                <span style="color: var(--text-muted);">${t.profileCareerAdvancement}:</span>
                 <span style="color: #00e5ff; font-weight: 800;">${prof.totalXp.toLocaleString()} / ${nextRankXp.toLocaleString()} XP (${xpPct}%)</span>
               </div>
               <div class="xp-bar-container">
@@ -493,7 +503,7 @@ export class Lobby {
             <!-- Equipped Ship Summary -->
             <div class="bay-ability-card" style="margin-top: 4px;">
               <div class="bay-ability-header">
-                <span class="bay-ability-title">EQUIPPED HULL: ${Security.escapeHtml(activeSkin.name.toUpperCase())}</span>
+                <span class="bay-ability-title">${t.profileEquippedHull}: ${Security.escapeHtml(activeSkin.name.toUpperCase())}</span>
                 <span class="bay-ability-key">[ ${Security.escapeHtml(activeSkin.ability.triggerKey)} ]</span>
               </div>
               <div class="bay-ability-desc">${Security.escapeHtml(activeSkin.ability.description)}</div>
@@ -501,23 +511,23 @@ export class Lobby {
 
             <!-- Hardware Overclock Stats -->
             <div class="pilot-hardware-strip" style="margin-top: 6px;">
-              <div class="hw-cell"><span>BLASTER CADENCE:</span> <b>LVL ${prof.fireRateLevel} / 5</b></div>
-              <div class="hw-cell"><span>THRUST AGILITY:</span> <b>LVL ${prof.thrusterLevel} / 5</b></div>
+              <div class="hw-cell"><span>${t.profileBlasterCadence}:</span> <b>LVL ${prof.fireRateLevel} / 5</b></div>
+              <div class="hw-cell"><span>${t.profileThrustAgility}:</span> <b>LVL ${prof.thrusterLevel} / 5</b></div>
             </div>
             <div class="pilot-hardware-strip">
-              <div class="hw-cell"><span>DEFLECTOR SHIELD:</span> <b>${prof.startingShield ? 'ACTIVE' : 'LOCKED'}</b></div>
-              <div class="hw-cell"><span>QUANTUM PIERCE:</span> <b>${prof.quantumPiercing ? 'ACTIVE' : 'LOCKED'}</b></div>
+              <div class="hw-cell"><span>${t.profileDeflectorShield}:</span> <b>${prof.startingShield ? t.profileReady : t.profileLocked}</b></div>
+              <div class="hw-cell"><span>${t.profileQuantumPierce}:</span> <b>${prof.quantumPiercing ? t.profileReady : t.profileLocked}</b></div>
             </div>
 
             <button class="store-action-btn btn-buy" id="btnProfileGoStore" style="margin-top: 6px;">
-              [ OPEN SHIP ENGINEERING BAY / UPGRADES ]
+              ${t.profileOpenEngineering}
             </button>
           </div>
 
           <!-- Right: Fleet Hangar Roster -->
           <div class="profile-fleet-box">
             <div style="font-size: 0.72rem; font-weight: 800; color: #00e5ff; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 4px;">
-              PILOT FLEET INVENTORY (${prof.unlockedSkins.length} / ${this.store.SKINS.length} SHIPS)
+              ${t.profileFleetInventory} (${prof.unlockedSkins.length} / ${this.store.SKINS.length})
             </div>
             <div class="fleet-ships-grid">
               ${fleetMiniHtml}
@@ -534,43 +544,44 @@ export class Lobby {
   private renderStatsView(): string {
     const prof = this.store.profile;
     const highScore = parseInt(localStorage.getItem('git_invaders_high_score') || '0', 10);
+    const t = I18n.getInstance().t;
 
     return `
       <div class="lobby-subview-container">
         <div class="subview-header">
-          <span class="subview-title">COMBAT TELEMETRY // CAREER RECORDS</span>
+          <span class="subview-title">${t.statsTitle} // ${t.statsTelemetryLogs}</span>
           <span class="subview-desc">SYSTEM ENGAGEMENT ARCHIVE & PURGE STATS</span>
         </div>
 
         <div class="stats-dossier-grid">
           <div class="stat-metric-card">
             <span class="metric-number cyan">${highScore.toLocaleString()}</span>
-            <span class="metric-label">RECORD HIGH SCORE</span>
+            <span class="metric-label">${t.statsHighScore}</span>
           </div>
 
           <div class="stat-metric-card">
             <span class="metric-number green">${prof.totalXp.toLocaleString()}</span>
-            <span class="metric-label">TOTAL ACCUMULATED XP</span>
+            <span class="metric-label">${t.statsPurgedCommits}</span>
           </div>
 
           <div class="stat-metric-card">
             <span class="metric-number amber">${prof.availableXp.toLocaleString()}</span>
-            <span class="metric-label">CURRENT SURPLUS CREDITS</span>
+            <span class="metric-label">${t.hangarCredits}</span>
           </div>
 
           <div class="stat-metric-card">
             <span class="metric-number purple">${prof.level}</span>
-            <span class="metric-label">PILOT CLEARANCE LEVEL</span>
+            <span class="metric-label">${t.profileClearance}</span>
           </div>
 
           <div class="stat-metric-card">
             <span class="metric-number cyan">${prof.unlockedSkins.length} / ${this.store.SKINS.length}</span>
-            <span class="metric-label">SHIPS COMMISSIONED</span>
+            <span class="metric-label">${t.profileFleetInventory}</span>
           </div>
 
           <div class="stat-metric-card">
             <span class="metric-number green">LVL ${prof.fireRateLevel + prof.thrusterLevel}</span>
-            <span class="metric-label">HARDWARE OVERCLOCK SUM</span>
+            <span class="metric-label">OVERCLOCK SUM</span>
           </div>
         </div>
 
@@ -592,6 +603,8 @@ export class Lobby {
      ---------------------------------------------------- */
   private renderSettingsView(): string {
     const currentTheme = this.themeManager.currentTheme;
+    const t = I18n.getInstance().t;
+    const i18n = I18n.getInstance();
     const themeOptionsHtml = (Object.keys(THEMES) as ThemeId[]).map((id) => `
       <option value="${id}" ${id === currentTheme.id ? 'selected' : ''}>
         ${Security.escapeHtml(THEMES[id].name.toUpperCase())}
@@ -604,31 +617,39 @@ export class Lobby {
     return `
       <div class="lobby-subview-container">
         <div class="subview-header">
-          <span class="subview-title">SYSTEM CONFIGURATION // ENGINE CONTROL</span>
+          <span class="subview-title">${t.settingsTitle} // ${t.settingsSub}</span>
           <span class="subview-desc">AUDIO, DISPLAY & CONTROLS CONFIGURATION</span>
         </div>
 
         <div class="settings-panel-grid">
           <!-- Display & Audio -->
           <div class="setting-card">
-            <span class="setting-card-title">DISPLAY & HARDWARE AUDIO</span>
+            <span class="setting-card-title">${t.settingsVisualGroup}</span>
 
             <div class="setting-row">
-              <label>PALETTE THEME:</label>
+              <label>${t.settingsActiveTheme}:</label>
               <select class="setting-select" id="settingsThemeSelect">
                 ${themeOptionsHtml}
               </select>
             </div>
 
             <div class="setting-row">
-              <label>MASTER AUDIO:</label>
+              <label>${t.settingsInterfaceLanguage}:</label>
+              <select class="setting-select" id="settingsLangSelect">
+                <option value="en" ${i18n.currentLang === 'en' ? 'selected' : ''}>ENGLISH [EN]</option>
+                <option value="es" ${i18n.currentLang === 'es' ? 'selected' : ''}>ESPAÑOL [ES]</option>
+              </select>
+            </div>
+
+            <div class="setting-row">
+              <label>${t.settingsAudioGroup}:</label>
               <button class="sub-nav-chip" id="settingsMuteToggleBtn" style="color: ${isMuted ? '#ef4444' : '#10b981'};">
                 ${isMuted ? '[ AUDIO: MUTED ]' : '[ AUDIO: ACTIVE ]'}
               </button>
             </div>
 
             <div class="setting-row">
-              <label>MASTER VOLUME:</label>
+              <label>${t.settingsMasterVolume}:</label>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <input type="range" class="setting-range" id="settingsVolumeRange" min="0" max="100" value="${currentVol}" />
                 <span id="settingsVolLabel" style="font-size: 0.65rem; font-weight: 800; width: 30px;">${currentVol}%</span>
@@ -645,31 +666,31 @@ export class Lobby {
 
           <!-- Flight Controls & Keybindings Reference -->
           <div class="setting-card">
-            <span class="setting-card-title">FLIGHT CONTROLS & BINDINGS</span>
+            <span class="setting-card-title">${t.settingsKeybindsTitle}</span>
 
             <table class="keybinds-table">
               <tr>
-                <td>LATERAL THRUSTERS</td>
+                <td>${t.settingsKeyMove}</td>
                 <td><kbd>LEFT / RIGHT</kbd> OR <kbd>A / D</kbd></td>
               </tr>
               <tr>
-                <td>PRIMARY BLASTER CANNON</td>
+                <td>${t.settingsKeyFire}</td>
                 <td><kbd>SPACEBAR</kbd></td>
               </tr>
               <tr>
-                <td>GIT REBASE (CHRONO SLOW-MO)</td>
+                <td>${t.settingsKeyRebase}</td>
                 <td><kbd>Q</kbd></td>
               </tr>
               <tr>
-                <td>STASH SHIELD MATRIX</td>
+                <td>${t.settingsKeyStash}</td>
                 <td><kbd>E</kbd></td>
               </tr>
               <tr>
-                <td>GIT PUSH (QUANTUM OVERDRIVE)</td>
+                <td>${t.settingsKeyPush}</td>
                 <td><kbd>SHIFT</kbd></td>
               </tr>
               <tr>
-                <td>TACTICAL PAUSE & TERMINAL</td>
+                <td>${t.settingsKeyPause}</td>
                 <td><kbd>ESC</kbd> OR <kbd>P</kbd></td>
               </tr>
             </table>
@@ -721,7 +742,8 @@ export class Lobby {
     ctx.clearRect(0, 0, w, h);
 
     // Subtle holographic wireframe grid
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.08)';
+    const isLight = this.themeManager.currentTheme.id === 'light';
+    ctx.strokeStyle = isLight ? 'rgba(9, 105, 218, 0.15)' : 'rgba(0, 229, 255, 0.08)';
     ctx.lineWidth = 1;
     for (let x = 0; x < w; x += 16) {
       ctx.beginPath();
@@ -911,6 +933,13 @@ export class Lobby {
       themeSelect?.addEventListener('change', (e) => {
         const themeId = (e.target as HTMLSelectElement).value as ThemeId;
         this.themeManager.setTheme(themeId);
+        SFX.playPowerup();
+      });
+
+      const langSelect = this.container.querySelector('#settingsLangSelect') as HTMLSelectElement | null;
+      langSelect?.addEventListener('change', (e) => {
+        const lang = (e.target as HTMLSelectElement).value as 'en' | 'es';
+        I18n.getInstance().setLanguage(lang);
         SFX.playPowerup();
       });
 

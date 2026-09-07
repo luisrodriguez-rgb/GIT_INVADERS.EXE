@@ -3,6 +3,7 @@ import { GameState } from '../core/GameState';
 import { Store } from '../store/Store';
 import { SFX } from '../audio/SFX';
 import { Sprites } from '../rendering/Sprites';
+import { I18n } from '../i18n/I18n';
 
 export class Modals {
   private overlay: HTMLElement;
@@ -17,46 +18,47 @@ export class Modals {
     onStore: () => void,
     onAbort: () => void
   ): void {
+    const t = I18n.getInstance().t;
     this.overlay.style.display = 'flex';
     this.overlay.innerHTML = `
       <div class="modal-card pause-modal">
         <div class="pause-header">
           <span class="pause-led"></span>
-          <h2>SYSTEM PAUSED</h2>
-          <span class="pause-sub">KERNEL EXECUTION FROZEN</span>
+          <h2>${t.modalPauseTitle}</h2>
+          <span class="pause-sub">${t.modalPauseSub}</span>
         </div>
 
         <div class="pause-stats-grid">
           <div class="p-card">
-            <span class="p-lbl">CURRENT SCORE</span>
+            <span class="p-lbl">${t.hudScore}</span>
             <span class="p-val val-green">${state.score.toLocaleString()}</span>
           </div>
           <div class="p-card">
-            <span class="p-lbl">ACTIVE WAVE</span>
+            <span class="p-lbl">${t.hudWave}</span>
             <span class="p-val val-cyan">${state.currentWave} / ${state.totalWaves}</span>
           </div>
           <div class="p-card">
-            <span class="p-lbl">COMMITS PURGED</span>
+            <span class="p-lbl">${t.hangarCommits}</span>
             <span class="p-val">${state.commitsPurged}</span>
           </div>
           <div class="p-card">
-            <span class="p-lbl">PRs MERGED</span>
+            <span class="p-lbl">${t.hangarPrs}</span>
             <span class="p-val val-purple">${state.prsMerged}</span>
           </div>
           <div class="p-card">
-            <span class="p-lbl">ISSUES SQUASHED</span>
+            <span class="p-lbl">${t.hangarIssues}</span>
             <span class="p-val val-red">${state.issuesClosed}</span>
           </div>
           <div class="p-card">
-            <span class="p-lbl">STREAK MULTIPLIER</span>
+            <span class="p-lbl">${t.hudStreak}</span>
             <span class="p-val val-yellow">${state.streakMultiplier.toFixed(1)}x</span>
           </div>
         </div>
 
         <div class="pause-actions">
-          <button class="launch-btn" id="resumeBtn">RESUME MISSION [ESC / P]</button>
-          <button class="store-nav-btn" id="pauseStoreBtn">OPEN GIT_STORE.EXE [SYS]</button>
-          <button class="abort-btn" id="abortBtn">ABORT TO LOBBY</button>
+          <button class="launch-btn" id="resumeBtn">${t.modalResumeBtn}</button>
+          <button class="store-nav-btn" id="pauseStoreBtn">${t.modalOpenStoreBtn}</button>
+          <button class="abort-btn" id="abortBtn">${t.modalAbortBtn}</button>
         </div>
       </div>
     `;
@@ -241,6 +243,7 @@ export class Modals {
     onPrimary: () => void,
     onSecondary?: () => void
   ): void {
+    const t = I18n.getInstance().t;
     this.overlay.style.display = 'flex';
     const isNewRecord = state.score >= state.highScore && state.score > 0;
     const isVictory = outcome === 'ACCOMPLISHED';
@@ -250,13 +253,13 @@ export class Modals {
         <div class="report-header">
           <span class="report-brand">GIT_INVADERS.EXE</span>
           <span class="report-status ${isVictory ? 'status-cleared' : 'status-term'}">
-            ${isVictory ? 'MISSION COMPLETE // SECURED' : 'MISSION TERMINATED'}
+            ${isVictory ? t.modalVictoryTitle : t.modalGameOverTitle}
           </span>
         </div>
 
         <div class="report-title-row">
           <h2 class="${isVictory ? 'text-green' : 'text-cyan'}">
-            ${isVictory ? 'MISSION ACCOMPLISHED' : 'MISSION TERMINATED'}
+            ${isVictory ? t.modalVictoryTitle : t.modalGameOverTitle}
           </h2>
           <div class="target-badge">[+] TARGET: ${state.currentWave > 0 ? 'sketion' : 'CORE'}</div>
         </div>
@@ -265,26 +268,26 @@ export class Modals {
           <!-- Left Column: Core Stats -->
           <div class="report-col-left">
             <div class="r-metric">
-              <span class="r-label">SCORE:</span>
+              <span class="r-label">${t.hudScore}:</span>
               <span class="r-val val-cyan">
                 ${state.score.toLocaleString()}
                 ${isNewRecord ? '<span class="new-record-pill">[ NEW RECORD! ]</span>' : ''}
               </span>
             </div>
             <div class="r-metric">
-              <span class="r-label">COMMITS DESTROYED:</span>
+              <span class="r-label">${t.hangarCommits}:</span>
               <span class="r-val">${state.commitsPurged}</span>
             </div>
             <div class="r-metric">
-              <span class="r-label">PRs MERGED:</span>
+              <span class="r-label">${t.hangarPrs}:</span>
               <span class="r-val val-purple">${state.prsMerged}</span>
             </div>
             <div class="r-metric">
-              <span class="r-label">ISSUES DESTROYED:</span>
+              <span class="r-label">${t.hangarIssues}:</span>
               <span class="r-val val-red">${state.issuesClosed}</span>
             </div>
             <div class="r-metric">
-              <span class="r-label">WAVES CLEARED:</span>
+              <span class="r-label">${t.hudWave}:</span>
               <span class="r-val">${state.currentWave} / ${state.totalWaves}</span>
             </div>
           </div>
@@ -293,15 +296,15 @@ export class Modals {
           <div class="report-col-right">
             <div class="r-subhead">PERFORMANCE:</div>
             <div class="r-metric">
-              <span class="r-label">BEST COMBO:</span>
+              <span class="r-label">${t.hudStreak}:</span>
               <span class="r-val val-yellow">x${state.streakMultiplier.toFixed(1)}</span>
             </div>
             <div class="r-metric">
-              <span class="r-label">XP EARNED:</span>
+              <span class="r-label">${t.hangarXp}:</span>
               <span class="r-val val-green">+${state.xp.toLocaleString()} XP</span>
             </div>
             <div class="r-metric">
-              <span class="r-label">THREAT REDUCTION:</span>
+              <span class="r-label">${t.hangarThreatLevel}:</span>
               <span class="r-val val-cyan">${Math.min(100, Math.round((state.currentWave / state.totalWaves) * 82))}%</span>
             </div>
 
@@ -316,10 +319,10 @@ export class Modals {
 
         <div class="report-actions-row">
           <button class="primary-report-btn" id="reportPrimaryBtn">
-            ${isVictory ? 'RETURN TO HANGAR [SPACE]' : 'RETRY MISSION [SPACE]'}
+            ${isVictory ? t.modalNextSectorBtn : t.modalRetryBtn}
           </button>
           <button class="secondary-report-btn" id="reportSecondaryBtn">
-            ${isVictory ? 'VISIT GIT_STORE.EXE' : 'HANGAR'}
+            ${isVictory ? t.storeTitle : t.btnLobby}
           </button>
         </div>
 

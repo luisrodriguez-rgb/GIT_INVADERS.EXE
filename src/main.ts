@@ -2,6 +2,7 @@ import './style.css';
 import { Game } from './core/Game';
 import { AudioEngine } from './audio/AudioEngine';
 import { ThemeManager, ThemeId } from './themes/ThemeManager';
+import { I18n } from './i18n/I18n';
 
 document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -16,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const game = new Game(canvas, lobbyContainer, termContainer, hudContainer, modalContainer);
+  (window as any).__game = game;
 
   // Header Lobby Button
   const lobbyBtn = document.getElementById('lobbyBtn');
@@ -101,4 +103,61 @@ document.addEventListener('DOMContentLoaded', () => {
       audioToggle.classList.toggle('muted', isMuted);
     }
   });
+
+  // Language Toggle Button & Dynamic Chrome Translation
+  const i18n = I18n.getInstance();
+  const langToggleBtn = document.getElementById('langToggleBtn');
+
+  const updateChromeTranslations = () => {
+    const t = i18n.t;
+    if (langToggleBtn) {
+      langToggleBtn.textContent = t.btnLang;
+    }
+    if (lobbyBtn) {
+      lobbyBtn.textContent = t.btnLobby;
+    }
+    if (pauseBtn) {
+      pauseBtn.textContent = t.btnPause;
+    }
+
+    // Theme selector option names
+    if (themeSelect) {
+      const optMap: Record<string, string> = {
+        cyan: t.themeCyberCyan,
+        matrix: t.themeMatrix,
+        light: t.themeGithubLight,
+        cyberpunk: t.themeCyberpunk,
+        amber: t.themeAmber,
+      };
+      Array.from(themeSelect.options).forEach((opt) => {
+        if (optMap[opt.value]) {
+          opt.textContent = optMap[opt.value];
+        }
+      });
+    }
+
+    // Footer desktop keybindings
+    const setLbl = (id: string, text: string) => {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    };
+    setLbl('lblKeyMove', t.footerKeyMove);
+    setLbl('lblKeyFire', t.footerKeyFire);
+    setLbl('lblKeyRebase', t.footerKeyRebase);
+    setLbl('lblKeyStash', t.footerKeyStash);
+    setLbl('lblKeyPush', t.footerKeyPush);
+    setLbl('lblKeyPause', t.footerKeyPause);
+  };
+
+  langToggleBtn?.addEventListener('click', () => {
+    i18n.toggleLanguage();
+    updateChromeTranslations();
+  });
+
+  i18n.subscribe(() => {
+    updateChromeTranslations();
+  });
+
+  // Run initial translation setup
+  updateChromeTranslations();
 });
