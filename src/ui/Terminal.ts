@@ -3,14 +3,21 @@ import { GameMode } from '../github/Types';
 export class Terminal {
   private container: HTMLElement;
   private onLaunchCallback: (mode: GameMode, input: string) => void;
+  private onBackToLobbyCallback?: () => void;
 
   constructor(
     container: HTMLElement,
-    onLaunch: (mode: GameMode, input: string) => void
+    onLaunch: (mode: GameMode, input: string) => void,
+    onBackToLobby?: () => void
   ) {
     this.container = container;
     this.onLaunchCallback = onLaunch;
+    this.onBackToLobbyCallback = onBackToLobby;
     this.render();
+  }
+
+  public setOnBackToLobby(cb: () => void): void {
+    this.onBackToLobbyCallback = cb;
   }
 
   public render(): void {
@@ -23,7 +30,10 @@ export class Terminal {
             <span class="dot green"></span>
           </div>
           <div class="terminal-title">GIT_INVADERS.EXE // BIOS v2.4.0</div>
-          <div class="terminal-clock" id="termClock">ACTIVE</div>
+          <div class="terminal-header-actions">
+            <button class="terminal-back-btn" id="termBackToLobbyBtn" title="Return to Lobby">[< VOLVER AL LOBBY]</button>
+            <div class="terminal-clock" id="termClock">ACTIVE</div>
+          </div>
         </div>
 
         <div class="terminal-body">
@@ -39,7 +49,8 @@ export class Terminal {
           <div class="mode-tabs">
             <button class="tab-btn active" data-mode="profile">1. PROFILE MODE</button>
             <button class="tab-btn" data-mode="repository">2. REPOSITORY MODE</button>
-            <button class="tab-btn chaos-tab" data-mode="chaos">3. CHAOS MODE [INSTANT]</button>
+            <button class="tab-btn chaos-tab" data-mode="chaos">3. CHAOS MODE</button>
+            <button class="tab-btn citadel-tab" data-mode="citadel">4. CODEBASE.UNIVERSE [CITADEL]</button>
           </div>
 
           <div class="mode-content" id="modeContent">
@@ -67,6 +78,11 @@ export class Terminal {
         const mode = (tab as HTMLElement).dataset.mode as GameMode;
         this.selectTab(mode);
       });
+    });
+
+    const backBtn = this.container.querySelector('#termBackToLobbyBtn');
+    backBtn?.addEventListener('click', () => {
+      this.onBackToLobbyCallback?.();
     });
   }
 
@@ -97,15 +113,15 @@ export class Terminal {
           <label>TARGET REPOSITORY:</label>
           <div class="input-wrapper">
             <span class="prompt-sym">repo/</span>
-            <input type="text" id="targetInput" value="luisrodriguez-rgb/sketion" placeholder="owner/repository" />
+            <input type="text" id="targetInput" value="luisrodriguez-rgb/CODEBASE.UNIVERSE" placeholder="owner/repository" />
             <button class="launch-btn" id="launchBtn">ENGAGE REPO BOSS [ENTER]</button>
           </div>
         </div>
         <div class="quick-tags">
           <span>QUICK REPOS:</span>
+          <button class="tag-btn" data-val="luisrodriguez-rgb/CODEBASE.UNIVERSE">luisrodriguez-rgb/CODEBASE.UNIVERSE</button>
           <button class="tag-btn" data-val="luisrodriguez-rgb/sketion">luisrodriguez-rgb/sketion</button>
           <button class="tag-btn" data-val="torvalds/linux">torvalds/linux</button>
-          <button class="tag-btn" data-val="facebook/react">facebook/react</button>
         </div>
       `;
     } else if (mode === 'chaos') {
@@ -115,7 +131,30 @@ export class Terminal {
             <span class="text-pink font-bold">WARNING: MAXIMUM CHAOS PROTOCOL.</span><br/>
             Zero GitHub dependencies. Instant procedural overdrive. 9,999 commits, 482 PRs, 731 issues.
           </div>
-          <button class="launch-btn chaos-launch" id="launchBtn">⚡ INITIATE CHAOS INVASION ⚡</button>
+          <button class="launch-btn chaos-launch" id="launchBtn">[!] INITIATE CHAOS INVASION [!]</button>
+        </div>
+      `;
+    } else if (mode === 'citadel') {
+      content.innerHTML = `
+        <div class="citadel-mode-box">
+          <div class="citadel-desc">
+            <span class="text-cyan font-bold">[CODEBASE.UNIVERSE // ARCHITECTURAL INTELLIGENCE]</span><br/>
+            Defend the 8 architectural biomes against God-Class Monoliths and Tarjan Cyclic Wormholes.
+          </div>
+          <div class="citadel-biomes-grid">
+            <span class="biome-pill b-core">1. CORE CITADEL</span>
+            <span class="biome-pill b-ui">2. UI METROPOLIS</span>
+            <span class="biome-pill b-power">3. POWER GRID</span>
+            <span class="biome-pill b-storage">4. STORAGE BUNKER</span>
+            <span class="biome-pill b-api">5. API GATEWAY</span>
+            <span class="biome-pill b-labs">6. RESEARCH LABS</span>
+            <span class="biome-pill b-hazard">7. HAZARD ZONE</span>
+            <span class="biome-pill b-ruins">8. RUINS</span>
+          </div>
+          <div class="citadel-mcp-line">
+            <span class="text-green">[AI CONTEXT BRIDGE ACTIVE]</span> Codebase-Memory-MCP (90%+ Token Savings Connected)
+          </div>
+          <button class="launch-btn citadel-launch-btn" id="launchBtn">[ DEFEND CODEBASE.UNIVERSE CITADEL ]</button>
         </div>
       `;
     }
@@ -171,7 +210,14 @@ export class Terminal {
     this.container.style.display = 'none';
   }
 
-  public show(): void {
+  public show(mode?: GameMode): void {
     this.container.style.display = 'flex';
+    if (mode) {
+      const tabs = this.container.querySelectorAll('.tab-btn');
+      tabs.forEach((t) => {
+        t.classList.toggle('active', (t as HTMLElement).dataset.mode === mode);
+      });
+      this.selectTab(mode);
+    }
   }
 }
