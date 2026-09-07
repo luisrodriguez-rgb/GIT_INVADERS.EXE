@@ -49,6 +49,9 @@ export class HUD {
     if (boss && boss.isAlive) {
       const hpPercent = Math.max(0, Math.round((boss.hp / boss.maxHp) * 100));
       const phaseColor = boss.currentPhase === 3 ? '#ef4444' : boss.blueprint.languageColor;
+      const adaptiveBadge = boss.activeAdaptiveNotice
+        ? `<div class="boss-adaptive-alert" style="font-size: 0.65rem; color: #ffd600; background: rgba(255, 214, 0, 0.15); border: 1px solid rgba(255, 214, 0, 0.5); padding: 2px 6px; border-radius: 3px; font-family: var(--font-mono); margin-top: 4px; text-align: center; letter-spacing: 0.5px;">[AI_TELEMETRY] ${boss.activeAdaptiveNotice}</div>`
+        : '';
       bossHtml = `
         <div class="boss-hud-bar">
           <div class="boss-hud-title">
@@ -59,6 +62,7 @@ export class HUD {
             <div class="boss-hp-fill" style="width: ${hpPercent}%; background: ${phaseColor};"></div>
           </div>
           <div class="boss-hp-text">HP: ${boss.hp} / ${boss.maxHp} (${hpPercent}%)</div>
+          ${adaptiveBadge}
         </div>
       `;
     }

@@ -487,7 +487,11 @@ export class Game {
     this.enemies = [];
     this.projectiles = [];
 
-    Music.setBpm(145);
+    if (this.gameData.bossBlueprint.genome) {
+      Music.applyBossGenome(this.gameData.bossBlueprint.genome);
+    } else {
+      Music.setBpm(145);
+    }
     Music.start();
   }
 
@@ -532,8 +536,9 @@ export class Game {
       this.updateInvaders(enemyDt);
     }
 
-    // 4. Boss Update & Attack
+    // 4. Boss Update & Attack with Adaptive Memory
     if (this.state.phase === 'BOSS_FIGHT' && this.boss && this.boss.isAlive) {
+      this.boss.trackPlayer(this.player.centerX, this.player.hasShield, this.renderer.width, dt);
       this.boss.update(enemyDt, { width: this.renderer.width, height: this.renderer.height });
       const bossShots = this.boss.tryAttack(this.player.centerX);
       if (bossShots.length > 0) {

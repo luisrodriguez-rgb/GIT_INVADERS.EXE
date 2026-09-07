@@ -6,6 +6,10 @@ import {
   BossMutation,
   BossArchetypeData,
   GitHubMetrics,
+  BehaviorMatrixEntry,
+  BossGenome,
+  MissionDirective,
+  MissionReward,
 } from '../github/Types';
 
 export const ARCHETYPE_DATABASE: Record<BossArchetype, BossArchetypeData> = {
@@ -282,6 +286,143 @@ export class BossGenerator {
     return 'FORKED';
   }
 
+  public static readonly MUTATION_BEHAVIOR_MATRIX: Record<BossMutation, BehaviorMatrixEntry> = {
+    OVERCLOCKED: {
+      visual: 'Núcleo de reactor hiperacelerado con conductos de ventilación incandescente',
+      combat: '+35% velocidad de proyectiles y +40% cadencia de fuego sostenido',
+      spawn: 'Despliegue de drones escolta en ráfagas de alta frecuencia',
+      audio: 'Arpegio sintetizado a tempo extremo (148 BPM)',
+    },
+    RECURSIVE: {
+      visual: 'Silueta fractal con desfasaje holográfico y estela de ecos temporales',
+      combat: 'Los proyectiles emiten réplicas retardadas a 0.8s en cascada',
+      spawn: 'Submódulos réplica que imitan los ángulos del jugador',
+      audio: 'Eco de retardo estéreo con modulación armónica',
+    },
+    CORRUPTED: {
+      visual: 'Aberración cromática glitch con polígonos de casco desfragmentados',
+      combat: 'Dispersión balística caótica con trayectorias sinusoidales impredecibles',
+      spawn: 'Minas de error volátiles que detonan por proximidad',
+      audio: 'Sintetizador desafinado (-140 cents) con ruido estático bitcrush',
+    },
+    FORKED: {
+      visual: 'Chasis bifurcado simétrico con conductos de energía gemelos',
+      combat: 'Ráfagas dobles en abanico cruzado que convergen en el centro',
+      spawn: 'Despliegue bilateral simultáneo de drones por las bandas',
+      audio: 'Pulsos rítmicos alternantes en canales estéreo',
+    },
+    UNSTABLE: {
+      visual: 'Arcos de plasma radiante y chispas de sobrecarga electromagnética',
+      combat: 'Impactos críticos con onda de choque de daño en área expandida',
+      spawn: 'Subrutinas kamikaze de alta aceleración frontal',
+      audio: 'Barridos de filtro resonante con caídas de sub-graves',
+    },
+    SECURED: {
+      visual: 'Proyección de barrera cibernética hexagonal y mamparos reforzados',
+      combat: 'Placas deflectoras rotatorias + Pulso EMP si el jugador usa escudo',
+      spawn: 'Pilares de soporte blindados que transfieren regeneración al núcleo',
+      audio: 'Compás industrial metronómico rígido (122 BPM) con puerta de ruido',
+    },
+    LEGACY: {
+      visual: 'Placas de obsidiana monolítica con filamentos ámbar de código fósil',
+      combat: 'Proyectiles de gran calibre cinético + Teleport de History Rewind',
+      spawn: 'Centinelas pesados de baja cadencia con blindaje denso',
+      audio: 'Bajos oscuros y lentos a tempo ominoso (96 BPM)',
+    },
+    DISTRIBUTED: {
+      visual: 'Nodos satélite descentralizados enlazados por flujo cuántico',
+      combat: 'Red de disipación de daño compartida + Fuego cruzado divergente',
+      spawn: 'Generación continua de submódulos auxiliares en órbita',
+      audio: 'Percusión polirrítmica multicapa con bajo sincopado',
+    },
+  };
+
+  /**
+   * Deterministic 6-char hex seed derived from repository metrics.
+   */
+  public static generateSeed(dna: { name: string; commits: number; pullRequests: number; issues: number; contributors: number }): string {
+    const raw = `${dna.name}_${dna.commits}_${dna.pullRequests}_${dna.issues}_${dna.contributors}`;
+    let hash = 0x811c9dc5;
+    for (let i = 0; i < raw.length; i++) {
+      hash ^= raw.charCodeAt(i);
+      hash = (hash * 0x01000193) >>> 0;
+    }
+    return (hash >>> 8).toString(16).padStart(6, '0').slice(-6).toUpperCase();
+  }
+
+  /**
+   * Generates procedural mission directives based on repository metrics.
+   */
+  public static generateDirectives(dna: RepositoryDNA, archetypeData: BossArchetypeData, mutation: BossMutation): MissionDirective[] {
+    return [
+      {
+        id: 'dir_w1',
+        waveTarget: 'W1',
+        title: 'DEPURACIÓN DE COMMITS',
+        description: `Eliminar la vanguardia de ${Math.min(30, 15 + Math.round(dna.commits / 200))} cazas sin perder escudos de búnker.`,
+        rewardText: '+150 STARS // +200 EXP',
+        isCompleted: false,
+      },
+      {
+        id: 'dir_w2',
+        waveTarget: 'W2',
+        title: 'INTERCEPTACIÓN DE PRs',
+        description: `Romper el flanco blindado en menos de 45 segundos con fuego continuo.`,
+        rewardText: 'PERK: REPARACIÓN KERNEL',
+        isCompleted: false,
+      },
+      {
+        id: 'dir_boss',
+        waveTarget: 'BOSS',
+        title: `ERRADICACIÓN // ${archetypeData.title}`,
+        description: `Neutralizar el núcleo en fase terminal (${mutation}) y estabilizar la rama.`,
+        rewardText: `EMBLEMA: ${archetypeData.codeNumber}_${archetypeData.archetype.toUpperCase()}`,
+        isCompleted: false,
+      },
+    ];
+  }
+
+  /**
+   * Generates mission rewards and bounties.
+   */
+  public static generateRewards(dna: RepositoryDNA, primaryLangName: string): MissionReward[] {
+    const starBounty = Math.round(350 + dna.threatLevel * 5.5);
+    const perkName = primaryLangName.toLowerCase().includes('rust')
+      ? 'BLINDAJE DE COSTO CERO (+25% Escudos)'
+      : primaryLangName.toLowerCase().includes('python')
+      ? 'DRONES SUBPROCESS (Soporte orbital)'
+      : primaryLangName.toLowerCase().includes('type')
+      ? 'TRACKING ESTRICTO (+15% Guía de láser)'
+      : 'COMPILADOR DINÁMICO (+15% Cadencia)';
+
+    return [
+      {
+        id: 'rew_stars',
+        name: 'RECOMPENSA DE ESTRELLAS',
+        type: 'currency',
+        value: `+${starBounty} STARS`,
+        icon: '[$]',
+        description: 'Fondos transferidos directamente al Hangar de mejoras.',
+      },
+      {
+        id: 'rew_perk',
+        name: `MÓDULO ${primaryLangName.toUpperCase()}`,
+        type: 'perk',
+        value: perkName,
+        icon: '[+]',
+        description: 'Buff táctico de combate sincronizado con el stack tecnológico.',
+      },
+      {
+        id: 'rew_artifact',
+        name: `ARTEFACTO // ${dna.name.toUpperCase()}`,
+        type: 'artifact',
+        value: 'REPOSITORIO ESTABILIZADO',
+        icon: '<*>',
+        description: 'Fragmento de código limpio guardado en la base de datos de telemetría.',
+      },
+    ];
+  }
+
   /**
    * Generates a fully procedural BossBlueprint directly from Repository DNA.
    */
@@ -289,10 +430,47 @@ export class BossGenerator {
     const archetype = this.classifyArchetype(dna, dna.threatLevel);
     const archetypeData = ARCHETYPE_DATABASE[archetype];
     const mutation = this.deriveMutation(dna, dna.threatLevel);
+    const behaviorMatrix = this.MUTATION_BEHAVIOR_MATRIX[mutation];
 
     const primaryLang = dna.languages[0] || { name: 'TypeScript', color: '#38bdf8', pct: 100 };
     const langTag = `${primaryLang.name.toUpperCase()} HEAVY`;
     const modifierTitle = `${archetypeData.title} // ${mutation} // ${langTag}`;
+
+    const seed = this.generateSeed(dna);
+
+    // Audio parameters calibrated to mutation
+    const audioBpm = mutation === 'OVERCLOCKED' ? 148 : mutation === 'LEGACY' ? 96 : mutation === 'SECURED' ? 122 : 126;
+    const audioDetuneCents = mutation === 'CORRUPTED' ? -140 : 0;
+    const audioDistortion = mutation === 'CORRUPTED' || mutation === 'UNSTABLE';
+
+    // Boss Genome compilation
+    const genome: BossGenome = {
+      seed,
+      hull: archetypeData.title,
+      weapon: archetypeData.abilities[0]?.name || 'LÁSER CINÉTICO',
+      movement: archetype === 'rebase_phantom' ? 'QUANTUM DASH' : archetype === 'issue_swarm' ? 'SINUOUS COIL' : archetype === 'code_abyss' ? 'SINGULARITY DRIFT' : 'ORBITAL WEAVE',
+      shield: `${archetypeData.shieldRating}% DENSIDAD // ${Math.max(1, Math.round(archetypeData.shieldRating / 25))} CAPAS`,
+      spawn: `${archetypeData.specialStatName} // CADENCIA ${archetypeData.specialStatValue}%`,
+      phases: 4,
+      audioBpm,
+      audioDetuneCents,
+      audioDistortion,
+      primaryColor: primaryLang.color || '#00e5ff',
+      secondaryColor: '#ff0055',
+      glowColor: archetypeData.specialStatName === 'DEFENSA' ? '#00e5ff' : archetypeData.specialStatName === 'ENJAMBRE' ? '#ef4444' : '#c084fc',
+      ratings: {
+        threat: dna.threatLevel,
+        complexity: Math.min(100, 40 + dna.languages.length * 15),
+        swarm: archetypeData.specialStatValue,
+        armor: archetypeData.shieldRating,
+        attack: archetypeData.attackRating,
+      },
+      behaviorMatrix,
+    };
+
+    // Procedural directives & rewards
+    const directives = this.generateDirectives(dna, archetypeData, mutation);
+    const rewards = this.generateRewards(dna, primaryLang.name);
 
     // Base gameplay attributes mathematically calibrated to archetype ratings
     const hpFactor = archetypeData.baseHpRating / 100;
@@ -345,6 +523,9 @@ export class BossGenerator {
       mutation,
       modifierTitle,
       archetypeData,
+      genome,
+      directives,
+      rewards,
       chassisType: archetype,
       threatIndex: dna.threatLevel,
       maxHp: baseHp,

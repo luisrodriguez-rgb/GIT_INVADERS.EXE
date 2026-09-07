@@ -101,6 +101,55 @@ export interface BossArchetypeData {
   finalPhaseName: string;
 }
 
+export interface BehaviorMatrixEntry {
+  visual: string;
+  combat: string;
+  spawn: string;
+  audio: string;
+}
+
+export interface BossGenome {
+  seed: string; // Deterministic 6-char hex string (e.g. 8F4A91)
+  hull: string;
+  weapon: string;
+  movement: string;
+  shield: string;
+  spawn: string;
+  phases: number;
+  audioBpm: number;
+  audioDetuneCents: number;
+  audioDistortion: boolean;
+  primaryColor: string;
+  secondaryColor: string;
+  glowColor: string;
+  ratings: {
+    threat: number;
+    complexity: number;
+    swarm: number;
+    armor: number;
+    attack: number;
+  };
+  behaviorMatrix: BehaviorMatrixEntry;
+}
+
+export interface MissionDirective {
+  id: string;
+  waveTarget: 'W1' | 'W2' | 'W3' | 'BOSS';
+  title: string;
+  description: string;
+  rewardText: string;
+  isCompleted: boolean;
+}
+
+export interface MissionReward {
+  id: string;
+  name: string;
+  type: 'currency' | 'perk' | 'artifact' | 'badge';
+  value: string;
+  icon: string;
+  description: string;
+}
+
 export interface BossBlueprint {
   repoName: string;
   coreName: string;
@@ -110,6 +159,9 @@ export interface BossBlueprint {
   mutation?: BossMutation;
   modifierTitle?: string;
   archetypeData: BossArchetypeData;
+  genome: BossGenome;
+  directives: MissionDirective[];
+  rewards: MissionReward[];
   chassisType?: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel' | BossArchetype;
   threatIndex: number; // 0 - 100
   maxHp: number;

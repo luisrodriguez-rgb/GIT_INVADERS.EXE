@@ -9,6 +9,7 @@ import { SFX } from '../audio/SFX';
 import { Security } from '../utils/Security';
 import { I18n, LanguageCode } from '../i18n/I18n';
 import { BossGenerator, ARCHETYPE_DATABASE } from '../procedural/BossGenerator';
+import { Modals } from './Modals';
 
 export type LobbyTab = 'HANGAR' | 'PLAY' | 'STORE' | 'PROFILE' | 'STATS' | 'SETTINGS';
 
@@ -20,6 +21,7 @@ export class Lobby {
   private store: Store;
   private themeManager: ThemeManager;
   private audioEngine: AudioEngine;
+  private modals: Modals | null = null;
   private animFrameId: number | null = null;
   private previewCanvas: HTMLCanvasElement | null = null;
   private previewCtx: CanvasRenderingContext2D | null = null;
@@ -40,6 +42,11 @@ export class Lobby {
     this.store = Store.getInstance();
     this.themeManager = ThemeManager.getInstance();
     this.audioEngine = AudioEngine.getInstance();
+
+    const modalEl = document.getElementById('modalOverlay');
+    if (modalEl) {
+      this.modals = new Modals(modalEl);
+    }
     I18n.getInstance().subscribe(() => {
       if (this.container.style.display !== 'none') {
         this.render();
@@ -211,9 +218,12 @@ export class Lobby {
     `).join('');
 
     const langMods = WaveGenerator.getLanguageModifiers(dna.primaryLanguage);
-    const bossArchetype = BossGenerator.classifyArchetype(dna, dna.threatLevel);
-    const archetypeData = ARCHETYPE_DATABASE[bossArchetype];
-    const mutation = BossGenerator.deriveMutation(dna, dna.threatLevel);
+    const bossBlueprint = BossGenerator.generateFromDNA(dna);
+    const archetypeData = bossBlueprint.archetypeData;
+    const mutation = bossBlueprint.mutation || 'STANDARD';
+    const genome = bossBlueprint.genome;
+    const directives = bossBlueprint.directives;
+    const rewards = bossBlueprint.rewards;
 
     return `
       <!-- Upper Split: Pilot Console + Target Repo -->
@@ -306,55 +316,46 @@ export class Lobby {
         </div>
       </div>
 
-      <!-- Middle Section: Tactical Mission Intelligence & Encounter Roadmap -->
-      <div class="tactical-intel-card">
+      <!-- Middle Section: Tactical Mission Directives & Dynamic Bounties -->
+      <div class="tactical-intel-card mission-directives-card">
         <div class="tactical-card-header">
           <div class="tac-header-left">
             <span class="tac-status-indicator"></span>
-            <span class="tac-title">${t.hangarBriefing}</span>
+            <span class="tac-title">DIRECTIVAS DE MISIÓN // ${Security.escapeHtml(dna.name.toUpperCase())}</span>
           </div>
-          <span class="tac-meta">${t.hangarRoadmap}</span>
-        </div>
-
-        <div class="tactical-roadmap-grid">
-          <div class="roadmap-node active">
-            <div class="node-badge">W1</div>
-            <div class="node-details">
-              <span class="node-title">${t.waveCommitSquadron}</span>
-              <span class="node-sub">${t.formationGrid}</span>
-            </div>
-          </div>
-          <div class="roadmap-node">
-            <div class="node-badge">W2</div>
-            <div class="node-details">
-              <span class="node-title">${t.waveArmoredPr}</span>
-              <span class="node-sub">${t.formationVChevron}</span>
-            </div>
-          </div>
-          <div class="roadmap-node">
-            <div class="node-badge">W3</div>
-            <div class="node-details">
-              <span class="node-title">${t.waveIssueBug}</span>
-              <span class="node-sub">FORMATION: DIVE ATTACK</span>
-            </div>
-          </div>
-          <div class="roadmap-node boss-node">
-            <div class="node-badge">BOSS</div>
-            <div class="node-details">
-              <span class="node-title">${Security.escapeHtml(dna.bossCoreName)}</span>
-              <span class="node-sub">${t.waveTitanBreach} // ${dna.contributors} DRONES</span>
-            </div>
+          <div class="tac-header-right" style="display: flex; align-items: center; gap: 8px;">
+            <button class="inspect-genome-btn" id="lobbyInspectGenomeBtn" title="Inspeccionar Genoma y Matriz de Comportamiento del Boss">
+              <span class="seed-chip">SEED #${genome.seed}</span>
+              <span class="btn-text">INSPECCIONAR BOSS GENOME</span>
+            </button>
+            <span class="tac-meta">AMENAZA: <b style="color: #ef4444;">${dna.threatRating}</b></span>
           </div>
         </div>
 
-        <!-- Active Stack Modifiers & Keybindings Banner -->
+        <!-- 3 Dynamic Directives Grid with concrete objectives & rewards -->
+        <div class="tactical-directives-grid">
+          ${directives.map(d => `
+            <div class="directive-card">
+              <div class="directive-header">
+                <span class="directive-badge ${d.waveTarget === 'BOSS' ? 'boss' : ''}">${d.waveTarget}</span>
+                <span class="directive-title">${d.title}</span>
+              </div>
+              <div class="directive-desc">${d.description}</div>
+              <div class="directive-bounty">
+                <span class="bounty-label">RECOMPENSA:</span>
+                <span class="bounty-value">${d.rewardText}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Mission Rewards & Active Modifiers Bar -->
         <div class="tactical-sub-banner">
           <div class="mod-pill-group">
-            <span class="pill-label">${t.hangarTechModifiers}</span>
-            <span class="pill-badge text-cyan">${Security.escapeHtml(dna.primaryLanguage.toUpperCase())} // ${langMods.speedMultiplier > 1 ? '+15% SPD & FIRE' : 'STANDARD'}</span>
-            ${langMods.hasDroneSupport ? '<span class="pill-badge text-green">PYTHON // DRONES</span>' : ''}
-            ${langMods.armorBonus > 0 ? '<span class="pill-badge text-yellow">C++/RUST // SHIELD+</span>' : ''}
-            ${langMods.bunkerIntegrityRatio > 1 ? '<span class="pill-badge text-purple">HTML/CSS // BUNKERS+</span>' : ''}
+            <span class="pill-label">RECOMPENSAS DE MISIÓN:</span>
+            ${rewards.map(r => `
+              <span class="pill-badge text-cyan" title="${r.description}">${r.icon} ${r.value}</span>
+            `).join('')}
           </div>
 
           <div class="combat-keys-pill">
@@ -368,7 +369,7 @@ export class Lobby {
         <!-- Live Telemetry Stream Ticker -->
         <div class="live-telemetry-strip">
           <span class="ticker-prefix">[GIT_FEED]</span>
-          <span class="ticker-text">${dna.commits.toLocaleString()} Commits synthesized • ${dna.pullRequests} Pull Requests converted • Boss Target: ${Security.escapeHtml(dna.bossCoreName)}</span>
+          <span class="ticker-text">${dna.commits.toLocaleString()} Commits analizados • ${dna.pullRequests} PRs • Boss: ${archetypeData.title} (${mutation}) // Seed: #${genome.seed} • ${genome.behaviorMatrix.combat}</span>
         </div>
       </div>
 
@@ -876,6 +877,14 @@ export class Lobby {
         this.selectedRepoId = (e.target as HTMLSelectElement).value;
         this.render();
         this.startShipAnimation();
+      });
+
+      const inspectGenomeBtn = this.container.querySelector('#lobbyInspectGenomeBtn');
+      inspectGenomeBtn?.addEventListener('click', () => {
+        const dna = this.getSelectedDNA();
+        const bossBlueprint = BossGenerator.generateFromDNA(dna);
+        SFX.playPowerup();
+        this.modals?.showBossDnaCard(bossBlueprint);
       });
 
       const skinChips = this.container.querySelectorAll('.skin-chip-mini');

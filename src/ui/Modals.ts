@@ -382,6 +382,83 @@ export class Modals {
     window.addEventListener('keydown', handleKey);
   }
 
+  /**
+   * Displays the Boss DNA / Genome Card modal with deterministic seed and multidimensional matrix.
+   */
+  public showBossDnaCard(blueprint: BossBlueprint): void {
+    const genome = blueprint.genome;
+    const archetypeData = blueprint.archetypeData;
+    const matrix = genome.behaviorMatrix;
+
+    this.overlay.style.display = 'flex';
+    this.overlay.innerHTML = `
+      <div class="modal-card boss-dna-card-modal" style="max-width: 540px; font-family: var(--font-mono);">
+        <div class="report-header" style="border-bottom-color: rgba(0, 229, 255, 0.3); margin-bottom: 8px;">
+          <div class="report-brand" style="color: #00e5ff; font-weight: 900; letter-spacing: 1px;">
+            <span>GIT_INVADERS.EXE // BOSS GENOME TELEMETRY</span>
+          </div>
+          <div class="target-badge" style="color: #ffd600; border-color: #ffd600; background: rgba(255, 214, 0, 0.1);">
+            SEED: #${genome.seed}
+          </div>
+        </div>
+
+        <div style="font-size: 1.05rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; margin-bottom: 2px;">
+          ${archetypeData.codeNumber}. ${archetypeData.title}
+        </div>
+        <div style="font-size: 0.74rem; color: #38bdf8; margin-bottom: 10px;">
+          MUTATION: <b style="color: #f43f5e;">${blueprint.mutation || 'STANDARD'}</b> // STACK: <b style="color: ${blueprint.languageColor};">${blueprint.language.toUpperCase()} HEAVY</b>
+        </div>
+
+        <!-- Genome Stats Specs Table -->
+        <div style="background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font-size: 0.72rem;">
+          <div><span style="color: #94a3b8;">AMENAZA:</span> <b style="color: #ef4444;">${genome.ratings.threat}</b></div>
+          <div><span style="color: #94a3b8;">COMPLEJIDAD:</span> <b style="color: #38bdf8;">${genome.ratings.complexity}</b></div>
+          <div><span style="color: #94a3b8;">ENJAMBRE:</span> <b style="color: #c084fc;">${genome.ratings.swarm}</b></div>
+          <div><span style="color: #94a3b8;">BLINDAJE:</span> <b style="color: #00e5ff;">${genome.ratings.armor}</b></div>
+          <div><span style="color: #94a3b8;">ATAQUE:</span> <b style="color: #facc15;">${genome.ratings.attack}</b></div>
+          <div><span style="color: #94a3b8;">FASES:</span> <b style="color: #4ade80;">${genome.phases}</b></div>
+        </div>
+
+        <!-- Multidimensional Behavior Matrix -->
+        <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px;">
+          MATRIZ DE COMPORTAMIENTO PROCEDURAL (2+ DIMENSIONES):
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; font-size: 0.72rem;">
+          <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #00e5ff; padding: 4px 8px; border-radius: 2px;">
+            <b style="color: #00e5ff;">[VISUAL]:</b> ${matrix.visual}
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #ef4444; padding: 4px 8px; border-radius: 2px;">
+            <b style="color: #ef4444;">[COMBAT]:</b> ${matrix.combat}
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #a855f7; padding: 4px 8px; border-radius: 2px;">
+            <b style="color: #a855f7;">[SPAWN]:</b> ${matrix.spawn}
+          </div>
+          <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #facc15; padding: 4px 8px; border-radius: 2px;">
+            <b style="color: #facc15;">[AUDIO]:</b> ${matrix.audio} (${genome.audioBpm} BPM)
+          </div>
+        </div>
+
+        <button class="launch-btn" id="closeDnaCardBtn" style="background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff; padding: 8px; width: 100%; border-radius: 4px; font-weight: 800; cursor: pointer;">
+          CERRAR TELEMETRÍA [ESC]
+        </button>
+      </div>
+    `;
+
+    const closeBtn = this.overlay.querySelector('#closeDnaCardBtn');
+    const handleClose = () => {
+      this.hide();
+      window.removeEventListener('keydown', handleKey);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    closeBtn?.addEventListener('click', handleClose);
+    window.addEventListener('keydown', handleKey);
+  }
+
   public hide(): void {
     this.overlay.style.display = 'none';
   }
