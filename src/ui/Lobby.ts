@@ -84,20 +84,18 @@ export class Lobby {
 
     this.container.innerHTML = `
       <div class="lobby-frame-window">
-        <!-- Top App Bar -->
+        <!-- Top App Bar: Station Status (Non-duplicated) -->
         <div class="lobby-app-bar">
           <div class="app-branding">
-            <div class="octocat-icon brand-emblem-badge">
-              <img src="/logo-256.png" alt="GIT_INVADERS" class="app-logo-emblem" />
-            </div>
+            <span class="status-dot"></span>
             <div class="brand-text">
-              <span class="brand-title">GIT_INVADERS.EXE</span>
-              <span class="brand-sub">GITHUB ACTIVITY ARCADE ENGINE</span>
+              <span class="brand-title">PILOT COMMAND // HANGAR DECK</span>
+              <span class="brand-sub">SUB-ORBITAL GITHUB TELEMETRY STATION • ACTIVE</span>
             </div>
           </div>
           <div class="app-meta">
-            <span class="meta-tag">v2.0 PRO</span>
-            <span class="meta-status"><span class="status-dot"></span> LIVE • ONLINE</span>
+            <span class="meta-tag">STATION DOCKED</span>
+            <span class="meta-status"><span class="status-dot"></span> SYSTEMS READY</span>
           </div>
         </div>
 
@@ -122,9 +120,6 @@ export class Lobby {
             </button>
             <button class="nav-tab-btn ${this.activeTab === 'SETTINGS' ? 'active' : ''}" id="navSettingsBtn">
               <span class="tab-icon">[*]</span> SETTINGS
-            </button>
-            <button class="nav-tab-btn nav-exit-btn" id="navExitBtn">
-              <span class="tab-icon">[X]</span> TERMINAL
             </button>
           </div>
 
@@ -823,11 +818,6 @@ export class Lobby {
       SFX.playLaser('player');
       this.render();
       this.stopShipAnimation();
-    });
-
-    const navExit = this.container.querySelector('#navExitBtn');
-    navExit?.addEventListener('click', () => {
-      this.onOpenTerminalCallback();
     });
 
     // 2. Hangar Events

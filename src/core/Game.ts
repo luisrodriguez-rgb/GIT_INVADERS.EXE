@@ -249,6 +249,8 @@ export class Game {
   }
 
   public openMissionSelect(mode?: GameMode): void {
+    const combatControls = document.getElementById('combatControls');
+    if (combatControls) combatControls.style.display = 'none';
     this.lobby.hide();
     this.state.phase = 'BOOT';
     this.terminal.show(mode);
@@ -327,6 +329,8 @@ export class Game {
     this.state.currentWave = 1;
     this.state.phase = 'PLAYING';
     this.isPaused = false;
+    const combatControls = document.getElementById('combatControls');
+    if (combatControls) combatControls.style.display = 'flex';
 
     this.player.reset(this.renderer.width / 2 - 22, 505);
     this.initBunkers();
@@ -581,6 +585,8 @@ export class Game {
     Music.stop();
     this.isPaused = false;
     this.state.phase = 'LOBBY';
+    const combatControls = document.getElementById('combatControls');
+    if (combatControls) combatControls.style.display = 'none';
     this.terminal.hide();
     this.modals.hide();
     this.storeModal.hide();

@@ -68,9 +68,23 @@
 .header-controls {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-shrink: 0;
   box-sizing: border-box;
+}
+
+.combat-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 8px;
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.hardware-controls-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Theme Dropdown matching retro terminal style */
@@ -84,14 +98,14 @@
   color: var(--text-main);
   padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-family: var(--font-mono);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   outline: none;
   transition: all 0.2s;
   box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
-  max-width: 160px;
+  letter-spacing: 0.5px;
 }
 
 .theme-dropdown option {

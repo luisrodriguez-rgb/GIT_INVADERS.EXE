@@ -41,11 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
     game.togglePause();
   });
 
-  // Header Store Button
-  const storeBtn = document.getElementById('storeBtn');
-  storeBtn?.addEventListener('click', () => {
-    game.openStore();
-  });
 
   // Mobile virtual controls
   const btnLeft = document.getElementById('btnLeft');

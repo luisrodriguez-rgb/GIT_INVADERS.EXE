@@ -22,22 +22,28 @@
       </div>
 
       <div class="header-controls">
-        <!-- Theme Select Dropdown -->
-        <div class="theme-select-box">
-          <select id="themeSelect" class="theme-dropdown" title="Select Visual Theme">
-            <option value="cyan" selected>Cyber Cyan (Azul)</option>
-            <option value="matrix">Matrix Phosphor (Oscuro)</option>
-            <option value="light">Modo Claro (GitHub Light)</option>
-            <option value="cyberpunk">Cyberpunk Neon (Fucsia)</option>
-            <option value="amber">Amber CRT (Terminal)</option>
-          </select>
+        <!-- In-Combat Session Controls (Visible only during active combat) -->
+        <div id="combatControls" class="combat-controls-group" style="display: none;">
+          <button id="pauseBtn" class="control-chip" title="Pause / Resume Game">PAUSE [ESC]</button>
+          <button id="lobbyBtn" class="control-chip" title="Abort to Pilot Hangar">LOBBY</button>
         </div>
 
-        <button id="lobbyBtn" class="control-chip" title="Go to Pilot Dashboard / Lobby">LOBBY</button>
-        <button id="storeBtn" class="control-chip highlight-chip" title="Open Upgrades & Skins Store">STORE [SYS]</button>
-        <button id="pauseBtn" class="control-chip" title="Pause / Resume Game">PAUSE [ESC]</button>
-        <button id="crtToggle" class="control-chip active" title="Toggle CRT Scanlines">CRT FX</button>
-        <button id="audioToggle" class="control-chip" title="Toggle Audio Synthesizer">AUDIO: ON</button>
+        <!-- Hardware & Cabinet Controls (Always accessible) -->
+        <div class="hardware-controls-group">
+          <!-- Theme Select Dropdown -->
+          <div class="theme-select-box">
+            <select id="themeSelect" class="theme-dropdown" title="Select Visual Theme">
+              <option value="cyan" selected>CYBER CYAN</option>
+              <option value="matrix">MATRIX PHOSPHOR</option>
+              <option value="light">GITHUB LIGHT</option>
+              <option value="cyberpunk">CYBERPUNK NEON</option>
+              <option value="amber">AMBER CRT</option>
+            </select>
+          </div>
+
+          <button id="crtToggle" class="control-chip active" title="Toggle CRT Scanlines">CRT FX</button>
+          <button id="audioToggle" class="control-chip" title="Toggle Audio Synthesizer">AUDIO: ON</button>
+        </div>
       </div>
     </header>
 
