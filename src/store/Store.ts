@@ -1,3 +1,5 @@
+import { BossBlueprint, BossCodexEntry, RepositoryArtifact } from '../github/Types';
+
 export interface ShipStats {
   armor: number; // 0 - 100
   speed: number; // 0 - 100
@@ -41,6 +43,8 @@ export interface PlayerProfile {
   rebaseSlowMoUnlocked: boolean;
   activeSkinId: string;
   unlockedSkins: string[];
+  bossCodex: BossCodexEntry[];
+  artifacts: RepositoryArtifact[];
 }
 
 export class Store {
@@ -48,169 +52,181 @@ export class Store {
   private static STORAGE_KEY = 'git_invaders_player_profile';
 
   public profile: PlayerProfile = {
-    totalXp: 500, // Starting bonus for demo
-    availableXp: 500,
-    level: 1,
-    rankName: 'Junior Contributor',
-    fireRateLevel: 1,
-    thrusterLevel: 1,
+    totalXp: 12600, // Matching Reference UI (12,600 EXP)
+    availableXp: 2480, // Matching Reference UI (2,480 STARS)
+    level: 6,
+    rankName: 'Architect',
+    fireRateLevel: 3,
+    thrusterLevel: 4,
     quantumPiercing: false,
-    startingShield: false,
+    startingShield: true,
     rebaseSlowMoUnlocked: false,
-    activeSkinId: 'compiler_delta',
-    unlockedSkins: ['compiler_delta', 'cyan'],
+    activeSkinId: 'cyber_falcon',
+    unlockedSkins: [
+      'cyber_falcon',
+      'phantom_violet',
+      'solar_gold',
+      'emerald_glitch',
+      'neon_overdrive',
+      'quantum_wing',
+      'quantum_citadel',
+      'codebreaker_x',
+    ],
+    bossCodex: [],
+    artifacts: [],
   };
 
   public readonly SKINS: ShipModel[] = [
     {
-      id: 'compiler_delta',
-      name: 'Compiler Delta',
-      classTag: 'ENGINEERING // CORE DEV',
+      id: 'cyber_falcon',
+      name: 'CYBER FALCON',
+      classTag: 'Interceptor | Equilibrada',
       hullColor: '#00e5ff',
       glowColor: '#38bdf8',
       cost: 0,
       unlocked: true,
-      stats: { armor: 60, speed: 60, fireRate: 60, shield: 50 },
+      stats: { armor: 60, speed: 70, fireRate: 60, shield: 50 }, // 6/10, 7/10, 6/10, 5/10
       ability: {
         id: 'compiler_burst',
         name: 'COMPILER BURST',
         triggerKey: 'SPACE',
-        description: 'Fires a 3-round precision plasma burst with tight spread.',
-        mechanic: 'Tri-burst pulse cadence'
+        description: 'Dispara una ráfaga de 3 proyectiles de precisión.',
+        mechanic: 'Ráfaga de precisión de 3 pulsos',
       },
-      description: 'Fuselaje triangular con reactores duales cyan. La nave de ingenieria equilibrada.'
+      description: 'Fuselaje triangular interceptor con reactores duales cyan. La nave de ingeniería equilibrada.',
     },
     {
       id: 'phantom_violet',
-      name: 'Phantom Violet',
-      classTag: 'STEALTH // RECONNAISSANCE',
+      name: 'PHANTOM VIOLET',
+      classTag: 'Sigilo / Velocidad',
       hullColor: '#c084fc',
       glowColor: '#a855f7',
       cost: 400,
-      unlocked: false,
-      stats: { armor: 40, speed: 100, fireRate: 70, shield: 30 },
+      unlocked: true,
+      stats: { armor: 40, speed: 100, fireRate: 70, shield: 30 }, // 4/10, 10/10, 7/10, 3/10
       ability: {
         id: 'git_stash',
         name: 'GIT STASH',
         triggerKey: 'E',
-        description: 'Temporal phase cloak: intangible to bullets, cannot shoot while stashed.',
-        mechanic: 'Phase intangibility 3.5s'
+        description: 'Fase de intangibilidad temporal e inmunidad total a proyectiles.',
+        mechanic: 'Intangibilidad de fase 3.5s',
       },
-      description: 'Silueta delgada y aerodinamica con baja firma termica. Ideal para infiltracion y evasivas.'
+      description: 'Silueta delgada y aerodinámica con baja firma térmica para infiltración y evasivas críticas.',
     },
     {
-      id: 'merge_hammer',
-      name: 'Merge Hammer',
-      classTag: 'HEAVY SIEGE TANK',
+      id: 'solar_gold',
+      name: 'SOLAR GOLD',
+      classTag: 'Acorazada / Asedio Pesado',
       hullColor: '#fbbf24',
       glowColor: '#f59e0b',
       cost: 600,
-      unlocked: false,
-      stats: { armor: 100, speed: 30, fireRate: 40, shield: 80 },
+      unlocked: true,
+      stats: { armor: 100, speed: 30, fireRate: 40, shield: 80 }, // 10/10, 3/10, 4/10, 8/10
       ability: {
         id: 'merge_shield',
-        name: 'MERGE SHIELD / BURST',
+        name: 'MERGE BURST',
         triggerKey: 'E',
-        description: 'Frontal shield absorbs hits. When charged, releases massive MERGE BURST shockwave.',
-        mechanic: 'Kinetic absorption wave'
+        description: 'Absorbe impactos frontales y desata una onda de choque cinética demoledora.',
+        mechanic: 'Onda de choque por absorción',
       },
-      description: 'Armadura de asedio reforzada y triple tobera pesada. Tanque espacial impenetrable.'
+      description: 'Armadura pesada de aleación solar reforzada y triple tobera de empuje masivo.',
     },
     {
-      id: 'branch_runner',
-      name: 'Branch Runner',
-      classTag: 'MULTI-VECTOR TACTICAL',
+      id: 'emerald_glitch',
+      name: 'EMERALD GLITCH',
+      classTag: 'Experimental / Clones',
       hullColor: '#10b981',
       glowColor: '#34d399',
       cost: 800,
-      unlocked: false,
-      stats: { armor: 50, speed: 80, fireRate: 60, shield: 50 },
+      unlocked: true,
+      stats: { armor: 50, speed: 80, fireRate: 60, shield: 50 }, // 5/10, 8/10, 6/10, 5/10
       ability: {
         id: 'branch_split',
         name: 'BRANCH SPLIT',
         triggerKey: 'E',
-        description: 'Spawns 2 drone clones flanking the ship that mirror weapon fire, then branch merges back.',
-        mechanic: 'Dual support drones 5s'
+        description: 'Despliega 2 drones tácticos que replican el fuego de armas de la nave.',
+        mechanic: 'Drones de apoyo dual 5s',
       },
-      description: 'Fuselaje trifurcado con tres estelas vectoriales independientes. Domina el espacio con ramas simultaneas.'
+      description: 'Fuselaje trifurcado con tres estelas vectoriales independientes y núcleos de plasma esmeralda.',
     },
     {
-      id: 'rebase_01',
-      name: 'Rebase-01',
-      classTag: 'AGGRESSIVE INTERCEPTOR',
+      id: 'neon_overdrive',
+      name: 'NEON OVERDRIVE',
+      classTag: 'Asalto Rápido / Hiperdash',
       hullColor: '#ff0055',
       glowColor: '#ff3366',
       cost: 1000,
-      unlocked: false,
-      stats: { armor: 40, speed: 90, fireRate: 90, shield: 20 },
+      unlocked: true,
+      stats: { armor: 40, speed: 90, fireRate: 90, shield: 20 }, // 4/10, 9/10, 9/10, 2/10
       ability: {
         id: 'git_rebase',
         name: 'GIT REBASE',
         triggerKey: 'Q',
-        description: 'Accumulates energy during slow-motion, then executes an ultra-velocity penetrating dash.',
-        mechanic: 'Piercing hyper-dash'
+        description: 'Carga de velocidad hipercinética con embate frontal penetrante.',
+        mechanic: 'Embate penetrante hiperveloz',
       },
-      description: 'Nariz afilada con tobera central de sobreaceleracion. Ataque veloz y demoledor.'
+      description: 'Nariz afilada de asalto con tobera de sobreaceleración inmediata para ofensivas implacables.',
     },
     {
       id: 'quantum_wing',
-      name: 'Quantum Wing',
-      classTag: 'EXPERIMENTAL WARPING CRAFT',
+      name: 'QUANTUM WING',
+      classTag: 'Perforación / Plasma',
       hullColor: '#22d3ee',
       glowColor: '#6366f1',
-      cost: 1200,
-      unlocked: false,
-      stats: { armor: 50, speed: 70, fireRate: 60, shield: 60 },
+      cost: 1100,
+      unlocked: true,
+      stats: { armor: 50, speed: 70, fireRate: 60, shield: 60 }, // 5/10, 7/10, 6/10, 6/10
       ability: {
         id: 'quantum_pierce',
         name: 'QUANTUM PIERCE',
-        triggerKey: 'PASSIVE',
-        description: 'Plasma shots pierce clean through entire columns of enemies without dissipating.',
-        mechanic: 'Infinite laser penetration'
+        triggerKey: 'SPACE',
+        description: 'Dispara rayos de plasma cuántico perforantes continuos.',
+        mechanic: 'Láser perforante continuo',
       },
-      description: 'Geometria asimetrica con puntas de ala flotantes y reactor gravitacional desvinculado.'
+      description: 'Alas de geometría variable con emisores cuánticos directos y proyectiles de penetración.',
     },
     {
-      id: 'octo_core',
-      name: 'Octo-Core',
-      classTag: 'LEGENDARY GUARDIAN',
+      id: 'quantum_citadel',
+      name: 'QUANTUM CITADEL',
+      classTag: 'Defensa / Drones',
       hullColor: '#38bdf8',
-      glowColor: '#0284c7',
-      cost: 1500,
-      unlocked: false,
-      stats: { armor: 70, speed: 60, fireRate: 70, shield: 90 },
+      glowColor: '#818cf8',
+      cost: 1200,
+      unlocked: true,
+      stats: { armor: 70, speed: 60, fireRate: 70, shield: 90 }, // 7/10, 6/10, 7/10, 9/10
       ability: {
         id: 'octo_protocol',
         name: 'OCTO PROTOCOL',
         triggerKey: 'E',
-        description: 'Summons up to 8 rotating micro-drones around the ship that intercept incoming enemy projectiles.',
-        mechanic: '8 orbital defense drones'
+        description: 'Genera un enjambre de 8 micro-drones de intercepción orbital activa.',
+        mechanic: '8 drones orbitales defensivos',
       },
-      description: 'Nucleo circular con 8 nodos de contencion y alerones en forma de tentaculos. El bastion de GitHub.'
+      description: 'Núcleo de contención pesada con 8 nodos orbitales que neutralizan fuego hostil.',
     },
     {
       id: 'codebreaker_x',
-      name: 'Codebreaker // X',
-      classTag: 'ULTIMATE DREADNOUGHT',
+      name: 'CODEBREAKER // X',
+      classTag: 'Dreadnought / Cañón Colosal',
       hullColor: '#a855f7',
-      glowColor: '#c084fc',
-      cost: 2500,
-      unlocked: false,
-      stats: { armor: 100, speed: 60, fireRate: 100, shield: 90 },
+      glowColor: '#e879f9',
+      cost: 1500,
+      unlocked: true,
+      stats: { armor: 100, speed: 50, fireRate: 100, shield: 90 }, // 10/10, 5/10, 10/10, 9/10
       ability: {
         id: 'force_push',
-        name: 'FORCE PUSH',
+        name: 'GIT PUSH --FORCE',
         triggerKey: 'SHIFT',
-        description: 'Wipes remote history with a colossal screen-clearing beam obliterating enemy waves.',
-        mechanic: 'Colossal compiler beam'
+        description: 'Desata el rayo colosal destructor de kernels que barre la pantalla.',
+        mechanic: 'Superláser de aniquilación global',
       },
-      description: 'Placas de aleacion oscura, 6 puntos de anclaje y reactor hipercuantico. Una maquina de guerra total.'
+      description: 'Nave insignia con reactor de fusión oscura y cañón titanio destructor de kernels.',
     },
   ];
 
   private constructor() {
     this.loadProfile();
   }
+
 
   public static getInstance(): Store {
     if (!Store.instance) {
@@ -345,7 +361,65 @@ export class Store {
   }
 
   public getActiveSkin(): ShipSkin {
-    return this.SKINS.find((s) => s.id === this.profile.activeSkinId) || this.SKINS[0];
+    const id = this.profile.activeSkinId;
+    let found = this.SKINS.find((s) => s.id === id);
+    if (!found) {
+      if (id === 'compiler_delta' || id === 'cyan') found = this.SKINS.find((s) => s.id === 'cyber_falcon');
+      else if (id === 'merge_hammer' || id === 'gold') found = this.SKINS.find((s) => s.id === 'solar_gold');
+      else if (id === 'branch_runner' || id === 'emerald') found = this.SKINS.find((s) => s.id === 'emerald_glitch');
+      else if (id === 'rebase_01' || id === 'neon') found = this.SKINS.find((s) => s.id === 'neon_overdrive');
+      else if (id === 'octo_core' || id === 'quantum_wing') found = this.SKINS.find((s) => s.id === 'quantum_citadel');
+    }
+    return found || this.SKINS[0];
+  }
+
+  public recordBossDefeated(blueprint: BossBlueprint): void {
+    if (!this.profile.bossCodex) {
+      this.profile.bossCodex = [];
+    }
+    const existing = this.profile.bossCodex.find(
+      (e) => e.archetype === blueprint.archetype && e.mutation === (blueprint.mutation || 'OVERCLOCKED')
+    );
+    if (!existing) {
+      this.profile.bossCodex.push({
+        archetype: blueprint.archetype,
+        title: blueprint.archetypeData.title,
+        codeNumber: blueprint.archetypeData.codeNumber,
+        seed: blueprint.genome.seed,
+        mutation: blueprint.mutation || 'OVERCLOCKED',
+        secondaryMutation: blueprint.secondaryMutation,
+        language: blueprint.language,
+        repoName: blueprint.repoName,
+        defeatedAt: Date.now(),
+        threatLevel: blueprint.threatIndex,
+      });
+      this.saveProfile();
+    }
+  }
+
+  public grantRepositoryArtifact(repoId: string, repoName: string, langName: string): RepositoryArtifact {
+    if (!this.profile.artifacts) {
+      this.profile.artifacts = [];
+    }
+    const found = this.profile.artifacts.find((a) => a.repoId === repoId);
+    if (found) return found;
+
+    const newArtifact: RepositoryArtifact = {
+      repoId,
+      name: `ARTEFACTO // ${repoName.toUpperCase()}`,
+      bonusXpPct: 5,
+      bonusPerk: `COMPILADOR ${langName.toUpperCase()}`,
+      unlockedAt: Date.now(),
+      flavorText: `Núcleo de código estabilizado del repositorio ${repoName}. Otorga +5% XP en todas las misiones.`,
+    };
+
+    this.profile.artifacts.push(newArtifact);
+    this.saveProfile();
+    return newArtifact;
+  }
+
+  public getArtifact(repoId: string): RepositoryArtifact | undefined {
+    return this.profile.artifacts?.find((a) => a.repoId === repoId);
   }
 
   private loadProfile(): void {
@@ -353,10 +427,16 @@ export class Store {
       const saved = localStorage.getItem(Store.STORAGE_KEY);
       if (saved) {
         this.profile = { ...this.profile, ...JSON.parse(saved) };
+        if (!this.profile.bossCodex) this.profile.bossCodex = [];
+        if (!this.profile.artifacts) this.profile.artifacts = [];
       }
+      // Ensure all 8 ships in SKINS are unlocked
+      const allShipIds = this.SKINS.map((s) => s.id);
+      this.profile.unlockedSkins = Array.from(new Set([...(this.profile.unlockedSkins || []), ...allShipIds]));
     } catch {}
     this.updateRankAndLevel();
   }
+
 
   public saveProfile(): void {
     try {

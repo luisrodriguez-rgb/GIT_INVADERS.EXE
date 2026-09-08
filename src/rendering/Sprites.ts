@@ -474,59 +474,217 @@ export class Sprites {
       }
 
       // ==========================================
-      // 04. THE DEPENDENCY HYDRA
+      // 04. THE DEPENDENCY HYDRA (CYBERNETIC MULTI-HEADED DRAGON)
       // ==========================================
       case 'dependency_hydra': {
-        const headCount = 4;
-        const headCoords: [number, number][] = [];
+        const headCount = 5;
+        const headCoords: { x: number; y: number; angle: number; idx: number }[] = [];
+        const coreX = 0;
+        const coreY = height * 0.15;
 
-        // Compute Head Coordinates
+        // 1. Calculate articulated serpentine neck paths and head anchors
         for (let h = 0; h < headCount; h++) {
-          const hAngle = -Math.PI * 0.75 + (h / (headCount - 1)) * Math.PI * 0.9;
-          const hWave = Math.sin(time * 2.5 + h * 1.2) * 8;
-          const hx = Math.cos(hAngle) * (width * 0.44) + hWave;
-          const hy = Math.sin(hAngle) * (height * 0.4) - 8;
-          headCoords.push([hx, hy]);
+          const spreadRatio = (h - (headCount - 1) / 2) / ((headCount - 1) / 2); // -1.0 to 1.0
+          const baseAngle = -Math.PI / 2 + spreadRatio * 0.95;
+          const slither = Math.sin(time * 2.8 + h * 1.3) * 10;
+          const hDist = width * (0.36 + Math.abs(spreadRatio) * 0.08);
+          const hx = Math.cos(baseAngle) * hDist + slither * 0.6;
+          const hy = Math.sin(baseAngle) * (height * 0.44) + Math.cos(time * 2.2 + h) * 6 - 8;
+          headCoords.push({ x: hx, y: hy, angle: baseAngle, idx: h });
 
-          // Glowing Dependency Conduits linking Core to Head
-          ctx.strokeStyle = '#10b981';
-          ctx.lineWidth = 2.5;
-          ctx.beginPath();
-          ctx.moveTo(0, height * 0.1);
-          ctx.lineTo(hx, hy);
-          ctx.stroke();
+          // Draw Articulated Segmented Vertebrae Neck
+          const segments = 7;
+          for (let s = 1; s <= segments; s++) {
+            const tSeg = s / segments;
+            const segX = coreX + (hx - coreX) * tSeg + Math.sin(time * 3 + h * 1.5 + s * 0.7) * (6 * Math.sin(tSeg * Math.PI));
+            const segY = coreY + (hy - coreY) * tSeg - (1 - tSeg) * 8;
+            const segSize = 5 + (1 - tSeg) * 4;
+
+            // Backbone wire link
+            if (s > 1) {
+              const prevTSeg = (s - 1) / segments;
+              const prevX = coreX + (hx - coreX) * prevTSeg + Math.sin(time * 3 + h * 1.5 + (s - 1) * 0.7) * (6 * Math.sin(prevTSeg * Math.PI));
+              const prevY = coreY + (hy - coreY) * prevTSeg - (1 - prevTSeg) * 8;
+              
+              ctx.strokeStyle = h % 2 === 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(56, 189, 248, 0.7)';
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              ctx.moveTo(prevX, prevY);
+              ctx.lineTo(segX, segY);
+              ctx.stroke();
+            }
+
+            // Segmented Vertebra armor scale
+            ctx.fillStyle = '#061a12';
+            ctx.strokeStyle = h % 2 === 0 ? '#10b981' : '#38bdf8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(segX, segY, segSize, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Inner cyber conduit node
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(segX, segY, 1.5, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
 
-        // Central Dependency Nexus
-        ctx.fillStyle = '#062015';
-        ctx.strokeStyle = '#34d399';
+        // 2. Central Nexus / Reactor Body (Intricate Hexagonal Carapace)
+        ctx.save();
+        // Outer energy aura
+        const nexusGrad = ctx.createRadialGradient(coreX, coreY, 5, coreX, coreY, width * 0.28);
+        nexusGrad.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
+        nexusGrad.addColorStop(0.6, 'rgba(6, 78, 59, 0.15)');
+        nexusGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = nexusGrad;
+        ctx.beginPath();
+        ctx.arc(coreX, coreY, width * 0.28, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Main Carapace Plating
+        ctx.fillStyle = '#03140e';
+        ctx.strokeStyle = '#10b981';
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.moveTo(0, height * 0.42);
-        ctx.lineTo(width * 0.22, height * 0.1);
-        ctx.lineTo(width * 0.18, -height * 0.25);
-        ctx.lineTo(-width * 0.18, -height * 0.25);
-        ctx.lineTo(-width * 0.22, height * 0.1);
+        ctx.moveTo(coreX, coreY + height * 0.32);
+        ctx.lineTo(coreX + width * 0.22, coreY + height * 0.1);
+        ctx.lineTo(coreX + width * 0.16, coreY - height * 0.2);
+        ctx.lineTo(coreX - width * 0.16, coreY - height * 0.2);
+        ctx.lineTo(coreX - width * 0.22, coreY + height * 0.1);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
 
-        // Render Hydra Head Pods
-        headCoords.forEach(([hx, hy], idx) => {
-          ctx.fillStyle = '#04170e';
-          ctx.strokeStyle = idx % 2 === 0 ? '#10b981' : '#38bdf8';
-          ctx.lineWidth = 2;
-          ctx.fillRect(hx - 12, hy - 10, 24, 20);
-          ctx.strokeRect(hx - 12, hy - 10, 24, 20);
+        // Interlocking Inner Shield Plating
+        ctx.fillStyle = '#06281b';
+        ctx.strokeStyle = '#34d399';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(coreX, coreY + height * 0.22);
+        ctx.lineTo(coreX + width * 0.14, coreY + height * 0.06);
+        ctx.lineTo(coreX + width * 0.1, coreY - height * 0.12);
+        ctx.lineTo(coreX - width * 0.1, coreY - height * 0.12);
+        ctx.lineTo(coreX - width * 0.14, coreY + height * 0.06);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
 
-          // Head Sensor Node
+        // Pulsing Quantum Dependency Core
+        const corePulse = 0.85 + Math.sin(time * 5) * 0.2;
+        const coreGrad = ctx.createRadialGradient(coreX, coreY, 2, coreX, coreY, 18 * corePulse);
+        coreGrad.addColorStop(0, '#ffffff');
+        coreGrad.addColorStop(0.4, '#34d399');
+        coreGrad.addColorStop(0.8, '#059669');
+        coreGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = coreGrad;
+        ctx.beginPath();
+        ctx.arc(coreX, coreY, 18 * corePulse, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Orbiting Ring with recursive dependency ticks
+        ctx.strokeStyle = 'rgba(52, 211, 153, 0.6)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.arc(coreX, coreY, width * 0.18, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Orbiting Dependency Nodes
+        for (let n = 0; n < 4; n++) {
+          const nAng = time * 2.2 + (n * Math.PI * 2) / 4;
+          const nx = coreX + Math.cos(nAng) * (width * 0.18);
+          const ny = coreY + Math.sin(nAng) * (height * 0.14);
+          ctx.fillStyle = '#10b981';
+          ctx.fillRect(nx - 3, ny - 3, 6, 6);
+          ctx.strokeStyle = '#ffffff';
+          ctx.strokeRect(nx - 3, ny - 3, 6, 6);
+        }
+        ctx.restore();
+
+        // 3. Render 5 Articulated Cyber Dragon Heads with Glowing Visors & Horns
+        headCoords.forEach(({ x: hx, y: hy, angle, idx }) => {
+          ctx.save();
+          ctx.translate(hx, hy);
+          ctx.rotate(angle + Math.PI / 2 + Math.sin(time * 2 + idx) * 0.15);
+
+          const headScale = idx === 2 ? 1.15 : 0.95; // Alpha center head is larger
+          ctx.scale(headScale, headScale);
+
+          // Head Back Horns / Spines
+          ctx.fillStyle = '#064e3b';
+          ctx.strokeStyle = '#10b981';
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-10, 8);
+          ctx.lineTo(-16, 18);
+          ctx.lineTo(-6, 10);
+          ctx.lineTo(0, 16);
+          ctx.lineTo(6, 10);
+          ctx.lineTo(16, 18);
+          ctx.lineTo(10, 8);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Main Dragon Skull (Armored Polygon)
+          ctx.fillStyle = '#021810';
+          ctx.strokeStyle = idx % 2 === 0 ? '#10b981' : '#38bdf8';
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.moveTo(0, -16); // Snout tip
+          ctx.lineTo(9, -8);  // Right cheek
+          ctx.lineTo(11, 6);  // Right jaw
+          ctx.lineTo(0, 10);  // Skull base
+          ctx.lineTo(-11, 6); // Left jaw
+          ctx.lineTo(-9, -8); // Left cheek
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+
+          // Jaw Razor Fangs
           ctx.fillStyle = '#ffffff';
           ctx.beginPath();
-          ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+          ctx.moveTo(-6, -6);
+          ctx.lineTo(-4, -12);
+          ctx.lineTo(-2, -6);
+          ctx.lineTo(2, -6);
+          ctx.lineTo(4, -12);
+          ctx.lineTo(6, -6);
           ctx.fill();
+
+          // Glowing Cyber Visor Eyes
+          const eyeGlow = idx % 2 === 0 ? '#34d399' : '#38bdf8';
+          ctx.fillStyle = eyeGlow;
+          ctx.shadowColor = eyeGlow;
+          ctx.shadowBlur = 6;
+          // Left Eye Slit
+          ctx.beginPath();
+          ctx.moveTo(-7, -2);
+          ctx.lineTo(-2, -5);
+          ctx.lineTo(-3, -1);
+          ctx.closePath();
+          ctx.fill();
+          // Right Eye Slit
+          ctx.beginPath();
+          ctx.moveTo(7, -2);
+          ctx.lineTo(2, -5);
+          ctx.lineTo(3, -1);
+          ctx.closePath();
+          ctx.fill();
+          ctx.shadowBlur = 0;
+
+          // Mouth Plasma Breath Node
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(0, -12, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.restore();
         });
         break;
       }
+
 
       // ==========================================
       // 05. THE MERGE CONFLICT

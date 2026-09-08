@@ -988,9 +988,10 @@ export class ShipComposer {
   public static createPreset(skinId: string): ShipDesign {
     switch (skinId) {
       case 'compiler_delta':
+      case 'cyber_falcon':
       case 'cyan':
         return {
-          name: 'COMPILER DELTA',
+          name: 'CYBER FALCON',
           archetype: 'delta',
           hull: {
             noseSweep: 0.28,
@@ -1071,8 +1072,9 @@ export class ShipComposer {
 
       case 'merge_hammer':
       case 'solar_gold':
+      case 'gold':
         return {
-          name: 'MERGE HAMMER',
+          name: 'SOLAR GOLD',
           archetype: 'hammerhead',
           hull: {
             noseSweep: 0.1,
@@ -1114,8 +1116,9 @@ export class ShipComposer {
 
       case 'branch_runner':
       case 'emerald_glitch':
+      case 'emerald':
         return {
-          name: 'BRANCH RUNNER',
+          name: 'EMERALD GLITCH',
           archetype: 'trimaran_fork',
           hull: {
             noseSweep: 0.35,
@@ -1155,8 +1158,9 @@ export class ShipComposer {
 
       case 'rebase_01':
       case 'neon_overdrive':
+      case 'neon':
         return {
-          name: 'REBASE-01',
+          name: 'NEON OVERDRIVE',
           archetype: 'arrow_interceptor',
           hull: {
             noseSweep: 0.55,
@@ -1235,8 +1239,9 @@ export class ShipComposer {
         };
 
       case 'octo_core':
+      case 'quantum_citadel':
         return {
-          name: 'OCTO-CORE',
+          name: 'QUANTUM CITADEL',
           archetype: 'octo_saucer',
           hull: {
             noseSweep: 0.2,
@@ -1277,7 +1282,7 @@ export class ShipComposer {
         };
 
       case 'codebreaker_x':
-      case 'quantum_citadel':
+      case 'dreadnought':
         return {
           name: 'CODEBREAKER // X',
           archetype: 'dreadnought_x',
