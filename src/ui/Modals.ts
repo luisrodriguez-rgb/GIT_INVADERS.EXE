@@ -459,6 +459,163 @@ export class Modals {
     window.addEventListener('keydown', handleKey);
   }
 
+  /**
+   * Displays the "WHY THIS BOSS?" causal reasoning telemetry modal.
+   */
+  public showWhyThisBoss(blueprint: BossBlueprint): void {
+    const fp = blueprint.fingerprint;
+    const whyReasons = blueprint.whyReasons || [];
+    const stack = blueprint.mutationStack;
+    const archetypeData = blueprint.archetypeData;
+
+    const asciiBars = fp ? [
+      `ACTIVITY      [${'█'.repeat(Math.round(fp.activity / 10))}${'░'.repeat(10 - Math.round(fp.activity / 10))}] ${fp.activity}%`,
+      `COLLABORATION [${'█'.repeat(Math.round(fp.collaboration / 10))}${'░'.repeat(10 - Math.round(fp.collaboration / 10))}] ${fp.collaboration}%`,
+      `COMPLEXITY    [${'█'.repeat(Math.round(fp.complexity / 10))}${'░'.repeat(10 - Math.round(fp.complexity / 10))}] ${fp.complexity}%`,
+      `INSTABILITY   [${'█'.repeat(Math.round(fp.instability / 10))}${'░'.repeat(10 - Math.round(fp.instability / 10))}] ${fp.instability}%`,
+      `LEGACY CODE   [${'█'.repeat(Math.round(fp.legacy / 10))}${'░'.repeat(10 - Math.round(fp.legacy / 10))}] ${fp.legacy}%`,
+      `DIVERSITY     [${'█'.repeat(Math.round(fp.diversity / 10))}${'░'.repeat(10 - Math.round(fp.diversity / 10))}] ${fp.diversity}%`,
+    ] : [];
+
+    this.overlay.style.display = 'flex';
+    this.overlay.innerHTML = `
+      <div class="modal-card boss-why-modal" style="max-width: 580px; font-family: var(--font-mono);">
+        <div class="report-header" style="border-bottom-color: rgba(0, 229, 255, 0.3); margin-bottom: 8px;">
+          <div class="report-brand" style="color: #00e5ff; font-weight: 900; letter-spacing: 1px;">
+            <span>GIT_INVADERS.EXE // CAUSAL REASONING TELEMETRY</span>
+          </div>
+          <div class="target-badge" style="color: #ffd600; border-color: #ffd600; background: rgba(255, 214, 0, 0.1);">
+            TARGET: ${blueprint.repoName.toUpperCase()}
+          </div>
+        </div>
+
+        <div style="font-size: 0.96rem; font-weight: 900; color: #ffffff; letter-spacing: 0.8px; margin-bottom: 2px;">
+          WHY THIS CODE BOSS: ${archetypeData.title}
+        </div>
+        <div style="font-size: 0.72rem; color: #38bdf8; margin-bottom: 10px;">
+          CHAIN: <b>METRICS → REPOSITORY FINGERPRINT → ARCHETYPE → MUTATIONS</b>
+        </div>
+
+        <!-- 6D ASCII Fingerprint Panel -->
+        <div style="background: #02050b; border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.65rem; color: #00e5ff; line-height: 1.4; white-space: pre-wrap;">${asciiBars.join('\n')}</div>
+
+        <!-- Causal Reasons List -->
+        <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px;">
+          CAUSAL DETERMINISTIC REASONS:
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; font-size: 0.72rem;">
+          ${whyReasons.map(r => `
+            <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #00e5ff; padding: 5px 8px; border-radius: 2px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <span style="color: #94a3b8; font-weight: 800;">${r.icon || '[*]'} ${r.metric}:</span>
+                <b style="color: #ffffff; margin-left: 4px;">${r.value}</b>
+              </div>
+              <span style="color: #38bdf8; font-weight: 700; text-align: right;">→ ${r.result}</span>
+            </div>
+          `).join('')}
+        </div>
+
+        <!-- Mutation Stack Summary -->
+        <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 4px; padding: 6px 10px; margin-bottom: 12px; font-size: 0.68rem; color: #f43f5e;">
+          <b>ACTIVE MUTATION STACK:</b> ${stack?.compositeTitle || blueprint.modifierTitle || 'STANDARD'}
+        </div>
+
+        <button class="launch-btn" id="closeWhyModalBtn" style="background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff; padding: 8px; width: 100%; border-radius: 4px; font-weight: 800; cursor: pointer;">
+          CERRAR ANÁLISIS CAUSAL [ESC]
+        </button>
+      </div>
+    `;
+
+    const closeBtn = this.overlay.querySelector('#closeWhyModalBtn');
+    const handleClose = () => {
+      this.hide();
+      window.removeEventListener('keydown', handleKey);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    closeBtn?.addEventListener('click', handleClose);
+    window.addEventListener('keydown', handleKey);
+  }
+
+  /**
+   * Displays the Boss Codex / Bestiary grid of all 10 Archetypes.
+   */
+  public showBossCodex(defeatedEntries: any[]): void {
+    const archetypes = Object.values(ARCHETYPE_DATABASE);
+
+    const cardsHtml = archetypes.map((arch) => {
+      const entry = defeatedEntries.find((e) => e.archetype === arch.archetype);
+      const isDefeated = !!entry;
+
+      return `
+        <div style="background: ${isDefeated ? 'rgba(16, 185, 129, 0.08)' : 'rgba(15, 23, 42, 0.6)'}; border: 1px solid ${isDefeated ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; border-radius: 4px; padding: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 0.68rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: ${isDefeated ? '#10b981' : '#64748b'}; font-weight: 900;">#${arch.codeNumber}</span>
+            <span style="font-size: 0.58rem; padding: 1px 5px; border-radius: 2px; font-weight: 800; background: ${isDefeated ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)'}; color: ${isDefeated ? '#10b981' : '#64748b'};">
+              ${isDefeated ? 'DEFEATED' : 'CLASSIFIED'}
+            </span>
+          </div>
+          <div style="font-size: 0.76rem; font-weight: 900; color: ${isDefeated ? '#ffffff' : '#94a3b8'};">
+            ${arch.title}
+          </div>
+          <div style="font-size: 0.6rem; color: var(--text-muted); line-height: 1.2;">
+            ${arch.profileDescription}
+          </div>
+          ${isDefeated ? `
+            <div style="margin-top: auto; font-size: 0.58rem; color: #38bdf8; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px;">
+              SEED: #${entry.seed} // MUTATION: <b style="color:#f43f5e">${entry.mutation}</b>
+            </div>
+          ` : `
+            <div style="margin-top: auto; font-size: 0.58rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px;">
+              ENCOUNTER TARGET: ${arch.canonicalRepo}
+            </div>
+          `}
+        </div>
+      `;
+    }).join('');
+
+    this.overlay.style.display = 'flex';
+    this.overlay.innerHTML = `
+      <div class="modal-card boss-codex-modal" style="max-width: 720px; font-family: var(--font-mono);">
+        <div class="report-header" style="border-bottom-color: rgba(0, 229, 255, 0.3); margin-bottom: 8px;">
+          <div class="report-brand" style="color: #00e5ff; font-weight: 900; letter-spacing: 1px;">
+            <span>GIT_INVADERS.EXE // CODE BOSS CODEX & BESTIARY</span>
+          </div>
+          <div class="target-badge" style="color: #10b981; border-color: #10b981; background: rgba(16, 185, 129, 0.1);">
+            DEFEATED: ${defeatedEntries.length} / 10
+          </div>
+        </div>
+
+        <!-- 10 Boss Grid -->
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-height: 380px; overflow-y: auto; margin-bottom: 12px; padding-right: 4px;">
+          ${cardsHtml}
+        </div>
+
+        <button class="launch-btn" id="closeCodexBtn" style="background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff; padding: 8px; width: 100%; border-radius: 4px; font-weight: 800; cursor: pointer;">
+          CERRAR CODEX [ESC]
+        </button>
+      </div>
+    `;
+
+    const closeBtn = this.overlay.querySelector('#closeCodexBtn');
+    const handleClose = () => {
+      this.hide();
+      window.removeEventListener('keydown', handleKey);
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
+        e.preventDefault();
+        handleClose();
+      }
+    };
+    closeBtn?.addEventListener('click', handleClose);
+    window.addEventListener('keydown', handleKey);
+  }
+
   public hide(): void {
     this.overlay.style.display = 'none';
   }
