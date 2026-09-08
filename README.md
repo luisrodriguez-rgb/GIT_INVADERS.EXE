@@ -13,260 +13,263 @@
  ╚═════╝ ╚═╝   ╚═╝╚═╝   ╚═╝╚═╝  ╚═══╝  ╚═══╝  ╚═╝  ╚═╝╚═════╝ ╚══════╝╚═╝  ╚═╝╚══════╝
 ```
 
-> **`GIT_INVADERS.EXE`** es un arcade retro-futurista procedural construido con **TypeScript, Canvas 2D, SVG y Web Audio API**. El motor analiza actividad real de GitHub y la transforma mediante un sistema de **Repository DNA** en naves, enemigos, formaciones, comportamientos, oleadas y Code Bosses generados dinámicamente. Su arquitectura desacopla la composicion visual de las mecanicas mediante **estrategias de movimiento, maquinas de estados, sistemas de particulas y generacion procedural**, convirtiendo cada repositorio en un desafio visual, matematico y tactico diferente.
+<p align="center">
+  <img src="https://img.shields.io/badge/Language-TypeScript_5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Rendering-Canvas_2D_%2B_Path2D-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="Canvas 2D" />
+  <img src="https://img.shields.io/badge/Audio-Web_Audio_API-47A248?style=for-the-badge&logo=webrtc&logoColor=white" alt="Web Audio API" />
+  <img src="https://img.shields.io/badge/Build-Vite_5.0-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
+  <img src="https://img.shields.io/badge/Visual_Assets-Zero_Raster_Assets-00e5ff?style=for-the-badge" alt="Zero Raster Assets" />
+  <img src="https://img.shields.io/badge/Performance-60_FPS_Fixed_Tick-10b981?style=for-the-badge" alt="60 FPS" />
+  <img src="https://img.shields.io/badge/License-MIT-a855f7?style=for-the-badge" alt="License MIT" />
+</p>
+
+> **`GIT_INVADERS.EXE`** es un arcade retro-futurista procedural de alta fidelidad construido íntegramente con **TypeScript, Canvas 2D, SVG Path2D y Web Audio API**. El motor analiza telemetría real de repositorios y perfiles de GitHub y la transforma, mediante un pipeline de **Repository DNA**, en naves de combate con 8 capas vectoriales, enemigos tipados, oleadas con formaciones tácticas, modificadores de combate por lenguaje y **10 arquetipos de Code Bosses generados proceduralmente** con mutaciones genéticas, semillas deterministas y síntesis de audio reactiva (**AudioDNA**).
 
 ---
 
-## Galeria Visual de la Suite Arcade
+## 📸 Galería Visual de la Suite Arcade
 
-### Panel 1: Hangar, Telemetria de Repository DNA y Selector de Modo
-
+### Panel 1: Hangar Táctico, Flota de Naves, Dossier del Boss y Directivas en Vivo
+*Vista panorámica 16:9 con selector para las 8 naves de la flota, previsualización vectorial en tiempo real, telemetría de ADN del repositorio y panel de directivas de misión.*
 ![Panel 1: Hangar Telemetria y Dossier de Piloto](docs/screenshots/hangar_panel1.png)
 
-### Panel 2: Arena de Combate, Tactical HUD y Matriz Deflectora de Boss
+---
 
+### Panel 2: Arena de Combate, Tactical HUD, Escudos de PR y Partículas Semánticas
+*Combate activo a 60 FPS con proyectiles de plasma, escudos deflectores cinéticos, barreras de código degradables y partículas de depuración de memoria.*
 ![Panel 2: Arena de Combate y HUD Tactico](docs/screenshots/combat_hud_panel2.png)
 
-### Panel 4: Terminal BIOS, Logs de Eventos Git en Tiempo Real
+---
 
+### Panel 3: Inspector de Genoma del Boss (Boss Genome) y Matriz de Mutación
+*Modal de telemetría forense con semilla determinista (ej. `#A15BF6`), radar de atributos pentagonales, mutaciones genéticas activas y análisis causal.*
+![Panel 7: Inspector de Genoma de Boss](docs/screenshots/boss_genome_panel7.png)
+
+---
+
+### Panel 4: Terminal BIOS y Escáner de Repositorios en Tiempo Real
+*Interfaz de línea de comandos retro CRT con logging en vivo de eventos Git, analizador de árboles de sintaxis y selector de temas cromáticos fósforo.*
 ![Panel 4: Terminal BIOS y Diagnosticos](docs/screenshots/terminal_bios_panel4.png)
 
-### Panel 5: Mision Terminada, Debriefing de Combate y Progresion
+---
 
+### Panel 5: Misión Terminada, Debriefing de Rendimiento y Progresión
+*Resumen de combate con cálculo de XP, recompensas de estrellas de GitHub, precisión balística, multiplicadores de combo y registro de artefactos recolectados.*
 ![Panel 5: Debriefing de Mision y Estadisticas](docs/screenshots/mission_terminated_panel5.png)
 
-### Panel 6: Arsenal Cibernetico, Overclocks de Firmware y Hangares de Naves
+---
 
+### Panel 6: Arsenal Cibernético y Tienda de Firmware (`GIT_STORE.EXE`)
+*Tienda de mejoras permanentes en `localStorage` con catálogo de 8 naves, overclocks de cadencia, blindajes cuánticos y protocolos de rebase temporal.*
 ![Panel 6: Tienda Cibernetica y Hangar de Naves](docs/screenshots/git_store_panel6.png)
 
 ---
 
-## Stack Tecnologico Oficial
+## 🎮 Modos de Juego
+
+1. **Repository Incursion (`usuario/repositorio`):**
+   - Escanea un repositorio específico de GitHub (ej. `facebook/react`, `luisrodriguez-rgb/GIT_INVADERS.EXE`, `torvalds/linux`).
+   - Extrae métricas reales (commits, PRs, issues, colaboradores, lenguajes) y genera una campaña procedural de 3 oleadas culminando en su **Code Boss** exclusivo.
+
+2. **Profile Assault (`@usuario`):**
+   - Escanea el perfil público de un desarrollador en GitHub.
+   - Modula el volumen de la flota enemiga y la dificultad en función del historial público de contribuciones y commits acumulados.
+
+3. **Instant Chaos Mode (`CHAOS // MAX`):**
+   - Simulación offline de máxima intensidad calibrada a 9,999 commits, 482 PRs y 731 issues.
+   - Despliega oleadas de nivel de amenaza extremo con cadencia de disparo multiplicada e invasores enfurecidos.
+
+4. **Codebase Universe Mode (`CITADEL`):**
+   - Enlace directo con la infraestructura espacial interactiva 2.5D del universo de repositorios.
+
+---
+
+## 🧬 Pipeline Causal de Generación Procedural
+
+El motor implementa un pipeline causal y determinista donde **ningún elemento visual o matemático es aleatorio**. Cada atributo del combate proviene directamente de los datos del repositorio analizado:
+
+```text
+                        ┌───────────────────────────────┐
+                        │   GitHub REST API / Metrics   │
+                        │ (Commits, PRs, Issues, Con.)  │
+                        └───────────────┬───────────────┘
+                                        ▼
+                        ┌───────────────────────────────┐
+                        │        Repository DNA         │
+                        │ (Fingerprint & Threat Index)  │
+                        └───────┬───────────────┬───────┘
+                                │               │
+                ┌───────────────┘               └───────────────┐
+                ▼                                               ▼
+┌───────────────────────────────┐               ┌───────────────────────────────┐
+│     Ship Vector Synthesis     │               │     Boss Genome Synthesis     │
+│ (8-Layer Procedural Geometry) │               │   (10 Archetypes + Mutations) │
+└───────────────┬───────────────┘               └───────────────┬───────────────┘
+                │                                               │
+                │        ┌──────────────────────────────┐       │
+                ├───────►│  Real-Time Game Engine       │◄──────┤
+                │        │  - AI Movement Strategies    │       │
+                │        │  - 4-Phase Boss StateMachine │       │
+                │        │  - Collision & Hitboxes      │       │
+                │        │  - Semantic Particles        │       │
+                │        │  - Dynamic AudioDNA (Synth)  │       │
+                │        └──────────────┬───────────────┘       │
+                │                       ▼                       │
+                └────────► Canvas 2D + SVG Path2D ◄─────────────┘
+                                 (60 FPS)
+```
+
+---
+
+## 🚀 Flota de Naves de Combate (8 Arquetipos Vectoriales)
+
+El subsistema `ShipComposer` desacopla la geometría física de la nave en 8 capas vectoriales generadas dinámicamente mediante funciones trigonométricas y matemáticas de curvas de Bézier:
+1. **Engine Flares:** Gradiente radial con toberas mecánicas y fulgor reactivo.
+2. **Wings & Stabilizers:** Geometría alar con franjas de telemetría y cañones alares.
+3. **Armored Hull Plating:** Casco central con nervaduras dorsales y biseles metálicos.
+4. **Weapon Hardpoints:** Puntos duros de anclaje balístico con conductos de energía.
+5. **Cockpit Visor:** Cúpula poligonal con pulso de reactor y brillo especular.
+6. **Navigation Strobe Lights:** Luces estroboscópicas de babor (rojo) y estribor (verde).
+7. **Structural Damage Layer:** Fisuras metalúrgicas y chispas cuando `HP < 60%`.
+8. **Kinetic Shield Bubble:** Campo de fuerza radial con efecto Fresnel y absorción de impactos.
+
+### 📋 Especificaciones Técnicas de la Flota
+
+| Nave | Arquetipo | Color Hull / Glow | Blindaje | Velocidad | Cadencia | Escudo | Habilidad Táctica | Mecánica en Batalla |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |
+| **CYBER FALCON** | `delta` | `#00e5ff` / `#38bdf8` | 60% | 70% | 60% | 50% | `COMPILER BURST` (`SPACE`) | Ráfaga triple de proyectiles de plasma cian de alta precisión. |
+| **PHANTOM VIOLET** | `stealth_needle` | `#c084fc` / `#a855f7` | 40% | 100% | 70% | 30% | `GIT STASH` (`E`) | Desfase de intangibilidad temporal e inmunidad total durante 3.5s. |
+| **SOLAR GOLD** | `hammerhead` | `#fbbf24` / `#f59e0b` | 100% | 30% | 40% | 80% | `MERGE BURST` (`E`) | Absorbe impactos frontales y desata una onda de choque cinética expansiva. |
+| **EMERALD GLITCH** | `trimaran_fork` | `#10b981` / `#34d399` | 50% | 80% | 60% | 50% | `BRANCH SPLIT` (`E`) | Despliega 2 drones tácticos que replican el fuego de armas durante 5s. |
+| **NEON OVERDRIVE** | `arrow_interceptor` | `#ff0055` / `#ff3366` | 40% | 90% | 90% | 20% | `GIT REBASE` (`Q`) | Aceleración hipercinética con embate frontal penetrante e invulnerabilidad. |
+| **QUANTUM WING** | `quantum_boomerang` | `#22d3ee` / `#6366f1` | 50% | 70% | 60% | 60% | `QUANTUM PIERCE` (`SPACE`) | Dispara rayos de plasma continuo con perforación balística multiobjetivo. |
+| **QUANTUM CITADEL** | `octo_saucer` | `#38bdf8` / `#818cf8` | 70% | 60% | 70% | 90% | `OCTO PROTOCOL` (`E`) | Genera un enjambre de 8 micro-drones defensivos que interceptan disparos. |
+| **CODEBREAKER // X** | `dreadnought_x` | `#a855f7` / `#e879f9` | 100% | 50% | 100% | 90% | `GIT PUSH --FORCE` (`SHIFT`) | Desata un superláser colosal que barre la totalidad de la pantalla. |
+
+---
+
+## 👾 Los 10 Arquetipos de Code Bosses
+
+Cada repositorio se clasifica matemáticamente en uno de los **10 arquetipos de Code Bosses**, con atributos de combate, ataques únicos, cotas de blindaje y fases terminales personalizadas:
+
+| N° | Arquetipo | Concepto de Repositorio | Stat Especial | Ataque Principal | Ataque Secundario | Fase Terminal |
+| :-: | :--- | :--- | :---: | :--- | :--- | :--- |
+| **01** | **THE COMMIT CORE** | Alta frecuencia de commits y CI/CD continuo. | `SPAWN: 90%` | Lluvia de Commits | Drones de Historial | `HISTORY OVERFLOW` |
+| **02** | **THE FORTRESS** | Alto volumen de Pull Requests y code reviews. | `DEFENSA: 100%` | Escudo Deflector | Torretas de PRs | `MERGE LOCK` |
+| **03** | **THE ISSUE SWARM** | Rastreador con alta densidad de bugs y reportes. | `ENJAMBRE: 100%` | Bombas de Bugs | Ráfagas Erráticas | `CRITICAL BUG` |
+| **04** | **THE DEPENDENCY HYDRA** | Árbol modular con dependencias interconectadas. | `COMPLEJIDAD: 100%` | Cadena Energética | Fragmentación de Nodos | `DEPENDENCY HELL` |
+| **05** | **THE MERGE CONFLICT** | Ramas bifurcadas en conflicto `<<<<<<< HEAD`. | `CONFLICTO: 100%` | División de Ramas | Láser Cruzado en X | `UNRESOLVED` |
+| **06** | **THE CONTRIBUTOR OVERLORD** | Ecosistema colaborativo con gran flota de autores. | `FLOTA: 100%` | Drones de Soporte | Sifón de Experiencia | `OPEN SOURCE ARMY` |
+| **07** | **THE BRANCHLORD** | Múltiples ramas vivas y universos de features. | `RAMIFICACIÓN: 100%` | Disparos Split | Decoys Holográficos | `BRANCH COLLAPSE` |
+| **08** | **THE REBASE PHANTOM** | Código legado reescrito con firma de sigilo. | `SIGILO: 100%` | Dash Cuántico | Rewind de Daño | `FORCE REBASE` |
+| **09** | **THE SECURITY SENTINEL** | Arquitectura enterprise y políticas zero-trust. | `SEGURIDAD: 100%` | Barrera Firewall | Encriptación Aegis | `BREACH DETECTED` |
+| **10** | **THE CODE ABYSS** | Monolito cósmico con complejidad gravitacional. | `SINGULARIDAD: 100%` | Colapso Gravitacional | Distorsión de Física | `SYSTEM LIMIT` |
+
+---
+
+## 🧪 Stack de Mutaciones Genéticas (Genetic Mutations)
+
+El motor evalúa el nivel de amenaza (`threatLevel`) y aplica una **mutación primaria** y una **mutación secundaria** con sinergias de combate:
+
+- **`OVERCLOCKED`:** +35% velocidad balística, +40% cadencia de fuego sostenido y drones en ráfaga rápida. Tempo de audio a 148 BPM.
+- **`RECURSIVE`:** Los proyectiles emiten réplicas retardadas en cascada a 0.8s; submódulos que imitan las coordenadas del jugador.
+- **`CORRUPTED`:** Trayectorias sinusoidales caóticas, minas de error y sintetizador bitcrush desafinado a -140 cents.
+- **`DISTRIBUTED`:** Nodos satélite interconectados con red de daño compartido y fuego divergente.
+- **`SECURED`:** Placas deflectoras rotatorias y pulso electromagnético EMP si el jugador activa sus escudos.
+- **`LEGACY`:** Proyectiles cinéticos pesados con teleport de *History Rewind* que restaura blindaje perdido.
+- **`FORKED`:** Chasis bifurcado simétrico con salvas dobles en abanico cruzado.
+- **`UNSTABLE`:** Arcos de plasma radiante y ondas de choque de daño en área crítica.
+
+---
+
+## 🎵 Motor de Síntesis Reactiva AudioDNA
+
+El audio en `GIT_INVADERS.EXE` se sintetiza en tiempo real utilizando la **Web Audio API** nativa de navegador (cero archivos `.mp3`/`.wav` externos):
+- **BPM Adaptativo:** Modulado entre 96 BPM (código legado) y 148 BPM (proyectos overclockeados).
+- **Escalas Armónicas Dinámicas:** Conmutación entre *D Minor Cyberpunk* (armónica menor) y *Locrian Glitch* (locria alterada con notas tritonales).
+- **Efectos en Tiempo Real:** Nodos biquad filter, moduladores de onda sinusoidal/cuadrada/sierra, reverberación convolutiva y puertas de ruido adaptativas.
+
+---
+
+## ⚡ Modificadores de Combate por Lenguaje (Language Modifiers)
+
+La composición porcentual de lenguajes del repositorio altera la física y mecánica del combate:
+
+| Lenguaje / Ecosistema | Modificador Táctico | Efecto en Batalla |
+| :--- | :--- | :--- |
+| **TypeScript / JavaScript** | `Dynamic Compiler (+15% Fire Rate)` | Mayor cadencia de disparo y proyectiles de alta frecuencia. |
+| **Python** | `Subprocess Drone Escort` | Spawnea drones de soporte orbital que asisten a la nave. |
+| **Rust / C++** | `Zero-Cost Deflector Armor` | +25% de resistencia de casco y deflectores cinéticos reforzados. |
+| **HTML / CSS** | `Defensive Bunker Hardening` | +30% de integridad estructural en búnkeres de contención. |
+| **Go** | `Concurrent Goroutine Swarm` | Invocación de micro-nodos de ataque concurrente coordinado. |
+| **Java / C#** | `Enterprise Object Shield` | Capa adicional de blindaje polimórfico contra daño por plasma. |
+
+---
+
+## 🕹️ Controles de Combate
+
+| Tecla / Control | Acción |
+| :--- | :--- |
+| `A` / `D` o `←` / `→` | Mover la nave lateralmente |
+| `SPACE` | Disparar blaster principal (mantener presionado para ráfaga continua) |
+| `Q` | Activar **`GIT REBASE`** (Ralentización temporal / Dash cinético) |
+| `E` | Activar **`GIT STASH` / `BRANCH SPLIT`** (Intangibilidad / Despliegue de drones) |
+| `SHIFT` | Activar **`GIT PUSH --FORCE`** (Superláser de aniquilación global) |
+| `ESC` o `P` | Pausar / Reanudar la simulación |
+| **Touch Controls** | Controles táctiles virtuales optimizados para pantallas táctiles y móviles |
+
+---
+
+## 🛠️ Stack Tecnológico
 
 ```text
 GIT_INVADERS.EXE
-│
-├── TypeScript
-│   └── logica, entidades, sistemas, estados, datos
-│
-├── Canvas 2D
-│   └── gameplay, naves, enemigos, particulas, proyectiles
-│
-├── SVG / Path2D
-│   └── disenos vectoriales de naves, iconos, HUD
-│
-├── CSS
-│   └── CRT, overlays, terminal, menus, efectos de interfaz
-│
-├── Web Audio API
-│   └── musica y efectos procedurales
-│
-├── GitHub REST API
-│   └── datos reales de repositorios y perfiles
-│
-└── Vite
-    └── build, modulos y desarrollo
+├── Core Logic: TypeScript 5.x (Strict Typing, State Machines, Procedural Math)
+├── Rendering: Canvas 2D Engine + SVG Path2D Vectors (Zero External Images)
+├── Audio: Web Audio API (Multi-Oscillator Subtractive Synthesis & AudioDNA)
+├── Styling & CRT: Vanilla CSS (Scanlines, Phosphor Glow, Aberration Shaders)
+├── Data Integration: GitHub REST API v3 (Octokit Octocat Pipeline)
+└── Bundler: Vite 5.x (HMR, Tree Shaking, ESM Optimized Builds)
 ```
 
 ---
 
-## Arquitectura del Motor (Pipeline Procedural)
+## 📦 Instalación y Ejecución Local
 
-```text
-GitHub Data
-     ↓
-Repository DNA
-     ↓
-Procedural Generation
-     ├── Ships (ShipDNA -> ShipComposer)
-     ├── Enemies (Commits, Armored PRs, Issue Bugs)
-     ├── Waves (Formations & Tech Stack Modifiers)
-     └── Bosses (BossDNA -> BossGenerator)
-     ↓
-Real-Time Game Engine
-     ├── AI Strategies (MovementStrategies)
-     ├── State Machines (BossStateMachine)
-     ├── Collision & Damage
-     ├── Semantic Particles
-     └── Web Audio API
-     ↓
-Canvas 2D + SVG Vector Pipeline
-```
+### Prerrequisitos
+- **Node.js** (v18.0 o superior)
+- **pnpm** (o `npm` / `yarn`)
 
----
-
-## Modulacion de Gameplay por Stack Tecnologico (Language Modifiers)
-
-El motor evalua la composicion de lenguajes del repositorio analizado y altera la fisica y mecanica del combate en tiempo real:
-
-| Stack / Lenguaje | Modificador de Gameplay | Efecto en Batalla |
-| :--- | :--- | :--- |
-| **JavaScript / TypeScript** | `Speed Boost (+15%)` | Mayor cadencia de proyectiles y velocidad de reactores |
-| **Python** | `Support Drone Escort` | Spawnea drones autonomos de apoyo que escoltan la formacion |
-| **C++ / Rust** | `Armor & Kinetic Deflectors` | Hulls reforzados, +1 capa de blindaje en naves y jefes |
-| **HTML / CSS** | `Defensive Bunker Fortification` | +30% de resistencia e integridad en búnkeres defensivos |
-
----
-
-## Sistema de Naves: Ship DNA y Arquetipos Vectoriales
-
-El subsistema `ShipComposer` desacopla la geometria fisica de la nave en 8 capas vectoriales renderizadas a 60 FPS sin imagenes rasterizadas:
-
-1. **Engines Flares:** Gradiente radial con fulgor dinamico y toberas mecanicas.
-2. **Wings & Stabilizers:** Geometria alar con franjas de telemetria y cañones alares.
-3. **Armored Hull Plating:** Casco central con nervadura dorsal y biseles.
-4. **Weapon Hardpoints:** Puntos duros de anclaje de armamento con conductos de energia.
-5. **Cockpit Visor:** Cupula poligonal con pulso de reactor y brillo especular blanco.
-6. **Navigation Strobe Lights:** Luces estroboscopicas de puerto (rojo) y estribor (verde).
-7. **Structural Damage Layer:** Fisuras metalicas y micro-chispas activadas cuando HP < 60%.
-8. **Kinetic Shield Bubble:** Campo de fuerza radial con efecto Fresnel y absorcion de impacto.
-
-### Arquetipos de Naves en el Hangar
-
-1. **CYBER FALCON / COMPILER DELTA:** Caza interceptor balanceado con doble tobera de plasma cian (`#00e5ff`) y alas en flecha moderada.
-2. **PHANTOM VIOLET:** Nave de sigilo con envergadura extendida (1.15x), cañones dobles de antimateria magenta y toberas purpuras (`#c084fc`).
-3. **SOLAR GOLD:** Acorazado pesado de tres toberas de reaccion ambar (`#fbbf24`), cinco paneles blindados y blasters gemelos reforzados.
-4. **EMERALD GLITCH:** Interceptor experimental con alas de barrido agresivo (0.72), estabilizadores de flujo y reactor mint (`#10b981`).
-5. **NEON OVERDRIVE:** Nave de asalto rapido con cuatro puntos duros de anclaje frontal y toberas hiperaceleradas neon (`#ff007f`).
-6. **QUANTUM CITADEL:** Fortaleza orbital pesada con ocho paneles de composite titanio, alas de asedio (1.35x) y deflectores cineticos reforzados (`#6366f1`).
-7. **CUSTOM PROCEDURAL SHIP (Repository DNA):** Cualquier repositorio ingresado en el buscador sintetiza una nave unica modulando `hullType`, `wingType`, `engineCount`, `weaponType`, `armor`, `speed` y `aggression`.
-
----
-
-## Flota Enemiga y Entidades Especiales
-
-1. **Commit Invader:** Sprite pixel-art tradicional de matriz 8x8 con extremidades animadas en dos cuadros (Frame A / Frame B), coloreado por estado y portando el SHA real del commit.
-2. **Armored Pull Request (`ArmoredPR`):** Crucero pesado con tarjeta de telemetria holografica `<< PR #... >>`, indicador `STATUS: OPEN` o `STATUS: MERGED`, barra de escudos segmentada y halo de fuerza deflector.
-3. **Issue Bug Bomber (`IssueBomber`):** Dron biologico/mecanico con alas oscilantes por funcion seno, nucleo rojo de advertencia critica y trayectoria de intercepcion descendente.
-4. **Code Boss / Titan Core:** Titan colosal multicapa con craneo mecanico, tenazas articuladas flotantes, reactor de plasma pulsante, cañones pesados de salva y matriz deflector giratoria.
-5. **Mystery Contributor Drone:** Nave orbital no tripulada con el glifo vectorial de GitHub Octocat, otorgando multiplicadores y recompensas al ser derribada.
-6. **Bunkers de Codigo:** Modulos defensivos con degradacion estructural pixel a pixel.
-
----
-
-## Biblioteca Vectorial SVG (`SvgAssets`)
-
-El motor incluye primitivas vectoriales de precision cero dependencias para su proyeccion tanto en Canvas2D mediante `Path2D` como en el DOM:
-
-- `OCTOCAT_PATH`: Silueta oficial del Octocat de GitHub para naves misteriosas e insignias.
-- `GIT_PULL_REQUEST_PATH`: Glifo de bifurcacion y union de ramas PR.
-- `GIT_COMMIT_PATH`: Nodo individual de historial con lineas de enlace.
-- `GIT_BRANCH_PATH`: Ramificacion de desarrollo concurrente.
-- `ISSUE_BUG_PATH`: Icono de insecto/alerta para proyectiles e invasores Bug.
-
----
-
-## Formaciones y Estrategias de Movimiento
-
-### Formaciones de Oleadas (`WaveGenerator`)
-
-- `GRID`: Formacion clasica Space Invaders (10 columnas x 5 filas) para la primera oleada limpia.
-- `V_CHEVRON / DELTA_WING`: Formacion piramidal con cruceros PR en los flancos y bugs en vanguardia.
-- `DIAMOND`: Rombo concentrico con escolta pesada en el centro.
-- `SWARM / CONSTELLATION`: Racimos orbitales dispersos con movimiento en bandada.
-- `PINCER / FLANKING_HELIX`: Dos columnas blindadas en las bandas con avanzadas rapidas de bugs.
-
-### Estrategias de IA (`MovementStrategies`)
-
-- `FormationMovement`: Movimiento coordenado en rejilla con descenso al borde de pantalla.
-- `ZigZagMovement`: Oscilacion lateral senoidal para unidades agiles.
-- `DiveAttack`: Aceleracion en picada hacia las coordenadas exactas del jugador.
-- `TrackingAttack`: Vector continuo de persecucion angular.
-- `OrbitMovement`: Trayectoria circular concentrica para satelites y drones de escolta.
-- `SwarmMovement`: Fluctuacion parametrica multi-fase.
-
----
-
-## Maquina de Estados del Boss (`BossStateMachine`)
-
-El combate contra el Code Boss responde de forma dinamica al comportamiento del jugador:
-
-- `ENTER`: Incursion hiperespacial descendente hacia la cota de combate.
-- `ATTACK`: Salvas calibradas segun el numero de contribuidores del repositorio.
-- `ENRAGED`: Activado por tiempo o dano rapido (+40% cadencia de fuego).
-- `PHASE_2`: Activado al quebrar el escudo o superar un combo de jugador > 5x con HP < 70%.
-- `CRITICAL`: Brecha de contencion de nucleo (HP < 25%), cortinas densas de plasma y temblor CRT.
-- `DESTROYED`: Secuencia de detonaciones encadenadas y dispersion de particulas de codigo `FATAL`, `ERROR`, `500`, `CORE`.
-
----
-
-## Sistema de Particulas Semanticas
-
-Las explosiones emiten tokens de desarrollo tipados segun el enemigo purgado:
-
-- **Commits:** `commit`, `hash`, `#`, `git`, `0x7F`, `diff`, `HEAD`
-- **Pull Requests:** `PR`, `merge`, `< >`, `{ }`, `branch`, `approve`, `rebase`
-- **Issues:** `BUG`, `404`, `!`, `null`, `void`, `ERR`, `panic`
-- **Bosses:** `FATAL`, `ERROR`, `500`, `CORE`, `BREACH`, `SEGFAULT`, `CRITICAL`
-
----
-
-## Modos de Juego
-
-1. **Profile Mode (`@usuario`):** Escanea la actividad publica de cualquier usuario (ej. `luisrodriguez-rgb`, `torvalds`, `shadcn`) y genera oleadas proporcionales a su historial.
-2. **Repository Mode (`usuario/repositorio`):** Incursion directa en un repositorio especifico (ej. `luisrodriguez-rgb/sketion`, `facebook/react`), culminando en su `CODE BOSS` exclusivo.
-3. **Chaos Mode (`INSTANT`):** Simulacion offline con parametros extremos: `9,999 COMMITS`, `482 PRs`, `731 ISSUES`, cadencia demencial y `CHAOS LEVEL: MAX`.
-4. **Codebase Universe Mode (`CITADEL`):** Enlace con la arquitectura espacial 2.5D de CODEBASE.UNIVERSE.
-
----
-
-## Tienda y Progresion (`GIT_STORE.EXE`)
-
-Acumula XP y creditos en combate para desbloquear mejoras persistentes en `localStorage`:
-
-- **Blaster Overclock (Lvl 1 - 5):** Reduce el tiempo de recarga del disparo principal (+12% por nivel).
-- **Thrust Velocity (Lvl 1 - 5):** Aumenta la velocidad de maniobra de la nave (+15% por nivel).
-- **Quantum Piercing Lasers:** Los blasters perforan el primer invasor impactando objetivos posteriores.
-- **Stash Shield Reserves:** Despliega un escudo de emergencia activo al inicio de cada mision.
-- **Git Rebase Protocol:** Desbloquea `[Q]` para ralentizar enemigos y proyectiles un 60% durante 4 segundos.
-
----
-
-## Controles de Combate
-
-| Tecla / Control | Accion |
-| :--- | :--- |
-| `A` / `D` o `←` / `→` | Mover la nave |
-| `SPACE` | Disparar blaster principal (mantener para rafaga continua) |
-| `Q` | Activar `GIT REBASE` (Slow-Motion 4s) |
-| `E` | Activar `GIT STASH` (Escudo de emergencia) |
-| `SHIFT` | Activar `GIT PUSH --FORCE` (Overdrive Wiping Beam) |
-| `ESC` o `P` | Pausar / Reanudar el proceso |
-| Controles Tactiles | Pad virtual integrado para dispositivos moviles |
-
----
-
-## Instalacion y Ejecucion Local
-
-Requiere **Node.js** y **pnpm**:
-
+### Pasos de Instalación
 ```bash
-# 1. Clonar el repositorio
+# 1. Clonar el repositorio oficial
 git clone https://github.com/luisrodriguez-rgb/GIT_INVADERS.EXE.git
 cd GIT_INVADERS.EXE
 
 # 2. Instalar dependencias
 pnpm install
 
-# 3. Iniciar servidor de desarrollo
+# 3. Iniciar servidor de desarrollo local
 pnpm dev
 
-# 4. Construir bundle de produccion optimizado
+# 4. Compilar bundle de producción optimizado
 pnpm build
 ```
 
 ---
 
-## Licencia
+## 👨‍💻 Autor y Licencia
 
 Desarrollado y mantenido por **Luis Rodriguez** ([@luisrodriguez-rgb](https://github.com/luisrodriguez-rgb)).
 
 <div align="center">
   <a href="https://github.com/luisrodriguez-rgb">
-    <img src="https://github.com/luisrodriguez-rgb.png" width="90" height="90" style="border-radius: 50%; border: 3px solid #2563eb;" alt="Luis Rodriguez" />
+    <img src="https://github.com/luisrodriguez-rgb.png" width="96" height="96" style="border-radius: 50%; border: 3px solid #00e5ff; box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);" alt="Luis Rodriguez" />
     <br/>
     <strong>Luis Rodriguez (luisrodriguez-rgb)</strong>
   </a>
 </div>
 
-MIT (c) 2026 - Disenado como motor interactivo de datos y simulacion arcade procedural.
+<br/>
+
+Distribuido bajo la Licencia **MIT**. Consulta el archivo `LICENSE` para más detalles.
