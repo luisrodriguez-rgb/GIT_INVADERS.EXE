@@ -4,6 +4,9 @@ import {
   RepositoryDNA,
   BossArchetype,
   BossMutation,
+  SecondaryMutation,
+  MutationStack,
+  AudioDNA,
   BossArchetypeData,
   GitHubMetrics,
   BehaviorMatrixEntry,
@@ -11,6 +14,7 @@ import {
   MissionDirective,
   MissionReward,
 } from '../github/Types';
+import { RepositoryAnalyzer } from './RepositoryAnalyzer';
 
 export const ARCHETYPE_DATABASE: Record<BossArchetype, BossArchetypeData> = {
   commit_core: {
@@ -286,6 +290,173 @@ export class BossGenerator {
     return 'FORKED';
   }
 
+  /**
+   * Compatibility matrix for primary and secondary mutations, including synergy names.
+   */
+  public static readonly MUTATION_COMPATIBILITY_MATRIX: Record<
+    BossMutation,
+    {
+      allowed: SecondaryMutation[];
+      synergies: Partial<Record<SecondaryMutation, { title: string; combatEffect: string }>>;
+    }
+  > = {
+    OVERCLOCKED: {
+      allowed: ['ADAPTIVE', 'VOLATILE', 'CRYSTALLIZED'],
+      synergies: {
+        ADAPTIVE: { title: 'HYPER_EVOLUTION', combatEffect: 'Rapid counter-measure recalculation under sustained fire' },
+        VOLATILE: { title: 'THERMAL_OVERLOAD', combatEffect: 'High-frequency explosive laser bursts' },
+      },
+    },
+    RECURSIVE: {
+      allowed: ['CRYSTALLIZED', 'ADAPTIVE', 'STEALTH'],
+      synergies: {
+        CRYSTALLIZED: { title: 'FRACTAL_DIAMOND', combatEffect: 'Geometric fractal armor matrix deflecting kinetic shots' },
+      },
+    },
+    CORRUPTED: {
+      allowed: ['VOLATILE', 'ADAPTIVE', 'STEALTH'],
+      synergies: {
+        VOLATILE: { title: 'CHAOS_PRIME', combatEffect: 'Unpredictable screen-wide glitch detonations' },
+      },
+    },
+    FORKED: {
+      allowed: ['ADAPTIVE', 'STEALTH', 'REGENERATIVE'],
+      synergies: {
+        ADAPTIVE: { title: 'SPLIT_BRAIN_AI', combatEffect: 'Dual-phase hulls learn flanking player trajectories' },
+      },
+    },
+    UNSTABLE: {
+      allowed: ['VOLATILE', 'REGENERATIVE', 'CRYSTALLIZED'],
+      synergies: {
+        VOLATILE: { title: 'CRITICAL_MASS', combatEffect: 'Exponential shockwave expansion on hull breach' },
+      },
+    },
+    SECURED: {
+      allowed: ['REGENERATIVE', 'CRYSTALLIZED', 'VOLATILE'],
+      synergies: {
+        VOLATILE: { title: 'EMP_BASTION', combatEffect: 'Deflective barrier detonates EMP wave when player uses shield' },
+        REGENERATIVE: { title: 'FORTIFIED_AEGIS', combatEffect: 'Continuous sub-shield layer regeneration' },
+      },
+    },
+    LEGACY: {
+      allowed: ['STEALTH', 'REGENERATIVE', 'CRYSTALLIZED'],
+      synergies: {
+        REGENERATIVE: { title: 'ANCIENT_AEGIS', combatEffect: 'Code history rollback restores lost armor structure' },
+      },
+    },
+    DISTRIBUTED: {
+      allowed: ['STEALTH', 'ADAPTIVE', 'REGENERATIVE'],
+      synergies: {
+        STEALTH: { title: 'PHANTOM_SWARM', combatEffect: 'Satellite node fleet phase-shifts into cloaked flanking orbits' },
+      },
+    },
+  };
+
+  /**
+   * Derives secondary mutation if threat index exceeds operational threshold (>= 65).
+   */
+  public static deriveSecondaryMutation(
+    dna: { commits: number; pullRequests: number; issues: number; contributors: number; threatLevel?: number; languages?: Array<{ name: string }> },
+    primary: BossMutation,
+    threatLevel: number = 50
+  ): SecondaryMutation | undefined {
+    const threat = dna.threatLevel ?? threatLevel;
+    if (threat < 65) return undefined;
+
+    const compat = this.MUTATION_COMPATIBILITY_MATRIX[primary];
+    if (!compat) return undefined;
+
+    // Evaluate strongest secondary mutation candidates based on repo DNA
+    if (dna.issues > 25 && compat.allowed.includes('VOLATILE')) return 'VOLATILE';
+    if (dna.pullRequests > 25 && compat.allowed.includes('REGENERATIVE')) return 'REGENERATIVE';
+    if ((dna.languages?.length || 1) >= 3 && compat.allowed.includes('ADAPTIVE')) return 'ADAPTIVE';
+    if (dna.commits > 1800 && compat.allowed.includes('CRYSTALLIZED')) return 'CRYSTALLIZED';
+    if (compat.allowed.includes('STEALTH')) return 'STEALTH';
+
+    return compat.allowed[0];
+  }
+
+  /**
+   * Builds the complete MutationStack.
+   */
+  public static deriveMutationStack(
+    dna: RepositoryDNA | { name: string; commits: number; pullRequests: number; issues: number; contributors: number; threatLevel?: number; languages: Array<{ name: string }> },
+    primary: BossMutation,
+    threatLevel: number,
+    langName: string,
+    archetypeTitle: string
+  ): MutationStack {
+    const secondary = this.deriveSecondaryMutation(dna, primary, threatLevel);
+    const langMod = `${langName.toUpperCase()} HEAVY`;
+
+    let synergyTitle: string | undefined;
+    if (secondary) {
+      const compat = this.MUTATION_COMPATIBILITY_MATRIX[primary];
+      synergyTitle = compat?.synergies[secondary]?.title;
+    }
+
+    const secPart = secondary ? ` :: ${secondary}${synergyTitle ? ` [${synergyTitle}]` : ''}` : '';
+    const compositeTitle = `${archetypeTitle} // ${primary}${secPart} // ${langMod}`;
+
+    return {
+      primary,
+      secondary,
+      languageModifier: langMod,
+      synergyTitle,
+      compositeTitle,
+    };
+  }
+
+  /**
+   * Synthesizes dynamic AudioDNA from mutation stack and repository metrics.
+   */
+  public static deriveAudioDNA(
+    stack: MutationStack,
+    fingerprint: { activity: number; instability: number; complexity: number; legacy: number }
+  ): AudioDNA {
+    let bpm = 126;
+    let detune = 0;
+    let distortion = false;
+    let glitchIntensity = 0;
+    let density = Math.min(100, Math.round(fingerprint.activity * 0.7 + fingerprint.complexity * 0.3));
+    let rhythmComplexity = Math.min(100, Math.round(fingerprint.complexity * 0.8 + 20));
+
+    if (stack.primary === 'OVERCLOCKED') {
+      bpm = 148;
+      rhythmComplexity += 20;
+    } else if (stack.primary === 'LEGACY') {
+      bpm = 96;
+      density = Math.round(density * 0.8);
+    } else if (stack.primary === 'SECURED') {
+      bpm = 122;
+    } else if (stack.primary === 'CORRUPTED' || stack.primary === 'UNSTABLE') {
+      bpm = 138;
+      detune = stack.primary === 'CORRUPTED' ? -140 : -60;
+      distortion = true;
+      glitchIntensity = 75;
+    }
+
+    if (stack.secondary === 'VOLATILE') {
+      distortion = true;
+      glitchIntensity = Math.max(glitchIntensity, 60);
+    } else if (stack.secondary === 'STEALTH') {
+      detune -= 30;
+      density = Math.round(density * 0.75);
+    }
+
+    return {
+      bpm,
+      baseFrequency: stack.primary === 'LEGACY' ? 65.41 : 73.42,
+      detune,
+      distortion,
+      density,
+      rhythmComplexity: Math.min(100, rhythmComplexity),
+      glitchIntensity,
+      scaleType: stack.primary === 'CORRUPTED' ? 'locrian_glitch' : 'd_minor_cyber',
+      aggression: Math.min(100, fingerprint.instability + 15),
+    };
+  }
+
   public static readonly MUTATION_BEHAVIOR_MATRIX: Record<BossMutation, BehaviorMatrixEntry> = {
     OVERCLOCKED: {
       visual: 'Núcleo de reactor hiperacelerado con conductos de ventilación incandescente',
@@ -433,15 +604,24 @@ export class BossGenerator {
     const behaviorMatrix = this.MUTATION_BEHAVIOR_MATRIX[mutation];
 
     const primaryLang = dna.languages[0] || { name: 'TypeScript', color: '#38bdf8', pct: 100 };
-    const langTag = `${primaryLang.name.toUpperCase()} HEAVY`;
-    const modifierTitle = `${archetypeData.title} // ${mutation} // ${langTag}`;
+    const mutationStack = this.deriveMutationStack(
+      dna,
+      mutation,
+      dna.threatLevel,
+      primaryLang.name,
+      archetypeData.title
+    );
+    const modifierTitle = mutationStack.compositeTitle;
 
     const seed = this.generateSeed(dna);
 
-    // Audio parameters calibrated to mutation
-    const audioBpm = mutation === 'OVERCLOCKED' ? 148 : mutation === 'LEGACY' ? 96 : mutation === 'SECURED' ? 122 : 126;
-    const audioDetuneCents = mutation === 'CORRUPTED' ? -140 : 0;
-    const audioDistortion = mutation === 'CORRUPTED' || mutation === 'UNSTABLE';
+    // Compute mathematical repository fingerprint and causal why-reasons
+    const fingerprint = RepositoryAnalyzer.computeFingerprint(dna);
+    const whyReasons = RepositoryAnalyzer.generateWhyReasons(dna, archetypeData, mutationStack);
+    fingerprint.whyReasons = whyReasons;
+
+    // Audio DNA synthesized from mutation stack and fingerprint
+    const audioDna = this.deriveAudioDNA(mutationStack, fingerprint);
 
     // Boss Genome compilation
     const genome: BossGenome = {
@@ -452,9 +632,10 @@ export class BossGenerator {
       shield: `${archetypeData.shieldRating}% DENSIDAD // ${Math.max(1, Math.round(archetypeData.shieldRating / 25))} CAPAS`,
       spawn: `${archetypeData.specialStatName} // CADENCIA ${archetypeData.specialStatValue}%`,
       phases: 4,
-      audioBpm,
-      audioDetuneCents,
-      audioDistortion,
+      audioBpm: audioDna.bpm,
+      audioDetuneCents: audioDna.detune,
+      audioDistortion: audioDna.distortion,
+      audioDna,
       primaryColor: primaryLang.color || '#00e5ff',
       secondaryColor: '#ff0055',
       glowColor: archetypeData.specialStatName === 'DEFENSA' ? '#00e5ff' : archetypeData.specialStatName === 'ENJAMBRE' ? '#ef4444' : '#c084fc',
@@ -521,11 +702,16 @@ export class BossGenerator {
       languageColor: primaryLang.color || '#00e5ff',
       archetype,
       mutation,
+      secondaryMutation: mutationStack.secondary,
+      mutationStack,
       modifierTitle,
       archetypeData,
       genome,
+      audioDna,
       directives,
       rewards,
+      fingerprint,
+      whyReasons,
       chassisType: archetype,
       threatIndex: dna.threatLevel,
       maxHp: baseHp,

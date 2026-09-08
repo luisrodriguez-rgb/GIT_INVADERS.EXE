@@ -135,6 +135,11 @@ export class Game {
       // Audio engine auto unlock
       AudioEngine.getInstance().init();
 
+      // Prevent browser default window scrolling on game keys
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Tab'].includes(e.code)) {
+        e.preventDefault();
+      }
+
       // Pause toggle
       if (e.code === 'Escape' || e.code === 'KeyP') {
         if (this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') {
@@ -148,7 +153,6 @@ export class Game {
 
       if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
         if (e.code === 'Space') {
-          e.preventDefault();
           this.fireBlaster();
         } else if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
           this.triggerOverdrive();
@@ -581,7 +585,11 @@ export class Game {
         }, ring * 220);
       }
 
-      Store.getInstance().addXp(this.state.xp);
+      const store = Store.getInstance();
+      store.addXp(this.state.xp);
+      store.recordBossDefeated(bossBlueprint);
+      const repoId = this.gameData?.repoName?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'sketion';
+      store.grantRepositoryArtifact(repoId, this.gameData?.repoName || 'sketion', bossBlueprint.language);
 
       setTimeout(() => {
         this.modals.showVictory(

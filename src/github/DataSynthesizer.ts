@@ -679,6 +679,11 @@ export class DataSynthesizer {
       audio: {
         bpm: Math.round(105 + threatRatio * 25),
         baseFrequency: 120 + threatRatio * 40,
+        detune: 0,
+        distortion: false,
+        density: Math.round(50 + threatRatio * 40),
+        rhythmComplexity: Math.round(40 + threatRatio * 45),
+        glitchIntensity: threatRatio >= 0.8 ? 50 : 0,
         aggression: repo.threatLevel,
         scaleType: repo.primaryLanguage === 'Python' ? 'dorian' : 'minor_pentatonic',
       },

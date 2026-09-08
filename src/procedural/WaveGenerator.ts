@@ -1,4 +1,4 @@
-import { FormationType, NormalizedGameData } from '../github/Types';
+import { FormationType, NormalizedGameData, WaveDNA, RepositoryDNA } from '../github/Types';
 
 export interface EnemySpawnPoint {
   x: number;
@@ -287,5 +287,36 @@ export class WaveGenerator {
     }
 
     return points;
+  }
+
+  /**
+   * Synthesizes procedural WaveDNA directly from Repository DNA.
+   */
+  public static deriveWaveDNA(dna: RepositoryDNA): WaveDNA {
+    const formations: FormationType[] = ['grid', 'v_chevron', 'swarm'];
+    if (dna.pullRequests > 30) formations[1] = 'diamond';
+    if (dna.threatLevel >= 80) formations[2] = 'pincer';
+
+    const speedBase = Math.round(50 + (dna.threatLevel / 100) * 45);
+    const dropSpeed = Math.round(18 + (dna.threatLevel / 100) * 16);
+    const prRatio = Number(Math.min(0.35, Math.max(0.08, dna.pullRequests / 150)).toFixed(2));
+    const issueRatio = Number(Math.min(0.30, Math.max(0.05, dna.issues / 120)).toFixed(2));
+    const conflictRatio = dna.threatLevel >= 70 ? 0.15 : 0.05;
+    const dependencyRatio = Math.min(0.25, (dna.languages.length * 0.04));
+
+    const rationale = `WAVES CALIBRATED: ${dna.commits} COMMITS (SPEED ${speedBase}PX/S) // ${dna.pullRequests} PRS (ARMOR ${(prRatio * 100).toFixed(0)}%) // ${dna.issues} ISSUES (BOMBERS ${(issueRatio * 100).toFixed(0)}%)`;
+
+    return {
+      totalWaves: 3,
+      formations,
+      speedBase,
+      dropSpeed,
+      prRatio,
+      issueRatio,
+      conflictRatio,
+      dependencyRatio,
+      formationName: formations[1].toUpperCase(),
+      rationale,
+    };
   }
 }

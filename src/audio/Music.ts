@@ -1,5 +1,5 @@
 import { AudioEngine } from './AudioEngine';
-import { BossGenome } from '../github/Types';
+import { BossGenome, AudioDNA } from '../github/Types';
 
 export class Music {
   private static isPlaying: boolean = false;
@@ -9,6 +9,7 @@ export class Music {
   private static detuneCents: number = 0;
   private static hasDistortion: boolean = false;
   private static isDistributed: boolean = false;
+  private static glitchIntensity: number = 0;
 
   // 16-step bassline pattern in D Minor (frequencies in Hz)
   // D2 (73.4), D2, F2 (87.3), D2, G2 (98.0), D2, A2 (110.0), C3 (130.8)
@@ -26,9 +27,29 @@ export class Music {
   }
 
   /**
-   * Adapts the procedural audio synthesizer in real-time according to Boss DNA.
+   * Adapts the procedural audio synthesizer in real-time according to formal AudioDNA.
+   */
+  public static applyAudioDNA(dna: AudioDNA): void {
+    this.bpm = dna.bpm || 128;
+    this.detuneCents = dna.detune || 0;
+    this.hasDistortion = !!dna.distortion;
+    this.glitchIntensity = dna.glitchIntensity || 0;
+    this.isDistributed = dna.rhythmComplexity > 70;
+
+    if (this.isPlaying) {
+      this.stop();
+      this.start();
+    }
+  }
+
+  /**
+   * Adapts the procedural audio synthesizer in real-time according to Boss DNA (backward compatible).
    */
   public static applyBossGenome(genome: BossGenome): void {
+    if (genome.audioDna) {
+      this.applyAudioDNA(genome.audioDna);
+      return;
+    }
     this.bpm = genome.audioBpm || 128;
     this.detuneCents = genome.audioDetuneCents || 0;
     this.hasDistortion = !!genome.audioDistortion;
@@ -45,6 +66,7 @@ export class Music {
     this.detuneCents = 0;
     this.hasDistortion = false;
     this.isDistributed = false;
+    this.glitchIntensity = 0;
     if (this.isPlaying) {
       this.stop();
       this.start();

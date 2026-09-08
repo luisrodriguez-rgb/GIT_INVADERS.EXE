@@ -77,6 +77,73 @@ export type BossMutation =
   | 'LEGACY'
   | 'DISTRIBUTED';
 
+export type SecondaryMutation =
+  | 'STEALTH'
+  | 'REGENERATIVE'
+  | 'ADAPTIVE'
+  | 'VOLATILE'
+  | 'CRYSTALLIZED';
+
+export interface MutationStack {
+  primary: BossMutation;
+  secondary?: SecondaryMutation;
+  languageModifier: string;
+  synergyTitle?: string;
+  compositeTitle: string;
+}
+
+export interface WhyReason {
+  metric: string;
+  value: string;
+  result: string;
+  icon?: string;
+}
+
+export interface RepositoryFingerprint {
+  activity: number;       // 0 - 100
+  collaboration: number;  // 0 - 100
+  complexity: number;     // 0 - 100
+  instability: number;    // 0 - 100
+  legacy: number;         // 0 - 100
+  diversity: number;      // 0 - 100
+  summary: string;
+  whyReasons: WhyReason[];
+}
+
+export interface BossCodexEntry {
+  archetype: BossArchetype;
+  title: string;
+  codeNumber: string;
+  seed: string;
+  mutation: BossMutation;
+  secondaryMutation?: SecondaryMutation;
+  language: string;
+  repoName: string;
+  defeatedAt: number;
+  threatLevel: number;
+}
+
+export interface RepositoryArtifact {
+  repoId: string;
+  name: string;
+  bonusXpPct: number;
+  bonusPerk: string;
+  unlockedAt: number;
+  flavorText: string;
+}
+
+export interface CombatMemory {
+  attacksUsed: number;
+  playerPositions: number[];
+  playerPositionBias: 'left' | 'center' | 'right';
+  shieldUsageCount: number;
+  damageTakenByPlayer: number;
+  successfulCounters: number;
+  learningPhase: 'observing' | 'pattern_detected' | 'counter_preparing' | 'counter_active';
+  phaseTimer: number;
+  telemetryLines: string[];
+}
+
 export interface BossAbility {
   id: string;
   name: string;
@@ -108,6 +175,18 @@ export interface BehaviorMatrixEntry {
   audio: string;
 }
 
+export interface AudioDNA {
+  bpm: number;
+  baseFrequency: number;
+  detune: number;
+  distortion: boolean;
+  density: number;
+  rhythmComplexity: number;
+  glitchIntensity: number;
+  scaleType?: string;
+  aggression?: number;
+}
+
 export interface BossGenome {
   seed: string; // Deterministic 6-char hex string (e.g. 8F4A91)
   hull: string;
@@ -119,6 +198,7 @@ export interface BossGenome {
   audioBpm: number;
   audioDetuneCents: number;
   audioDistortion: boolean;
+  audioDna?: AudioDNA;
   primaryColor: string;
   secondaryColor: string;
   glowColor: string;
@@ -157,11 +237,16 @@ export interface BossBlueprint {
   languageColor: string;
   archetype: BossArchetype;
   mutation?: BossMutation;
+  secondaryMutation?: SecondaryMutation;
+  mutationStack?: MutationStack;
   modifierTitle?: string;
   archetypeData: BossArchetypeData;
   genome: BossGenome;
+  audioDna?: AudioDNA;
   directives: MissionDirective[];
   rewards: MissionReward[];
+  fingerprint?: RepositoryFingerprint;
+  whyReasons?: WhyReason[];
   chassisType?: 'titan_skull' | 'dreadnought_carrier' | 'octo_destroyer' | 'quantum_citadel' | 'cyber_sentinel' | BossArchetype;
   threatIndex: number; // 0 - 100
   maxHp: number;
@@ -241,13 +326,8 @@ export interface WaveDNA {
   issueRatio: number;
   conflictRatio: number;
   dependencyRatio: number;
-}
-
-export interface AudioDNA {
-  bpm: number;
-  baseFrequency: number;
-  aggression: number;
-  scaleType: string;
+  formationName?: string;
+  rationale?: string;
 }
 
 export interface GameDNA {

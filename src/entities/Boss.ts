@@ -1,6 +1,6 @@
 import { Entity } from './Entity';
 import { Projectile } from './Projectile';
-import { BossBlueprint } from '../github/Types';
+import { BossBlueprint, CombatMemory } from '../github/Types';
 import { Sprites } from '../rendering/Sprites';
 import { SFX } from '../audio/SFX';
 import { BossStateMachine } from '../systems/BossStateMachine';
@@ -15,7 +15,19 @@ export class Boss extends Entity {
   public maxShieldHp: number = 0;
   public stateMachine: BossStateMachine;
 
-  // Adaptive Memory & Player Behavioral Telemetry
+  // Formal CombatMemory & Neural Learning State
+  public combatMemory: CombatMemory = {
+    attacksUsed: 0,
+    playerPositions: [],
+    playerPositionBias: 'center',
+    shieldUsageCount: 0,
+    damageTakenByPlayer: 0,
+    successfulCounters: 0,
+    learningPhase: 'observing',
+    phaseTimer: 0,
+    telemetryLines: ['[AI] NEURAL OBSERVER ACTIVE // SAMPLING PLAYER BIAS...'],
+  };
+
   public playerHabits = {
     dodgeLeftDuration: 0,
     dodgeRightDuration: 0,
@@ -23,6 +35,7 @@ export class Boss extends Entity {
     shieldActivationCount: 0,
     wasShieldActiveLastFrame: false,
   };
+
   public activeAdaptiveNotice: string | null = null;
   public noticeTimer: number = 0;
   private adaptiveCooldown: number = 4.0;
@@ -63,11 +76,17 @@ export class Boss extends Entity {
   }
 
   /**
-   * Tracks player behavior in real-time to train adaptive counter-measures.
+   * Tracks player behavior in real-time with formalized learning latencies.
    */
   public trackPlayer(playerX: number, playerShieldActive: boolean, arenaWidth: number, dt: number): void {
     const leftBound = arenaWidth * 0.35;
     const rightBound = arenaWidth * 0.65;
+
+    // Sample player position history (clamped to 30 samples)
+    this.combatMemory.playerPositions.push(Math.round((playerX / arenaWidth) * 100));
+    if (this.combatMemory.playerPositions.length > 30) {
+      this.combatMemory.playerPositions.shift();
+    }
 
     if (playerX < leftBound) {
       this.playerHabits.dodgeLeftDuration += dt;
@@ -81,12 +100,47 @@ export class Boss extends Entity {
 
     if (playerShieldActive && !this.playerHabits.wasShieldActiveLastFrame) {
       this.playerHabits.shieldActivationCount++;
+      this.combatMemory.shieldUsageCount++;
     }
     this.playerHabits.wasShieldActiveLastFrame = playerShieldActive;
 
+    // Advance learning phase timers
+    this.combatMemory.phaseTimer += dt;
+
+    if (this.combatMemory.learningPhase === 'observing') {
+      if (this.combatMemory.phaseTimer >= 5.0) {
+        // Calculate bias
+        const totalBias = this.playerHabits.dodgeLeftDuration + this.playerHabits.dodgeRightDuration + this.playerHabits.centerDuration;
+        if (this.playerHabits.dodgeLeftDuration > this.playerHabits.dodgeRightDuration * 1.3 && this.playerHabits.dodgeLeftDuration > 2.0) {
+          this.combatMemory.playerPositionBias = 'left';
+        } else if (this.playerHabits.dodgeRightDuration > this.playerHabits.dodgeLeftDuration * 1.3 && this.playerHabits.dodgeRightDuration > 2.0) {
+          this.combatMemory.playerPositionBias = 'right';
+        } else {
+          this.combatMemory.playerPositionBias = 'center';
+        }
+
+        this.combatMemory.learningPhase = 'pattern_detected';
+        this.combatMemory.phaseTimer = 0;
+        this.activeAdaptiveNotice = `[AI] PATTERN DETECTED // ${this.combatMemory.playerPositionBias.toUpperCase()} BIAS`;
+        this.noticeTimer = 3.0;
+      }
+    } else if (this.combatMemory.learningPhase === 'pattern_detected') {
+      if (this.combatMemory.phaseTimer >= 2.5) {
+        this.combatMemory.learningPhase = 'counter_preparing';
+        this.combatMemory.phaseTimer = 0;
+        this.activeAdaptiveNotice = `[AI] PREPARING COUNTER-MEASURE // ${this.combatMemory.playerPositionBias.toUpperCase()} INTERCEPT`;
+        this.noticeTimer = 2.0;
+      }
+    } else if (this.combatMemory.learningPhase === 'counter_preparing') {
+      if (this.combatMemory.phaseTimer >= 1.5) {
+        this.combatMemory.learningPhase = 'counter_active';
+        this.combatMemory.phaseTimer = 0;
+      }
+    }
+
     if (this.noticeTimer > 0) {
       this.noticeTimer -= dt;
-      if (this.noticeTimer <= 0) {
+      if (this.noticeTimer <= 0 && this.combatMemory.learningPhase === 'observing') {
         this.activeAdaptiveNotice = null;
       }
     }
@@ -182,34 +236,43 @@ export class Boss extends Entity {
     const langColor = this.blueprint.languageColor || '#00e5ff';
 
     // ── ADAPTIVE MEMORY TACTICAL COUNTER-ATTACK ──────────────────────────
-    if (this.adaptiveCooldown <= 0) {
-      if (this.playerHabits.dodgeLeftDuration > 3.0) {
+    if (this.combatMemory.learningPhase === 'counter_active' || this.adaptiveCooldown <= 0) {
+      if (this.combatMemory.playerPositionBias === 'left' || this.playerHabits.dodgeLeftDuration > 3.0) {
         // Player camps on left flank: Execute Left Flank Sweep
-        this.activeAdaptiveNotice = 'ADAPTIVE AI // LEFT FLANK BIAS DETECTED // SWEEP ENGAGED';
+        this.activeAdaptiveNotice = 'ADAPTIVE AI // LEFT FLANK INTERCEPT SALVO';
         this.noticeTimer = 3.0;
-        this.adaptiveCooldown = 6.5;
+        this.adaptiveCooldown = 7.0;
+        this.combatMemory.successfulCounters++;
+        this.combatMemory.learningPhase = 'observing';
+        this.combatMemory.phaseTimer = 0;
         this.playerHabits.dodgeLeftDuration = 0;
         for (let i = 0; i < 3; i++) {
           bullets.push(
             new Projectile(this.centerX, this.y + this.height, -180 - i * 40, 260, 'boss', 'diagonal_laser', 30, '#ff0055')
           );
         }
-      } else if (this.playerHabits.dodgeRightDuration > 3.0) {
+      } else if (this.combatMemory.playerPositionBias === 'right' || this.playerHabits.dodgeRightDuration > 3.0) {
         // Player camps on right flank: Execute Right Flank Sweep
-        this.activeAdaptiveNotice = 'ADAPTIVE AI // RIGHT FLANK BIAS DETECTED // SWEEP ENGAGED';
+        this.activeAdaptiveNotice = 'ADAPTIVE AI // RIGHT FLANK INTERCEPT SALVO';
         this.noticeTimer = 3.0;
-        this.adaptiveCooldown = 6.5;
+        this.adaptiveCooldown = 7.0;
+        this.combatMemory.successfulCounters++;
+        this.combatMemory.learningPhase = 'observing';
+        this.combatMemory.phaseTimer = 0;
         this.playerHabits.dodgeRightDuration = 0;
         for (let i = 0; i < 3; i++) {
           bullets.push(
             new Projectile(this.centerX, this.y + this.height, 180 + i * 40, 260, 'boss', 'diagonal_laser', 30, '#ff0055')
           );
         }
-      } else if (this.playerHabits.centerDuration > 4.0) {
+      } else if (this.playerHabits.centerDuration > 3.5) {
         // Player stays center: Deploy high-velocity Penetrating Orbital Lance
-        this.activeAdaptiveNotice = 'ADAPTIVE AI // CENTER CAMPING DETECTED // ORBITAL LANCE ENGAGED';
+        this.activeAdaptiveNotice = 'ADAPTIVE AI // CENTER CAMPING PENETRATION LANCE';
         this.noticeTimer = 3.0;
-        this.adaptiveCooldown = 6.5;
+        this.adaptiveCooldown = 7.0;
+        this.combatMemory.successfulCounters++;
+        this.combatMemory.learningPhase = 'observing';
+        this.combatMemory.phaseTimer = 0;
         this.playerHabits.centerDuration = 0;
         bullets.push(
           new Projectile(this.centerX - 10, this.y + this.height, 0, 380, 'boss', 'plasma', 45, '#ffd600'),
@@ -217,16 +280,16 @@ export class Boss extends Entity {
         );
       } else if (this.playerHabits.shieldActivationCount >= 2) {
         // Player abuses shield: EMP Disruption Pulse
-        this.activeAdaptiveNotice = 'ADAPTIVE AI // SHIELD USAGE EXCEEDED // EMP PULSE ENGAGED';
+        this.activeAdaptiveNotice = 'ADAPTIVE AI // SHIELD DISRUPTION EMP PULSE';
         this.noticeTimer = 3.0;
-        this.adaptiveCooldown = 7.5;
+        this.adaptiveCooldown = 7.0;
+        this.combatMemory.successfulCounters++;
+        this.combatMemory.learningPhase = 'observing';
+        this.combatMemory.phaseTimer = 0;
         this.playerHabits.shieldActivationCount = 0;
-        for (let r = 0; r < 5; r++) {
-          const angle = -0.5 + (r / 4) * 1.0;
-          bullets.push(
-            new Projectile(this.centerX, this.y + this.height, Math.sin(angle) * 200, 240, 'boss', 'plasma', 25, '#38bdf8')
-          );
-        }
+        bullets.push(
+          new Projectile(this.centerX, this.y + this.height, 0, 190, 'boss', 'plasma', 25, '#c084fc')
+        );
       }
     }
 
