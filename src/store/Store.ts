@@ -21,6 +21,8 @@ export interface ShipModel {
   classTag: string;
   hullColor: string;
   glowColor: string;
+  secondaryColor?: string;
+  paletteDescription?: string;
   cost: number;
   unlocked: boolean;
   stats: ShipStats;
@@ -52,14 +54,14 @@ export class Store {
   private static STORAGE_KEY = 'git_invaders_player_profile';
 
   public profile: PlayerProfile = {
-    totalXp: 12600, // Matching Reference UI (12,600 EXP)
-    availableXp: 2480, // Matching Reference UI (2,480 STARS)
-    level: 6,
-    rankName: 'Architect',
-    fireRateLevel: 3,
-    thrusterLevel: 4,
+    totalXp: 0,
+    availableXp: 0,
+    level: 1,
+    rankName: 'JUNIOR_DEV',
+    fireRateLevel: 1,
+    thrusterLevel: 1,
     quantumPiercing: false,
-    startingShield: true,
+    startingShield: false,
     rebaseSlowMoUnlocked: false,
     activeSkinId: 'cyber_falcon',
     unlockedSkins: [
@@ -71,6 +73,8 @@ export class Store {
       'quantum_wing',
       'quantum_citadel',
       'codebreaker_x',
+      'hyper_void',
+      'solar_flare',
     ],
     bossCodex: [],
     artifacts: [],
@@ -99,8 +103,8 @@ export class Store {
       id: 'phantom_violet',
       name: 'PHANTOM VIOLET',
       classTag: 'Sigilo / Velocidad',
-      hullColor: '#c084fc',
-      glowColor: '#a855f7',
+      hullColor: '#8b5cf6',
+      glowColor: '#c084fc',
       cost: 400,
       unlocked: true,
       stats: { armor: 40, speed: 100, fireRate: 70, shield: 30 }, // 4/10, 10/10, 7/10, 3/10
@@ -111,14 +115,14 @@ export class Store {
         description: 'Fase de intangibilidad temporal e inmunidad total a proyectiles.',
         mechanic: 'Intangibilidad de fase 3.5s',
       },
-      description: 'Silueta delgada y aerodinámica con baja firma térmica para infiltración y evasivas críticas.',
+      description: 'Silueta de flecha invertida con baja firma térmica para infiltración y evasivas críticas.',
     },
     {
       id: 'solar_gold',
       name: 'SOLAR GOLD',
       classTag: 'Acorazada / Asedio Pesado',
-      hullColor: '#fbbf24',
-      glowColor: '#f59e0b',
+      hullColor: '#f59e0b',
+      glowColor: '#fbbf24',
       cost: 600,
       unlocked: true,
       stats: { armor: 100, speed: 30, fireRate: 40, shield: 80 }, // 10/10, 3/10, 4/10, 8/10
@@ -129,14 +133,14 @@ export class Store {
         description: 'Absorbe impactos frontales y desata una onda de choque cinética demoledora.',
         mechanic: 'Onda de choque por absorción',
       },
-      description: 'Armadura pesada de aleación solar reforzada y triple tobera de empuje masivo.',
+      description: 'Armadura pesada de aleación solar reforzada con ariete frontal y triple tobera de empuje.',
     },
     {
       id: 'emerald_glitch',
       name: 'EMERALD GLITCH',
       classTag: 'Experimental / Clones',
       hullColor: '#10b981',
-      glowColor: '#34d399',
+      glowColor: '#a3e635',
       cost: 800,
       unlocked: true,
       stats: { armor: 50, speed: 80, fireRate: 60, shield: 50 }, // 5/10, 8/10, 6/10, 5/10
@@ -147,14 +151,14 @@ export class Store {
         description: 'Despliega 2 drones tácticos que replican el fuego de armas de la nave.',
         mechanic: 'Drones de apoyo dual 5s',
       },
-      description: 'Fuselaje trifurcado con tres estelas vectoriales independientes y núcleos de plasma esmeralda.',
+      description: 'Fuselaje fractal asimétrico con tres estelas vectoriales y plasma verde radiactivo.',
     },
     {
       id: 'neon_overdrive',
       name: 'NEON OVERDRIVE',
       classTag: 'Asalto Rápido / Hiperdash',
       hullColor: '#ff0055',
-      glowColor: '#ff3366',
+      glowColor: '#ff7700',
       cost: 1000,
       unlocked: true,
       stats: { armor: 40, speed: 90, fireRate: 90, shield: 20 }, // 4/10, 9/10, 9/10, 2/10
@@ -165,13 +169,13 @@ export class Store {
         description: 'Carga de velocidad hipercinética con embate frontal penetrante.',
         mechanic: 'Embate penetrante hiperveloz',
       },
-      description: 'Nariz afilada de asalto con tobera de sobreaceleración inmediata para ofensivas implacables.',
+      description: 'Cohete dragster con tobera colosal de sobreaceleración inmediata para embates frontales.',
     },
     {
       id: 'quantum_wing',
       name: 'QUANTUM WING',
       classTag: 'Perforación / Plasma',
-      hullColor: '#22d3ee',
+      hullColor: '#06b6d4',
       glowColor: '#6366f1',
       cost: 1100,
       unlocked: true,
@@ -183,14 +187,14 @@ export class Store {
         description: 'Dispara rayos de plasma cuántico perforantes continuos.',
         mechanic: 'Láser perforante continuo',
       },
-      description: 'Alas de geometría variable con emisores cuánticos directos y proyectiles de penetración.',
+      description: 'Trimarán cuántico con alas flotantes desconectadas por levitación magnética.',
     },
     {
       id: 'quantum_citadel',
       name: 'QUANTUM CITADEL',
       classTag: 'Defensa / Drones',
-      hullColor: '#38bdf8',
-      glowColor: '#818cf8',
+      hullColor: '#2563eb',
+      glowColor: '#e2e8f0',
       cost: 1200,
       unlocked: true,
       stats: { armor: 70, speed: 60, fireRate: 70, shield: 90 }, // 7/10, 6/10, 7/10, 9/10
@@ -201,14 +205,14 @@ export class Store {
         description: 'Genera un enjambre de 8 micro-drones de intercepción orbital activa.',
         mechanic: '8 drones orbitales defensivos',
       },
-      description: 'Núcleo de contención pesada con 8 nodos orbitales que neutralizan fuego hostil.',
+      description: 'Plato toroidal acorazado con 4 estabilizadores orbitales en rotación y domo de mando.',
     },
     {
       id: 'codebreaker_x',
       name: 'CODEBREAKER // X',
       classTag: 'Dreadnought / Cañón Colosal',
-      hullColor: '#a855f7',
-      glowColor: '#e879f9',
+      hullColor: '#ec4899',
+      glowColor: '#7c3aed',
       cost: 1500,
       unlocked: true,
       stats: { armor: 100, speed: 50, fireRate: 100, shield: 90 }, // 10/10, 5/10, 10/10, 9/10
@@ -219,7 +223,47 @@ export class Store {
         description: 'Desata el rayo colosal destructor de kernels que barre la pantalla.',
         mechanic: 'Superláser de aniquilación global',
       },
-      description: 'Nave insignia con reactor de fusión oscura y cañón titanio destructor de kernels.',
+      description: 'Crucero pesado en cruz X con 4 alas divergentes y torre de mando escalonada.',
+    },
+    {
+      id: 'hyper_void',
+      name: 'VOID STALKER',
+      classTag: 'Sigilo / Asesino Táctico',
+      hullColor: '#ef4444',
+      glowColor: '#f59e0b',
+      secondaryColor: '#ffffff',
+      paletteDescription: 'Obsidiana Mate + Carmesí + Oro Prisma',
+      cost: 1400,
+      unlocked: true,
+      stats: { armor: 40, speed: 95, fireRate: 80, shield: 40 },
+      ability: {
+        id: 'temporal_rift',
+        name: 'TEMPORAL RIFT',
+        triggerKey: 'E',
+        description: 'Crea una fractura temporal que ralentiza proyectiles enemigos un 80% y te teletransporta.',
+        mechanic: 'Ralentización temporal + traslación',
+      },
+      description: 'Aguja furtiva de titanio obsidiana con hojas de ataque invertidas y óptica carmesí.',
+    },
+    {
+      id: 'solar_flare',
+      name: 'SOLAR PHOENIX',
+      classTag: 'Plasma / Fénix Termonuclear',
+      hullColor: '#ea580c',
+      glowColor: '#facc15',
+      secondaryColor: '#06b6d4',
+      paletteDescription: 'Naranja Solar + Amarillo Fénix + Cian Ion',
+      cost: 1600,
+      unlocked: true,
+      stats: { armor: 60, speed: 85, fireRate: 85, shield: 70 },
+      ability: {
+        id: 'supernova_rebirth',
+        name: 'SUPERNOVA NOVA',
+        triggerKey: 'SPACE',
+        description: 'Descarga un estallido omnidireccional de plasma que calcina proyectiles e invasores.',
+        mechanic: 'Estallido solar omnidireccional',
+      },
+      description: 'Caza de plumaje aerodinámico triple con reactores de combustión solar y blindaje compuesto dorado.',
     },
   ];
 

@@ -34,15 +34,26 @@ export class Renderer {
   }
 
   public resize(): void {
-    // Standard virtual resolution
-    this.width = 800;
-    this.height = 640;
+    const parent = this.canvas.parentElement;
+    if (parent) {
+      const rect = parent.getBoundingClientRect();
+      if (rect.width > 300 && rect.height > 300) {
+        this.width = Math.round(rect.width);
+        this.height = Math.round(rect.height);
+      } else {
+        this.width = 1100;
+        this.height = 640;
+      }
+    } else {
+      this.width = 1100;
+      this.height = 640;
+    }
 
     const dpr = window.devicePixelRatio || 1;
     this.canvas.width = this.width * dpr;
     this.canvas.height = this.height * dpr;
-    this.canvas.style.width = `${this.width}px`;
-    this.canvas.style.height = `${this.height}px`;
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
 
     this.ctx.resetTransform();
     this.ctx.scale(dpr, dpr);

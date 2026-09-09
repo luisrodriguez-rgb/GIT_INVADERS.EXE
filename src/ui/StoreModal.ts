@@ -93,6 +93,12 @@ export class StoreModal {
               <span class="bay-hologram-label">SHIP HOLOGRAM [ 0${this.selectedShipIndex + 1} / 0${this.store.SKINS.length} ]</span>
               <span class="bay-ship-name">${selectedShip.name.toUpperCase()}</span>
               <span class="bay-ship-tag">${selectedShip.classTag}</span>
+              <div class="bay-palette-row" style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:4px;">
+                <span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${selectedShip.hullColor}; box-shadow:0 0 6px ${selectedShip.hullColor};"></span>
+                <span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${selectedShip.glowColor}; box-shadow:0 0 6px ${selectedShip.glowColor};"></span>
+                ${selectedShip.secondaryColor ? `<span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${selectedShip.secondaryColor}; box-shadow:0 0 6px ${selectedShip.secondaryColor};"></span>` : ''}
+                <span class="bay-palette-desc" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#94a3b8; letter-spacing:0.5px;">${selectedShip.paletteDescription || `${selectedShip.hullColor} // ${selectedShip.glowColor}`}</span>
+              </div>
             </div>
             <button class="bay-nav-btn" id="bayNextShipBtn">[ ▶ ]</button>
           </div>
@@ -390,7 +396,10 @@ export class StoreModal {
       this.animTime,
       1.0,
       true,
-      selectedShip.id
+      selectedShip.id,
+      0,
+      false,
+      0
     );
   }
 

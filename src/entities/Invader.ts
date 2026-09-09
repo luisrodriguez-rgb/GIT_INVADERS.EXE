@@ -34,7 +34,7 @@ export class Invader extends Entity {
 
   public render(ctx: CanvasRenderingContext2D): void {
     if (!this.isAlive) return;
-    Sprites.drawCommitInvader(ctx, this.x, this.y, this.width, this.height, this.animFrame, this.color);
+    Sprites.drawCommitInvader(ctx, this.x, this.y, this.width, this.height, this.animFrame, this.color, this.commitSha);
   }
 
   public takeDamage(amount: number): boolean {

@@ -122,15 +122,22 @@ export class Game {
       : ['.gitignore', 'docs/', 'lockfile', 'tests/'];
     const count = 4;
     const spacing = this.renderer.width / (count + 1);
+    const by = Math.max(380, this.renderer.height - 175);
 
     for (let i = 1; i <= count; i++) {
       const bx = i * spacing - 32;
-      const by = 430; // Elevated so bunkers don't crowd the player
       this.bunkers.push(new Bunker(bx, by, labels[i - 1]));
     }
   }
 
   private bindInputs(): void {
+    window.addEventListener('resize', () => {
+      this.renderer.resize();
+      if (this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') {
+        this.initBunkers();
+      }
+    });
+
     window.addEventListener('keydown', (e) => {
       // Audio engine auto unlock
       AudioEngine.getInstance().init();
@@ -422,7 +429,8 @@ export class Game {
     const combatControls = document.getElementById('combatControls');
     if (combatControls) combatControls.style.display = 'flex';
 
-    this.player.reset(this.renderer.width / 2 - 22, 505);
+    this.renderer.resize();
+    this.player.reset(this.renderer.width / 2 - 22, Math.max(480, this.renderer.height - 105));
     this.initBunkers();
     this.projectiles = [];
     this.particles.clear();

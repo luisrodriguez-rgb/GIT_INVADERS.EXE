@@ -10,6 +10,7 @@ import { Security } from '../utils/Security';
 import { I18n } from '../i18n/I18n';
 import { BossGenerator, ARCHETYPE_DATABASE } from '../procedural/BossGenerator';
 import { Modals } from './Modals';
+import { CodexModal } from './CodexModal';
 
 export type LobbyTab = 'HANGAR' | 'PLAY' | 'STORE' | 'PROFILE' | 'STATS' | 'SETTINGS';
 
@@ -22,11 +23,14 @@ export class Lobby {
   private themeManager: ThemeManager;
   private audioEngine: AudioEngine;
   private modals: Modals | null = null;
+  private codexModal: CodexModal | null = null;
   private animFrameId: number | null = null;
   private shipCanvas: HTMLCanvasElement | null = null;
   private shipCtx: CanvasRenderingContext2D | null = null;
   private bossCanvas: HTMLCanvasElement | null = null;
   private bossCtx: CanvasRenderingContext2D | null = null;
+  private radarCanvas: HTMLCanvasElement | null = null;
+  private radarCtx: CanvasRenderingContext2D | null = null;
   private animTime: number = 0;
   private selectedRepoId: string = 'infra_service';
   private isProceduralActive: boolean = false;
@@ -49,6 +53,7 @@ export class Lobby {
     const modalEl = document.getElementById('modalOverlay');
     if (modalEl) {
       this.modals = new Modals(modalEl);
+      this.codexModal = new CodexModal(modalEl);
     }
     I18n.getInstance().subscribe(() => {
       if (this.container.style.display !== 'none') {
@@ -210,7 +215,7 @@ export class Lobby {
   }
 
   /* ----------------------------------------------------
-     VIEW: PILOT HANGAR DECK (PERFECT NO-OVERLAP GRID)
+     VIEW: PILOT HANGAR DECK (COMBAT FIRST // 3-ZONE HIERARCHY)
      ---------------------------------------------------- */
   private renderHangarView(): string {
     const prof = this.store.profile;
@@ -220,7 +225,8 @@ export class Lobby {
     const archetypeData = bossBlueprint.archetypeData;
     const mutation = bossBlueprint.mutation || 'CORRUPTED';
     const genome = bossBlueprint.genome;
-    const directives = bossBlueprint.directives;
+    const diagnostics = ShipComposer.getDiagnostics(1.0, prof.startingShield);
+    const t = I18n.getInstance().t;
 
     // 1. Mis Naves Vertical List (All 8 Ships)
     const fleetVerticalHtml = this.store.SKINS.map((skin) => {
@@ -231,7 +237,7 @@ export class Lobby {
           <div class="ship-info-col">
             <div class="ship-title-row">
               <span class="ship-card-name">${Security.escapeHtml(skin.name)}</span>
-              ${isEquipped ? '<span class="equipped-tag-pill">EQUIPADA</span>' : ''}
+              ${isEquipped ? `<span class="equipped-tag-pill">${t.hangarEquipped}</span>` : ''}
             </div>
             <span class="ship-card-class">${Security.escapeHtml(skin.classTag.split('|')[1]?.trim() || skin.classTag)}</span>
           </div>
@@ -245,26 +251,33 @@ export class Lobby {
     const cadence10 = Math.round((activeSkin.stats.fireRate / 100) * 10);
     const shield10 = Math.round((activeSkin.stats.shield / 100) * 10);
 
+    const renderPips = (val10: number, color: string) => {
+      let pips = '';
+      for (let i = 1; i <= 10; i++) {
+        pips += `<span class="stat-pip ${i <= val10 ? `filled ${color}` : ''}"></span>`;
+      }
+      return `<div class="stat-pips-strip">${pips}</div>`;
+    };
+
     // Genome Ratings
     const threatVal = genome.ratings?.threat || Math.min(99, Math.max(70, Math.round(dna.threatLevel * 0.95 + 10)));
     const complexityVal = genome.ratings?.complexity || Math.min(99, Math.max(65, Math.round(dna.contributors * 4 + 40)));
     const swarmVal = genome.ratings?.swarm || Math.min(99, Math.max(60, Math.round(dna.issues * 1.5 + 40)));
     const armorVal = genome.ratings?.armor || Math.min(99, Math.max(75, Math.round(dna.pullRequests * 1.2 + 55)));
     const attackVal = genome.ratings?.attack || Math.min(99, Math.max(70, Math.round(dna.commits / 30 + 45)));
-    const phasesVal = genome.phases || Math.min(5, Math.max(3, bossBlueprint.phases.length));
 
     return `
       <div class="hangar-master-layout">
 
         <!-- ==============================================
-             TOP DECK: 3 MAIN COLUMNS
+             TOP DECK: 3 MAIN COMBAT COLUMNS
              ============================================== -->
         <div class="hangar-top-deck-grid">
 
           <!-- 1. LEFT COLUMN: MIS NAVES (8 FLEET SHIPS) -->
           <aside class="hangar-left-col">
             <div class="col-section-header">
-              <span>MIS NAVES (${this.store.SKINS.length})</span>
+              <span>${t.hangarMyFleet} (${this.store.SKINS.length})</span>
             </div>
             <div class="fleet-cards-scroll-list">
               ${fleetVerticalHtml}
@@ -280,9 +293,9 @@ export class Lobby {
                 </svg>
               </div>
               <div class="proc-text-col">
-                <span class="proc-title">NAVE PROCEDURAL</span>
-                <span class="proc-tag">DNA &rarr; NAVE REPOSITORIO</span>
-                <span class="proc-sub">Forjada de /${Security.escapeHtml(dna.name)}</span>
+                <span class="proc-title">${t.hangarProceduralShip}</span>
+                <span class="proc-tag">DNA &rarr; ${t.hangarTargetRepo}</span>
+                <span class="proc-sub">/${Security.escapeHtml(dna.name)}</span>
               </div>
             </div>
           </aside>
@@ -299,10 +312,10 @@ export class Lobby {
               </div>
               <div class="center-title-col">
                 <div class="center-ship-name">${this.isProceduralActive ? `PROCEDURAL // ${Security.escapeHtml(dna.name.toUpperCase())}` : Security.escapeHtml(activeSkin.name)}</div>
-                <div class="center-ship-class">${this.isProceduralActive ? 'Nave Forjada por ADN de Código' : Security.escapeHtml(activeSkin.classTag)}</div>
+                <div class="center-ship-class">${this.isProceduralActive ? t.hangarProceduralDesc : Security.escapeHtml(activeSkin.classTag)}</div>
               </div>
               <div class="center-level-badge">
-                <span class="lvl-txt">NIVEL ${prof.level}</span>
+                <span class="lvl-txt">${t.profileClearance} ${prof.level}</span>
                 <div class="lvl-pips">
                   <span class="pip filled"></span>
                   <span class="pip filled"></span>
@@ -314,7 +327,7 @@ export class Lobby {
               </div>
             </div>
 
-            <!-- Main Stage & Specs Side-by-Side (Full Height) -->
+            <!-- Main Stage & Specs Side-by-Side -->
             <div class="holo-stage-and-specs-row">
               <!-- 3D Platform Viewport with Left/Right Chevrons -->
               <div class="holo-platform-viewport">
@@ -325,52 +338,46 @@ export class Lobby {
 
               <!-- Side Specs & Special Ability Box -->
               <div class="ship-specs-sidebar">
-                <div class="spec-stat-row">
-                  <div class="spec-label-line">
-                    <span class="spec-name">BLINDAJE</span>
-                    <span class="spec-val">${armor10}/10</span>
+                <div class="telemetry-specs-group">
+                  <div class="spec-stat-row">
+                    <div class="spec-label-line">
+                      <span class="spec-name">${t.hangarArmor}</span>
+                      <span class="spec-val">${armor10}/10</span>
+                    </div>
+                    ${renderPips(armor10, 'cyan')}
                   </div>
-                  <div class="spec-track">
-                    <div class="spec-fill cyan" style="width: ${activeSkin.stats.armor}%;"></div>
-                  </div>
-                </div>
 
-                <div class="spec-stat-row">
-                  <div class="spec-label-line">
-                    <span class="spec-name">VELOCIDAD</span>
-                    <span class="spec-val">${speed10}/10</span>
+                  <div class="spec-stat-row">
+                    <div class="spec-label-line">
+                      <span class="spec-name">${t.hangarSpeed}</span>
+                      <span class="spec-val">${speed10}/10</span>
+                    </div>
+                    ${renderPips(speed10, 'cyan-bright')}
                   </div>
-                  <div class="spec-track">
-                    <div class="spec-fill cyan-bright" style="width: ${activeSkin.stats.speed}%;"></div>
-                  </div>
-                </div>
 
-                <div class="spec-stat-row">
-                  <div class="spec-label-line">
-                    <span class="spec-name">CADENCIA</span>
-                    <span class="spec-val">${cadence10}/10</span>
+                  <div class="spec-stat-row">
+                    <div class="spec-label-line">
+                      <span class="spec-name">${t.hangarFireRate}</span>
+                      <span class="spec-val">${cadence10}/10</span>
+                    </div>
+                    ${renderPips(cadence10, 'pink')}
                   </div>
-                  <div class="spec-track">
-                    <div class="spec-fill pink" style="width: ${activeSkin.stats.fireRate}%;"></div>
-                  </div>
-                </div>
 
-                <div class="spec-stat-row">
-                  <div class="spec-label-line">
-                    <span class="spec-name">ESCUDO</span>
-                    <span class="spec-val">${shield10}/10</span>
-                  </div>
-                  <div class="spec-track">
-                    <div class="spec-fill orange" style="width: ${activeSkin.stats.shield}%;"></div>
+                  <div class="spec-stat-row">
+                    <div class="spec-label-line">
+                      <span class="spec-name">${t.hangarShield}</span>
+                      <span class="spec-val">${shield10}/10</span>
+                    </div>
+                    ${renderPips(shield10, 'orange')}
                   </div>
                 </div>
 
                 <!-- Habilidad Especial Card -->
                 <div class="special-ability-card">
-                  <div class="ability-card-title">HABILIDAD ESPECIAL</div>
+                  <div class="ability-card-title">${t.hangarSpecialAbility} [${Security.escapeHtml(activeSkin.ability.triggerKey)}]</div>
                   <div class="ability-content-row">
                     <div class="ability-icon-circle">
-                      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#00e5ff" stroke-width="2">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00e5ff" stroke-width="2">
                         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
                       </svg>
                     </div>
@@ -383,20 +390,20 @@ export class Lobby {
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
                       <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
                     </svg>
-                    <span>VER DETALLE EN TIENDA</span>
+                    <span>${Security.escapeHtml(diagnostics.summary)}</span>
                   </button>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- 3. RIGHT COLUMN: BOSS ENCOUNTER & GENOME -->
+          <!-- 3. RIGHT COLUMN: BOSS ENCOUNTER & QUICK DOSSIER -->
           <aside class="hangar-right-col">
             <!-- Top Card: Próximo Encuentro Boss -->
             <div class="boss-encounter-card">
               <div class="boss-card-top-header">
-                <span class="boss-header-label">PRÓXIMO ENCUENTRO</span>
-                <span class="boss-type-badge">BOSS</span>
+                <span class="boss-header-label">${t.hangarNextEncounter}</span>
+                <span class="boss-type-badge">THREAT ${threatVal}</span>
               </div>
 
               <div class="boss-title-block">
@@ -406,14 +413,14 @@ export class Lobby {
 
               <!-- Boss Canvas Portrait -->
               <div class="boss-portrait-box">
-                <canvas id="bossPortraitCanvas" width="260" height="110" class="boss-canvas-elem"></canvas>
+                <canvas id="bossPortraitCanvas" width="260" height="95" class="boss-canvas-elem"></canvas>
               </div>
 
               <!-- Archetype Tags -->
               <div class="boss-tags-row">
-                <span class="tag-pill archetype">ARQUETIPO ${Security.escapeHtml(archetypeData.codeNumber)}</span>
-                <span class="tag-pill mutation">MUTACIÓN ${Security.escapeHtml(mutation)}</span>
-                <span class="tag-pill language">LENGUAJE ${Security.escapeHtml(dna.primaryLanguage.toUpperCase())} HEAVY</span>
+                <span class="tag-pill archetype">${t.hangarArchetype} ${Security.escapeHtml(archetypeData.codeNumber)}</span>
+                <span class="tag-pill mutation">${Security.escapeHtml(mutation)}</span>
+                <span class="tag-pill language">${Security.escapeHtml(dna.primaryLanguage.toUpperCase())} HEAVY</span>
               </div>
 
               <!-- Boss Concept Quote -->
@@ -421,74 +428,77 @@ export class Lobby {
                 "${Security.escapeHtml(archetypeData.conceptQuote)}"
               </div>
 
-              <button class="boss-info-full-btn" id="btnViewBossInfo">
-                <div class="btn-icon-label-group">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  <span>VER INFO COMPLETA</span>
-                </div>
-                <span class="chevron-arrow">&gt;</span>
-              </button>
+              <div style="display: flex; gap: 4px; margin-top: 2px;">
+                <button class="boss-info-full-btn" id="btnInspectGenome" style="flex: 1;">
+                  <div class="btn-icon-label-group">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M2 15c6.667-6 13.333 0 20-6M2 9c6.667 6 13.333 0 20 6"/>
+                    </svg>
+                    <span>${t.hangarGenome}</span>
+                  </div>
+                  <span class="chevron-arrow">&gt;</span>
+                </button>
+                <button class="boss-info-full-btn" id="btnHangarCodex" style="flex: 1; border-color: rgba(244, 63, 94, 0.4); color: #f43f5e;">
+                  <div class="btn-icon-label-group">
+                    <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                    </svg>
+                    <span>${t.hangarCodex}</span>
+                  </div>
+                  <span class="chevron-arrow">&gt;</span>
+                </button>
+              </div>
             </div>
 
-            <!-- Bottom Card: Boss Genome -->
+            <!-- Bottom Card: Boss Genome Quick Spec -->
             <div class="boss-genome-card">
               <div class="genome-header-line">
-                <span class="genome-title">BOSS GENOME</span>
+                <span class="genome-title">${t.hangarTacticalMatrix}</span>
                 <span class="genome-seed-chip">SEED #${Security.escapeHtml(genome.seed)}</span>
               </div>
 
-              <div class="genome-sub-identity">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#00e5ff" stroke-width="2">
-                  <path d="M2 15c6.667-6 13.333 0 20-6M2 9c6.667 6 13.333 0 20 6"/>
-                </svg>
-                <div class="genome-id-text">
-                  <b>${Security.escapeHtml(archetypeData.title)}</b>
-                  <span class="genome-tags-meta">// ${Security.escapeHtml(mutation)} // ${Security.escapeHtml(dna.primaryLanguage.toUpperCase())} HEAVY</span>
-                </div>
-              </div>
-
-              <!-- 6 Rating Bars -->
+              <!-- 4 Chunky Matrix Bars -->
               <div class="genome-ratings-grid">
                 <div class="g-rating-row">
-                  <span class="g-lbl">AMENAZA</span>
-                  <div class="g-track"><div class="g-fill" style="width: ${threatVal}%;"></div></div>
-                  <span class="g-val">${threatVal}</span>
+                  <div class="g-rating-header">
+                    <span class="g-lbl">${t.hangarComplexity}</span>
+                    <span class="g-val cyan">${complexityVal}%</span>
+                  </div>
+                  <div class="g-track"><div class="g-fill cyan" style="width: ${complexityVal}%;"></div></div>
                 </div>
+
                 <div class="g-rating-row">
-                  <span class="g-lbl">COMPLEJIDAD</span>
-                  <div class="g-track"><div class="g-fill" style="width: ${complexityVal}%;"></div></div>
-                  <span class="g-val">${complexityVal}</span>
+                  <div class="g-rating-header">
+                    <span class="g-lbl">${t.hangarSwarm}</span>
+                    <span class="g-val green">${swarmVal}%</span>
+                  </div>
+                  <div class="g-track"><div class="g-fill green" style="width: ${swarmVal}%;"></div></div>
                 </div>
+
                 <div class="g-rating-row">
-                  <span class="g-lbl">ENJAMBRE</span>
-                  <div class="g-track"><div class="g-fill" style="width: ${swarmVal}%;"></div></div>
-                  <span class="g-val">${swarmVal}</span>
+                  <div class="g-rating-header">
+                    <span class="g-lbl">${t.hangarArmor}</span>
+                    <span class="g-val orange">${armorVal}%</span>
+                  </div>
+                  <div class="g-track"><div class="g-fill orange" style="width: ${armorVal}%;"></div></div>
                 </div>
+
                 <div class="g-rating-row">
-                  <span class="g-lbl">BLINDAJE</span>
-                  <div class="g-track"><div class="g-fill" style="width: ${armorVal}%;"></div></div>
-                  <span class="g-val">${armorVal}</span>
-                </div>
-                <div class="g-rating-row">
-                  <span class="g-lbl">ATAQUE</span>
-                  <div class="g-track"><div class="g-fill" style="width: ${attackVal}%;"></div></div>
-                  <span class="g-val">${attackVal}</span>
-                </div>
-                <div class="g-rating-row">
-                  <span class="g-lbl">FASES</span>
-                  <div class="g-track"><div class="g-fill" style="width: ${(phasesVal / 5) * 100}%;"></div></div>
-                  <span class="g-val">${phasesVal}</span>
+                  <div class="g-rating-header">
+                    <span class="g-lbl">${t.hangarAttack}</span>
+                    <span class="g-val pink">${attackVal}%</span>
+                  </div>
+                  <div class="g-track"><div class="g-fill pink" style="width: ${attackVal}%;"></div></div>
                 </div>
               </div>
 
-              <button class="inspect-genome-cta-btn" id="btnInspectGenome">
+              <button class="inspect-genome-cta-btn" id="btnHangarDirectives">
                 <div class="btn-icon-label-group">
-                  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M2 15c6.667-6 13.333 0 20-6M2 9c6.667 6 13.333 0 20 6"/>
+                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
                   </svg>
-                  <span>INSPECCIONAR GENOME</span>
+                  <span>${t.hangarDirectivesBounties} (3)</span>
                 </div>
                 <span class="chevron-arrow">&gt;</span>
               </button>
@@ -498,113 +508,42 @@ export class Lobby {
         </div>
 
         <!-- ==============================================
-             BOTTOM DECK: DIRECTIVAS & RECOMPENSAS TOTALES
+             BOTTOM DECK: HERO DEPLOY ACTION & UTILITY BAR
              ============================================== -->
-        <div class="hangar-bottom-deck-row">
-          <!-- Directivas Box -->
-          <div class="mission-directives-box">
-            <div class="directives-header-line">
-              <span class="dir-header-title">DIRECTIVAS DE MISIÓN &amp; RECOMPENSAS</span>
-              <span class="bounties-pill">BOUNTIES</span>
-            </div>
-
-            <div class="directives-three-cards-row">
-              <!-- Directive 1 -->
-              <div class="directive-box-card">
-                <div class="dir-tag-badge cyan">[W1] DEPURACIÓN DE COMMITS</div>
-                <div class="dir-desc-text">
-                  ${directives[0]?.description || 'Erradica la vanguardia de cazas sin pérdida crítica de búnkeres.'}
-                </div>
-                <div class="dir-rewards-line">
-                  <span class="r-stars">+150 STARS</span>
-                  <span class="r-exp">+200 EXP</span>
-                </div>
-                <div class="dir-footer-pill">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#00e5ff" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
-                  </svg>
-                  <span>RECOMPENSA</span>
-                </div>
-              </div>
-
-              <!-- Directive 2 -->
-              <div class="directive-box-card">
-                <div class="dir-tag-badge cyan">[W2] INTERCEPTACIÓN DE PRs</div>
-                <div class="dir-desc-text">
-                  ${directives[1]?.description || 'Ruptura del flanco blindado en menos de 45 segundos con fuego sostenido.'}
-                </div>
-                <div class="dir-rewards-line">
-                  <span class="r-stars">+300 STARS</span>
-                  <span class="r-exp">+400 EXP</span>
-                </div>
-                <div class="dir-footer-pill">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#00e5ff" stroke-width="2">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-                  </svg>
-                  <span>PERK: REPARACIÓN KERNEL</span>
-                </div>
-              </div>
-
-              <!-- Directive 3 (Boss) -->
-              <div class="directive-box-card boss-card">
-                <div class="dir-tag-badge magenta">[BOSS] ERRADICACIÓN DE ARQUETIPO</div>
-                <div class="dir-desc-text">
-                  Neutraliza el núcleo en su fase terminal con el modificador activo.
-                </div>
-                <div class="dir-rewards-line">
-                  <span class="r-stars">+800 STARS</span>
-                  <span class="r-exp">+1,200 EXP</span>
-                </div>
-                <div class="dir-footer-pill gold">
-                  <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#fbbf24" stroke-width="2">
-                    <polygon points="12 2 15 9 22 9 17 14 19 21 12 17 5 21 7 14 2 9 9 9 12 2"/>
-                  </svg>
-                  <span>EMBLEMA DE ARQUETIPO</span>
-                </div>
+        <div class="hangar-bottom-deck-row" style="height: auto; display: flex; gap: 8px; align-items: stretch;">
+          <!-- Giant Hero Deploy Button -->
+          <button class="deploy-hero-action-btn" id="btnDominantStartMission">
+            <div class="deploy-btn-inner">
+              <span class="deploy-play-icon">&#9654;</span>
+              <div class="deploy-text-block">
+                <span class="deploy-title-main">${t.hangarDeployBattle}</span>
+                <span class="deploy-sub-meta">${Security.escapeHtml(archetypeData.title)} // ${t.hangarThreatLevel}: ${threatVal}/100 // ${Security.escapeHtml(dna.primaryLanguage.toUpperCase())} HEAVY</span>
               </div>
             </div>
-          </div>
+            <div class="recommended-ship-chip">${t.hangarRecommendedShip}: ${this.isProceduralActive ? 'PROCEDURAL' : Security.escapeHtml(activeSkin.name)}</div>
+          </button>
 
-          <!-- Recompensas Totales & Main CTA Button -->
-          <div class="total-rewards-and-cta-card">
-            <div class="tot-rewards-title">RECOMPENSAS TOTALES</div>
-
-            <div class="tot-rewards-list">
-              <div class="tot-item stars">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="#fbbf24">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
-                </svg>
-                <span class="tot-k">STARS</span>
-                <span class="tot-v">+800</span>
-              </div>
-              <div class="tot-item exp">
-                <span class="xp-mini-box">[XP]</span>
-                <span class="tot-k">EXP</span>
-                <span class="tot-v">+1,200</span>
-              </div>
-              <div class="tot-item module">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#00e5ff" stroke-width="2">
-                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                </svg>
-                <div class="tot-module-text">
-                  <span class="mod-k">MÓDULO STACK</span>
-                  <span class="mod-v">${Security.escapeHtml(dna.primaryLanguage)}: Tracking Estricto</span>
-                </div>
-              </div>
-              <div class="tot-item artifact">
-                <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="#38bdf8" stroke-width="2">
-                  <polygon points="12 2 2 9 12 22 22 9 12 2"></polygon>
-                </svg>
-                <div class="tot-module-text">
-                  <span class="mod-k">ARTEFACTO</span>
-                  <span class="mod-v">Núcleo Estabilizado</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Giant Launch Mission CTA -->
-            <button class="dominant-launch-cta-btn" id="btnDominantStartMission">
-              <span class="play-arrow-glyph">&#9654;</span> COMENZAR MISIÓN
+          <!-- Quick Actions Bar -->
+          <div class="hangar-quick-actions-bar">
+            <button class="quick-action-pill-btn" id="btnQuickDirectives" title="Directivas de misión">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+              <span>${t.hangarBriefing.split(' ')[0] || 'DIRECTIVAS'}</span>
+            </button>
+            <button class="quick-action-pill-btn magenta" id="btnQuickCodex" title="Base de datos Codex">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              </svg>
+              <span>${t.hangarCodex}</span>
+            </button>
+            <button class="quick-action-pill-btn" id="btnQuickStore" title="Tienda de mejoras">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              <span>${t.tabStore}</span>
             </button>
           </div>
         </div>
@@ -614,64 +553,188 @@ export class Lobby {
   }
 
   /* ----------------------------------------------------
-     VIEW 2: PLAY (MISIÓN)
+     VIEW 2: PLAY (MISIÓN) - TACTICAL WAR ROOM
      ---------------------------------------------------- */
   private renderPlayView(): string {
     const dna = this.getSelectedDNA();
+    const bossBlueprint = BossGenerator.generateFromDNA(dna);
+    const archetypeData = bossBlueprint.archetypeData;
+    const activeSkin = this.store.getActiveSkin();
+    const prof = this.store.profile;
+    const threatVal = bossBlueprint.threatIndex || Math.min(99, Math.max(70, Math.round(dna.threatLevel * 0.95 + 10)));
     const t = I18n.getInstance().t;
+
     return `
-      <div class="lobby-subview-wrapper">
-        <div class="subview-header-row">
-          <span class="subview-headline">${t.playModesTitle}</span>
-          <span class="subview-subheadline">${t.playModesSub}</span>
-        </div>
-
-        <div class="play-modes-grid-container">
-          <!-- Mode 1: Repository Campaign -->
-          <div class="mode-selection-card" id="playModeRepoCard">
-            <div class="mode-card-badge cyan">CAMPAÑA</div>
-            <div class="mode-card-title">${t.modeCampaignTitle}</div>
-            <div class="mode-card-desc">
-              ${t.modeCampaignDesc.replace('{repo}', Security.escapeHtml(dna.name))}
+      <div class="lobby-subview-wrapper tactical-mission-subview">
+        <!-- 1. Top War Room Banner & Radar Telemetry -->
+        <div class="tactical-deck-header">
+          <div class="tactical-deck-title-col">
+            <div class="tactical-badge-strip">
+              <span class="tac-badge cyan"><span class="live-dot-pulse cyan"></span> SECTOR DE COMBATE SUB-ORBITAL</span>
+              <span class="tac-badge orange">NIVEL DE AMENAZA: ${threatVal}/100 [CRÍTICO]</span>
+              <span class="tac-badge purple">OP-HEX // ${Security.escapeHtml(dna.name.toUpperCase())}</span>
             </div>
-            <button class="mode-launch-cta-btn" id="btnLaunchRepoMode">${t.btnLaunchOperation}</button>
+            <h2 class="tactical-headline">CENTRO DE OPERACIONES TÁCTICAS & DESPLIEGUE</h2>
+            <p class="tactical-subheadline">Configura los parámetros de inserción orbital, inspecciona el vector de avance de oleadas y ejecuta las operaciones de combate en el repositorio.</p>
           </div>
 
-          <!-- Mode 2: Profile Arcade -->
-          <div class="mode-selection-card" id="playModeProfileCard">
-            <div class="mode-card-badge green">ARCADE</div>
-            <div class="mode-card-title">PROFILE ARCADE</div>
-            <div class="mode-card-desc">
-              Convierte tus commits, ramas y actividad en un combate de defensa de código galáctico.
-            </div>
-            <button class="mode-launch-cta-btn" id="btnLaunchProfileMode">${t.btnLaunchOperation}</button>
-          </div>
-
-          <!-- Mode 3: Chaos Max Mode -->
-          <div class="mode-selection-card" id="playModeChaosCard">
-            <div class="mode-card-badge red">HARDCORE</div>
-            <div class="mode-card-title">${t.modeChaosTitle}</div>
-            <div class="mode-card-desc">
-              ${t.modeChaosDesc}
-            </div>
-            <button class="mode-launch-cta-btn" id="btnLaunchChaosMode">${t.btnLaunchOperation}</button>
-          </div>
-
-          <!-- Mode 4: Citadel Universe Gauntlet -->
-          <div class="mode-selection-card" id="playModeCitadelCard">
-            <div class="mode-card-badge purple">GAUNTLET</div>
-            <div class="mode-card-title">${t.modeCitadelTitle}</div>
-            <div class="mode-card-desc">
-              ${t.modeCitadelDesc}
-            </div>
-            <button class="mode-launch-cta-btn" id="btnLaunchCitadelMode">${t.btnLaunchOperation}</button>
+          <div class="tactical-actions-top">
+            <button class="tactical-quick-btn terminal-style" id="btnOpenAdvancedTerminal" title="Abrir terminal BIOS de Git">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              <span>TERMINAL BIOS</span>
+            </button>
+            <button class="tactical-quick-btn repo-style" id="btnTacSwitchRepo" title="Cambiar repositorio objetivo">
+              <span>REPO: /${Security.escapeHtml(dna.name)}</span>
+            </button>
           </div>
         </div>
 
-        <div style="display: flex; justify-content: center; margin-top: 14px;">
-          <button class="terminal-open-btn" id="btnOpenAdvancedTerminal">
-            [ ABRIR TERMINAL AVANZADA DE REPOSITORIOS ]
-          </button>
+        <!-- 2. Split Workspace: Left Radar & Insertion Vector / Right 4 Operation Modes -->
+        <div class="tactical-operations-grid">
+          <!-- LEFT PANEL: TACTICAL ORBITAL RADAR & WAVE TELEMETRY -->
+          <div class="tactical-radar-card">
+            <div class="tac-card-header">
+              <div class="tac-card-title-group">
+                <span class="tac-section-num">01 //</span>
+                <span class="tac-section-title">VECTOR DE INSERCIÓN & TRAYECTORIA DE OLEADAS</span>
+              </div>
+              <span class="tac-status-tag active">RADAR 60 FPS ACTIVO</span>
+            </div>
+
+            <!-- Radar Canvas Element -->
+            <div class="tactical-radar-canvas-box">
+              <canvas id="tacticalMissionRadarCanvas" width="340" height="170" class="tactical-radar-canvas"></canvas>
+              <div class="radar-scanlines"></div>
+              <div class="radar-target-reticle">OBJETIVO: /${Security.escapeHtml(dna.name)}</div>
+            </div>
+
+            <!-- Wave Sequence Telemetry Row -->
+            <div class="wave-sequence-telemetry">
+              <div class="seq-node">
+                <div class="seq-step-badge green">W1</div>
+                <div class="seq-info">
+                  <span class="seq-name">COMMITS RECON</span>
+                  <span class="seq-target">${Math.min(30, Math.round(dna.commits / 15 + 10))} Cazas Hex</span>
+                </div>
+              </div>
+              <div class="seq-arrow">&rarr;</div>
+              <div class="seq-node">
+                <div class="seq-step-badge cyan">W2</div>
+                <div class="seq-info">
+                  <span class="seq-name">ASALTO PRs</span>
+                  <span class="seq-target">${Math.min(8, Math.round(dna.pullRequests / 5 + 3))} Cruceros</span>
+                </div>
+              </div>
+              <div class="seq-arrow">&rarr;</div>
+              <div class="seq-node">
+                <div class="seq-step-badge yellow">W3</div>
+                <div class="seq-info">
+                  <span class="seq-name">ENJAMBRE ISSUES</span>
+                  <span class="seq-target">${Math.min(12, Math.round(dna.issues / 3 + 4))} Avispas</span>
+                </div>
+              </div>
+              <div class="seq-arrow">&rarr;</div>
+              <div class="seq-node boss">
+                <div class="seq-step-badge red">BOSS</div>
+                <div class="seq-info">
+                  <span class="seq-name">${Security.escapeHtml(archetypeData.title.split('//')[0].trim())}</span>
+                  <span class="seq-target">${archetypeData.codeNumber} // HP ${bossBlueprint.maxHp}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pilot Combat Status Line -->
+            <div class="pilot-mission-readiness-strip">
+              <div class="p-readiness-col">
+                <span class="r-lbl">NAVE ASIGNADA:</span>
+                <span class="r-val cyan">${Security.escapeHtml(activeSkin.name)}</span>
+              </div>
+              <div class="p-readiness-col">
+                <span class="r-lbl">HABILIDAD:</span>
+                <span class="r-val yellow">${Security.escapeHtml(activeSkin.ability.name)} [${activeSkin.ability.triggerKey}]</span>
+              </div>
+              <div class="p-readiness-col">
+                <span class="r-lbl">DEFENSA:</span>
+                <span class="r-val green">${prof.startingShield ? 'ESCUDO ACTIVO' : 'DEFLECTOR BASE'}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT PANEL: 4 COMBAT MODES GRID -->
+          <div class="tactical-modes-grid">
+            <!-- MODE 1: CAMPAÑA DE REPOSITORIO (HERO DECK) -->
+            <div class="tac-mode-card hero-campaign" id="playModeRepoCard">
+              <div class="tac-mode-top-row">
+                <div class="tac-mode-badge-pill cyan">MODO PRINCIPAL // CAMPAÑA</div>
+                <span class="tac-mode-hotkey">[ENTER]</span>
+              </div>
+              <div class="tac-mode-headline">CAMPAÑA DE REPOSITORIO // ${Security.escapeHtml(dna.name.toUpperCase())}</div>
+              <div class="tac-mode-stats-pills">
+                <span class="m-pill"><b>${dna.commits}</b> COMMITS</span>
+                <span class="m-pill"><b>${dna.pullRequests}</b> PRs</span>
+                <span class="m-pill"><b>${dna.issues}</b> ISSUES</span>
+                <span class="m-pill highlight" style="color: ${bossBlueprint.languageColor}; border-color: ${bossBlueprint.languageColor};">${Security.escapeHtml(dna.primaryLanguage.toUpperCase())}</span>
+              </div>
+              <div class="tac-mode-desc">
+                Enfrenta la estructura procedural del repositorio. Las oleadas de invasores y el Code Boss <b>${Security.escapeHtml(archetypeData.title)}</b> son generados directamente por la telemetría real del código.
+              </div>
+              <button class="tac-launch-btn cyan" id="btnLaunchRepoMode">
+                <span class="tac-play-triangle">&#9654;</span>
+                <span>DESPLEGAR EN REPOSITORIO [ENTER]</span>
+              </button>
+            </div>
+
+            <!-- MODE 2: PROFILE ARCADE -->
+            <div class="tac-mode-card" id="playModeProfileCard">
+              <div class="tac-mode-top-row">
+                <div class="tac-mode-badge-pill green">ARCADE CLÁSICO</div>
+                <span class="tac-mode-hotkey">[A]</span>
+              </div>
+              <div class="tac-mode-headline">PROFILE ARCADE // @luisrodriguez-rgb</div>
+              <div class="tac-mode-desc">
+                Oleadas ilimitadas de invasores con dificultad incremental exponencial basada en la actividad global de tu perfil de desarrollador. Ideal para records de puntuación.
+              </div>
+              <div class="tac-mode-footer">
+                <button class="tac-launch-btn green" id="btnLaunchProfileMode">
+                  <span>INICIAR PROFILE ARCADE [A]</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- MODE 3: PROTOCOLO DE CAOS -->
+            <div class="tac-mode-card chaos-border" id="playModeChaosCard">
+              <div class="tac-mode-top-row">
+                <div class="tac-mode-badge-pill red">HARDCORE // PESADILLA</div>
+                <span class="tac-mode-hotkey">[C]</span>
+              </div>
+              <div class="tac-mode-headline">PROTOCOLO DE CAOS ABSOLUTO</div>
+              <div class="tac-mode-desc">
+                Sobrecarga de 9,999 commits, 482 PRs y 731 issues. Sin dependencias externas de red. Cadencia de fuego letal y balas enemigas en enjambre denso.
+              </div>
+              <div class="tac-mode-footer">
+                <button class="tac-launch-btn red" id="btnLaunchChaosMode">
+                  <span>[!] SOBRECARGA CAOS [C] [!]</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- MODE 4: CITADEL UNIVERSE -->
+            <div class="tac-mode-card citadel-border" id="playModeCitadelCard">
+              <div class="tac-mode-top-row">
+                <div class="tac-mode-badge-pill purple">GAUNTLET // ARQUITECTURA</div>
+                <span class="tac-mode-hotkey">[U]</span>
+              </div>
+              <div class="tac-mode-headline">CODEBASE.UNIVERSE CITADEL</div>
+              <div class="tac-mode-desc">
+                Defiende los 8 biomas arquitectónicos del software frente a God-Class Monoliths y Tarjan Cyclic Wormholes con enlace neural Codebase-Memory-MCP.
+              </div>
+              <div class="tac-mode-footer">
+                <button class="tac-launch-btn purple" id="btnLaunchCitadelMode">
+                  <span>DEFENDER CIUDADELA [U]</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -841,6 +904,10 @@ export class Lobby {
     if (this.bossCanvas) {
       this.bossCtx = this.bossCanvas.getContext('2d');
     }
+    this.radarCanvas = this.container.querySelector('#tacticalMissionRadarCanvas') as HTMLCanvasElement;
+    if (this.radarCanvas) {
+      this.radarCtx = this.radarCanvas.getContext('2d');
+    }
   }
 
   private startAnimations(): void {
@@ -850,6 +917,8 @@ export class Lobby {
       if (this.activeTab === 'HANGAR') {
         this.drawHoloShipPlatform();
         this.drawBossPortrait();
+      } else if (this.activeTab === 'PLAY') {
+        this.drawTacticalMissionRadar();
       }
       this.animFrameId = requestAnimationFrame(renderLoop);
     };
@@ -978,9 +1047,13 @@ export class Lobby {
         {
           time: t,
           hpRatio: 1.0,
-          hasShield: this.store.profile.startingShield,
+          hasShield: false, // Pristine inspect view without shield obscuring hull
           isOverdrive: false,
           isThrusting: true,
+        },
+        {
+          lod: 0,
+          isHovering: true,
         }
       );
     } else {
@@ -990,14 +1063,17 @@ export class Lobby {
         shipY,
         shipW,
         shipH,
-        this.store.profile.startingShield,
+        false, // Pristine inspect view without shield obscuring hull
         false,
         activeSkin.hullColor,
         activeSkin.glowColor,
         t,
         1.0,
         true,
-        activeSkin.id
+        activeSkin.id,
+        0,
+        false,
+        0
       );
     }
   }
@@ -1061,6 +1137,127 @@ export class Lobby {
     );
   }
 
+  /**
+   * Draws the animated tactical mission radar & wave insertion path
+   */
+  private drawTacticalMissionRadar(): void {
+    if (!this.radarCanvas || !this.radarCtx) return;
+    const ctx = this.radarCtx;
+    const w = this.radarCanvas.width;
+    const h = this.radarCanvas.height;
+    const t = this.animTime;
+    const dna = this.getSelectedDNA();
+
+    ctx.clearRect(0, 0, w, h);
+
+    // 1. Dark CRT Cyber Space Backdrop
+    const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, w * 0.65);
+    bgGrad.addColorStop(0, 'rgba(0, 35, 65, 0.45)');
+    bgGrad.addColorStop(0.7, 'rgba(4, 12, 28, 0.88)');
+    bgGrad.addColorStop(1, 'rgba(2, 6, 16, 0.96)');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    // 2. Coordinate Grid Lines
+    ctx.save();
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.08)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= w; x += 22) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, h);
+      ctx.stroke();
+    }
+    for (let y = 0; y <= h; y += 22) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(w, y);
+      ctx.stroke();
+    }
+
+    // 3. Rotating Radar Sweep Beam & Concentric Distance Rings
+    const rx = w * 0.22;
+    const ry = h * 0.52;
+    const maxRadius = Math.min(w * 0.2, h * 0.44);
+
+    for (let r = 1; r <= 3; r++) {
+      ctx.beginPath();
+      ctx.arc(rx, ry, (maxRadius / 3) * r, 0, Math.PI * 2);
+      ctx.strokeStyle = r === 3 ? 'rgba(0, 229, 255, 0.3)' : 'rgba(0, 229, 255, 0.14)';
+      ctx.stroke();
+    }
+
+    // Sweep Angle
+    const sweepAngle = (t * 2.4) % (Math.PI * 2);
+    const sweepGrad = ctx.createRadialGradient(rx, ry, 0, rx, ry, maxRadius);
+    sweepGrad.addColorStop(0, 'rgba(0, 229, 255, 0.35)');
+    sweepGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+    ctx.fillStyle = sweepGrad;
+    ctx.beginPath();
+    ctx.moveTo(rx, ry);
+    ctx.arc(rx, ry, maxRadius, sweepAngle - 0.45, sweepAngle);
+    ctx.closePath();
+    ctx.fill();
+
+    // Radar Center Crosshair
+    ctx.fillStyle = '#00e5ff';
+    ctx.fillRect(rx - 2, ry - 2, 4, 4);
+
+    // 4. Orbital Wave Insertion Trajectory (Curved Path)
+    const p0 = { x: rx, y: ry };
+    const p1 = { x: w * 0.45, y: h * 0.28 };
+    const p2 = { x: w * 0.68, y: h * 0.72 };
+    const p3 = { x: w * 0.88, y: h * 0.38 };
+
+    // Animated dotted trajectory
+    ctx.beginPath();
+    ctx.moveTo(p0.x, p0.y);
+    ctx.bezierCurveTo(p1.x - 15, p1.y, p1.x, p1.y, p1.x, p1.y);
+    ctx.bezierCurveTo(p2.x - 15, p2.y, p2.x, p2.y, p2.x, p2.y);
+    ctx.bezierCurveTo(p3.x - 15, p3.y, p3.x, p3.y, p3.x, p3.y);
+    ctx.strokeStyle = 'rgba(0, 229, 255, 0.55)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([5, 4]);
+    ctx.lineDashOffset = -t * 24;
+    ctx.stroke();
+    ctx.setLineDash([]); // reset
+
+    // 5. Waypoints along trajectory
+    const nodes = [
+      { pt: p0, label: 'INSERCIÓN', color: '#00e5ff' },
+      { pt: p1, label: 'W1: RECON', color: '#10b981' },
+      { pt: p2, label: 'W2: PR FLANK', color: '#38bdf8' },
+      { pt: p3, label: 'BOSS CORE', color: '#f43f5e' },
+    ];
+
+    nodes.forEach((n, idx) => {
+      const pulse = Math.sin(t * 4 + idx) * 3 + 4;
+      ctx.beginPath();
+      ctx.arc(n.pt.x, n.pt.y, pulse + 2, 0, Math.PI * 2);
+      ctx.fillStyle = n.color === '#f43f5e' ? 'rgba(244, 63, 94, 0.25)' : 'rgba(0, 229, 255, 0.25)';
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.arc(n.pt.x, n.pt.y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = n.color;
+      ctx.fill();
+
+      // Waypoint text
+      ctx.font = '8px monospace';
+      ctx.fillStyle = n.color;
+      ctx.fillText(n.label, n.pt.x - 22, n.pt.y - 7);
+    });
+
+    // 6. Coordinates & Sub-orbital HUD overlay
+    ctx.fillStyle = 'rgba(0, 229, 255, 0.75)';
+    ctx.font = '7.5px monospace';
+    ctx.fillText(`COORDS: LAT 37°46'N // LNG 122°24'W`, 8, 12);
+    ctx.fillText(`ALT: 382.4 KM // VEL: 7.66 KM/S`, 8, 22);
+    ctx.fillText(`TARGET: /${dna.name.toUpperCase()}`, w - 160, 12);
+
+    ctx.restore();
+  }
+
 
   /**
    * Renders mini ship thumbnails for left roster and horizontal strip
@@ -1092,7 +1289,10 @@ export class Lobby {
         0,
         1.0,
         false,
-        skin.id
+        skin.id,
+        0,
+        false,
+        0
       );
     });
   }
@@ -1126,7 +1326,7 @@ export class Lobby {
     const navCodex = this.container.querySelector('#navCodexBtn');
     navCodex?.addEventListener('click', () => {
       SFX.playPowerup();
-      this.modals?.showBossCodex(this.store.profile.bossCodex || []);
+      this.codexModal?.show();
     });
 
     const navStats = this.container.querySelector('#navStatsBtn');
@@ -1202,13 +1402,17 @@ export class Lobby {
         this.render();
       });
 
-      // Boss Info Full Button
-      const btnBossInfo = this.container.querySelector('#btnViewBossInfo');
-      btnBossInfo?.addEventListener('click', () => {
-        const dna = this.getSelectedDNA();
-        const blueprint = BossGenerator.generateFromDNA(dna);
+      // Boss Info / Codex Button in Hangar
+      const btnHangarCodex = this.container.querySelector('#btnHangarCodex');
+      btnHangarCodex?.addEventListener('click', () => {
         SFX.playPowerup();
-        this.modals?.showWhyThisBoss(blueprint);
+        this.codexModal?.show('boss_dependency_hydra');
+      });
+
+      const btnQuickCodex = this.container.querySelector('#btnQuickCodex');
+      btnQuickCodex?.addEventListener('click', () => {
+        SFX.playPowerup();
+        this.codexModal?.show();
       });
 
       // Inspect Genome Button
@@ -1218,6 +1422,35 @@ export class Lobby {
         const blueprint = BossGenerator.generateFromDNA(dna);
         SFX.playPowerup();
         this.modals?.showBossDnaCard(blueprint);
+      });
+
+      // Directives Buttons
+      const btnDirectives = this.container.querySelector('#btnHangarDirectives');
+      btnDirectives?.addEventListener('click', () => {
+        const dna = this.getSelectedDNA();
+        const blueprint = BossGenerator.generateFromDNA(dna);
+        SFX.playPowerup();
+        this.modals?.showBossBlueprint(blueprint, () => {
+          this.hide();
+          this.onStartGameCallback('repository', this.getSelectedDNA());
+        });
+      });
+
+      const btnQuickDirectives = this.container.querySelector('#btnQuickDirectives');
+      btnQuickDirectives?.addEventListener('click', () => {
+        const dna = this.getSelectedDNA();
+        const blueprint = BossGenerator.generateFromDNA(dna);
+        SFX.playPowerup();
+        this.modals?.showBossBlueprint(blueprint, () => {
+          this.hide();
+          this.onStartGameCallback('repository', this.getSelectedDNA());
+        });
+      });
+
+      const btnQuickStore = this.container.querySelector('#btnQuickStore');
+      btnQuickStore?.addEventListener('click', () => {
+        SFX.playPowerup();
+        this.onOpenStoreCallback();
       });
 
       // Ability Detail Button
@@ -1264,6 +1497,12 @@ export class Lobby {
       const btnTerminal = this.container.querySelector('#btnOpenAdvancedTerminal');
       btnTerminal?.addEventListener('click', () => {
         this.onOpenTerminalCallback();
+      });
+
+      const btnTacSwitch = this.container.querySelector('#btnTacSwitchRepo');
+      btnTacSwitch?.addEventListener('click', () => {
+        const select = this.container.querySelector('#lobbyRepoSelect') as HTMLSelectElement | null;
+        select?.focus();
       });
     }
 

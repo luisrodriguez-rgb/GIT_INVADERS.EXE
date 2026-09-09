@@ -292,6 +292,7 @@ export interface NormalizedGameData {
   commits: SampleCommit[];
   pullRequests: SamplePR[];
   issues: SampleIssue[];
+  branches?: string[];
 }
 
 export interface LanguageBar {

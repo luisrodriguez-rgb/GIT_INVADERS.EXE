@@ -8,6 +8,8 @@ import { ArmoredPR } from '../entities/ArmoredPR';
 import { IssueBomber } from '../entities/IssueBomber';
 import { MergeConflict, ConflictFragment } from '../entities/MergeConflict';
 import { DependencyDrone } from '../entities/DependencyDrone';
+import { BranchDrone } from '../entities/BranchDrone';
+import { SecuritySentinel } from '../entities/SecuritySentinel';
 import { ParticleSystem } from '../rendering/Particles';
 import { CRTEffects } from '../rendering/CRT';
 import { SFX } from '../audio/SFX';
@@ -190,6 +192,51 @@ export class CollisionSystem {
                     gameState.addScore(child.scoreValue);
                   }
                 }
+              }
+            }
+          } else if (enemy instanceof BranchDrone) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, '#a855f7', 12);
+            particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#c084fc', 3, 'commit');
+
+            if (destroyed) {
+              if (!enemy.isChild && !enemy.isSplit) {
+                enemy.isSplit = true;
+                const b1 = new BranchDrone(enemy.x - 14, enemy.y, `${enemy.branchName}-α`, true);
+                const b2 = new BranchDrone(enemy.x + 14, enemy.y, `${enemy.branchName}-β`, true);
+                b1.vx = -40;
+                b2.vx = 40;
+                enemies.push(b1, b2);
+                particles.emitText(enemy.centerX, enemy.centerY, 'BRANCH SPLIT! // 2 SUB-THREADS', '#a855f7');
+                SFX.playExplosion('small');
+                gameState.addScore(enemy.scoreValue);
+                gameState.incrementStreak();
+                player.addOverdriveCharge(8);
+              } else {
+                SFX.playExplosion('small');
+                gameState.addScore(enemy.scoreValue);
+                gameState.incrementStreak();
+                player.addOverdriveCharge(4);
+                particles.emitText(enemy.centerX, enemy.centerY, `${enemy.branchName} MERGED`, '#a855f7');
+              }
+            }
+          } else if (enemy instanceof SecuritySentinel) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            if (enemy.firewallActive) {
+              particles.emitExplosion(enemy.centerX, enemy.centerY, '#10b981', 8);
+              particles.emitText(enemy.centerX, enemy.y - 12, 'FIREWALL BLOCKED!', '#10b981');
+            } else {
+              particles.emitExplosion(enemy.centerX, enemy.centerY, '#10b981', 14);
+              particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#10b981', 4, 'commit');
+
+              if (destroyed) {
+                SFX.playExplosion('medium');
+                gameState.addScore(enemy.scoreValue);
+                gameState.incrementStreak();
+                player.addOverdriveCharge(15);
+                particles.emitText(enemy.centerX, enemy.centerY, 'SECURITY BYPASS // +200 XP', '#10b981');
+                particles.emitDebris(enemy.centerX, enemy.centerY, '#10b981', 6);
+                crt.addTrauma(0.12);
               }
             }
           }

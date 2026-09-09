@@ -55,7 +55,27 @@ export interface TranslationDictionary {
   hangarStartMission: string;
   hangarXp: string;
   hangarCredits: string;
-  hangarSystemsUniverse: string;
+  hangarMyFleet: string;
+  hangarProceduralShip: string;
+  hangarProceduralDesc: string;
+  hangarArmor: string;
+  hangarSpeed: string;
+  hangarFireRate: string;
+  hangarShield: string;
+  hangarSpecialAbility: string;
+  hangarDiagnostics: string;
+  hangarNextEncounter: string;
+  hangarArchetype: string;
+  hangarGenome: string;
+  hangarCodex: string;
+  hangarTacticalMatrix: string;
+  hangarComplexity: string;
+  hangarSwarm: string;
+  hangarAttack: string;
+  hangarDirectivesBounties: string;
+  hangarDeployBattle: string;
+  hangarRecommendedShip: string;
+  hangarEquipped: string;
 
   // Encounter Wave Types
   waveCommitSquadron: string;
@@ -255,7 +275,27 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
     hangarStartMission: 'START MISSION',
     hangarXp: 'XP',
     hangarCredits: 'CREDITS',
-    hangarSystemsUniverse: 'SYSTEMS: CODEBASE.UNIVERSE ONLINE',
+    hangarMyFleet: 'MY FLEET',
+    hangarProceduralShip: 'PROCEDURAL SHIP',
+    hangarProceduralDesc: 'Forged from repository code DNA',
+    hangarArmor: 'ARMOR',
+    hangarSpeed: 'SPEED',
+    hangarFireRate: 'FIRE RATE',
+    hangarShield: 'SHIELD',
+    hangarSpecialAbility: 'SPECIAL ABILITY',
+    hangarDiagnostics: 'DIAGNOSTICS // ALL SYSTEMS NOMINAL',
+    hangarNextEncounter: 'NEXT ENCOUNTER',
+    hangarArchetype: 'ARCHETYPE',
+    hangarGenome: 'GENOME',
+    hangarCodex: 'CODEX',
+    hangarTacticalMatrix: 'TACTICAL MATRIX',
+    hangarComplexity: 'COMPLEXITY',
+    hangarSwarm: 'SWARM',
+    hangarAttack: 'ATTACK',
+    hangarDirectivesBounties: 'VIEW DIRECTIVES & BOUNTIES',
+    hangarDeployBattle: 'DEPLOY INTO BATTLE',
+    hangarRecommendedShip: 'RECOMMENDED SHIP',
+    hangarEquipped: 'EQUIPPED',
 
     waveCommitSquadron: 'COMMIT SQUADRON',
     waveArmoredPr: 'ARMORED PR FLANK',
@@ -443,7 +483,27 @@ export const TRANSLATIONS: Record<LanguageCode, TranslationDictionary> = {
     hangarStartMission: 'INICIAR MISIÓN',
     hangarXp: 'XP',
     hangarCredits: 'CRÉDITOS',
-    hangarSystemsUniverse: 'SISTEMAS: CODEBASE.UNIVERSE EN LÍNEA',
+    hangarMyFleet: 'MI FLOTA',
+    hangarProceduralShip: 'NAVE PROCEDURAL',
+    hangarProceduralDesc: 'Forjada de ADN del repositorio',
+    hangarArmor: 'BLINDAJE',
+    hangarSpeed: 'VELOCIDAD',
+    hangarFireRate: 'CADENCIA',
+    hangarShield: 'ESCUDO',
+    hangarSpecialAbility: 'HABILIDAD ESPECIAL',
+    hangarDiagnostics: 'DIAGNÓSTICO // TODOS LOS SISTEMAS NOMINALES',
+    hangarNextEncounter: 'PRÓXIMO ENCUENTRO',
+    hangarArchetype: 'ARQUETIPO',
+    hangarGenome: 'GENOMA',
+    hangarCodex: 'CÓDICE',
+    hangarTacticalMatrix: 'MATRIZ TÁCTICA',
+    hangarComplexity: 'COMPLEJIDAD',
+    hangarSwarm: 'ENJAMBRE',
+    hangarAttack: 'ATAQUE',
+    hangarDirectivesBounties: 'VER DIRECTIVAS Y RECOMPENSAS',
+    hangarDeployBattle: 'DESPLEGAR A LA BATALLA',
+    hangarRecommendedShip: 'NAVE RECOMENDADA',
+    hangarEquipped: 'EQUIPADA',
 
     waveCommitSquadron: 'ESCUADRÓN DE COMMITS',
     waveArmoredPr: 'FLANCO BLINDADO PR',

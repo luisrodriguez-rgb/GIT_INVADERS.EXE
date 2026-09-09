@@ -4,6 +4,8 @@ import { ArmoredPR } from '../entities/ArmoredPR';
 import { IssueBomber } from '../entities/IssueBomber';
 import { MergeConflict } from '../entities/MergeConflict';
 import { DependencyDrone } from '../entities/DependencyDrone';
+import { BranchDrone } from '../entities/BranchDrone';
+import { SecuritySentinel } from '../entities/SecuritySentinel';
 import { Entity } from '../entities/Entity';
 import { WaveGenerator } from './WaveGenerator';
 
@@ -51,16 +53,42 @@ export class EnemyFactory {
         child2.parent = root;
         root.children.push(child1, child2);
         entities.push(root, child1, child2);
+      } else if (pt.type === 'branch') {
+        const branchList = gameData.branches && gameData.branches.length > 0 ? gameData.branches : ['feat/auth', 'refactor/core', 'fix/pipeline', 'feat/stream'];
+        const branchName = branchList[depIdx % branchList.length];
+        depIdx++;
+        entities.push(new BranchDrone(pt.x, pt.y, branchName, false));
+      } else if (pt.type === 'security') {
+        entities.push(new SecuritySentinel(pt.x, pt.y));
       } else {
-        // Standard Commit Invader
+        // Standard Commit Invader with rich semantic git coloration
         const commit = gameData.commits[commitIdx % Math.max(1, gameData.commits.length)] || {
           sha: `0x${(commitIdx + 10).toString(16)}`,
           message: `feat: commit patch ${commitIdx + 1}`,
           author: gameData.authorName,
         };
         commitIdx++;
+
+        // Diverse semantic color assignment (no boring monochrome repeats)
+        let commitColor = gameData.languageColor;
+        const msg = (commit.message || '').toLowerCase();
+        if (msg.includes('fix') || msg.includes('hotfix') || msg.includes('bug') || msg.includes('patch')) {
+          commitColor = '#ff0055'; // Hotfix Crimson
+        } else if (msg.includes('merge') || msg.includes('rebase') || msg.includes('pr')) {
+          commitColor = '#f59e0b'; // Merge Amber
+        } else if (msg.includes('feat') || msg.includes('feature') || msg.includes('add')) {
+          commitColor = '#00e5ff'; // Feature Cyan
+        } else if (msg.includes('refactor') || msg.includes('perf') || msg.includes('core')) {
+          commitColor = '#10b981'; // Performance Emerald
+        } else if (msg.includes('docs') || msg.includes('chore') || msg.includes('style') || msg.includes('test')) {
+          commitColor = '#a855f7'; // Test/Chore Violet
+        } else {
+          const paletteCycle = ['#00e5ff', '#10b981', '#f59e0b', '#a855f7', '#ff0055', '#38bdf8'];
+          commitColor = paletteCycle[commitIdx % paletteCycle.length];
+        }
+
         entities.push(
-          new Invader(pt.x, pt.y, commit.sha, commit.message, commit.author, gameData.languageColor)
+          new Invader(pt.x, pt.y, commit.sha, commit.message, commit.author, commitColor)
         );
       }
     });

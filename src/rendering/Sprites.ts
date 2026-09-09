@@ -1,8 +1,27 @@
+/**
+ * GIT_INVADERS.EXE // SPRITE ORCHESTRATION PIPELINE
+ * Central graphic dispatcher for ships, invaders, and modular boss leviathans.
+ * Delegating to specialized industrial procedural renderers:
+ * - ShipComposer (Modular 11-subsystem player ship renderer)
+ * - CommitRenderer (Symmetrical drone with panel grooves and SHA stamp)
+ * - PRRenderer (Armored diamond cruiser with 4-quadrant shield ring)
+ * - IssueRenderer (Biomechanical arachnid drone with articulated leg servos)
+ * - BranchRenderer (Forked switchblade geometry with dual diverging thrusters)
+ * - SecurityRenderer (Fortress cybersecurity bastion with cryptographic padlock)
+ * - BossModularRenderer (Multi-module leviathans with phase transformations)
+ */
+
 import { ShipComposer, ShipDesign } from './ShipComposer';
+import { CommitRenderer } from './enemies/CommitRenderer';
+import { PRRenderer } from './enemies/PRRenderer';
+import { IssueRenderer } from './enemies/IssueRenderer';
+import { BranchRenderer } from './enemies/BranchRenderer';
+import { SecurityRenderer } from './enemies/SecurityRenderer';
+import { BossModularRenderer } from './enemies/BossModularRenderer';
 
 export class Sprites {
   /**
-   * Draws the Compiler Player Ship with Layered Procedural Geometry
+   * Draws the Player Ship with Layered Procedural Geometry & Secondary Motion
    */
   public static drawPlayer(
     ctx: CanvasRenderingContext2D,
@@ -17,7 +36,10 @@ export class Sprites {
     time: number = 0,
     hpRatio: number = 1.0,
     isThrusting: boolean = false,
-    shipId: string = 'compiler_delta'
+    shipId: string = 'compiler_delta',
+    vx: number = 0,
+    isFiring: boolean = false,
+    lod: number = 1
   ): void {
     const baseDesign = ShipComposer.createPreset(shipId);
     const design: ShipDesign = {
@@ -42,12 +64,18 @@ export class Sprites {
         hasShield,
         isOverdrive: overdriveCharged,
         isThrusting,
+      },
+      {
+        lod,
+        vx,
+        isFiring,
+        isHovering: lod === 0,
       }
     );
   }
 
   /**
-   * Draws Basic Commit Invader (Traditional retro pixel silhouette with animated limbs)
+   * Draws Basic Commit Invader (Modular drone with central commit node, stabilizers & floating SHA tag)
    */
   public static drawCommitInvader(
     ctx: CanvasRenderingContext2D,
@@ -56,53 +84,14 @@ export class Sprites {
     width: number,
     height: number,
     animFrame: number,
-    color: string = '#00ff66'
+    color: string = '#00ff66',
+    commitSha: string = '7f3a2c'
   ): void {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.fillStyle = color;
-
-    // Classic 8x8 matrix pixel invader
-    const pixelW = width / 8;
-    const pixelH = height / 8;
-
-    const frameA = [
-      '  ████  ',
-      ' ██████ ',
-      '████████',
-      '██ ██ ██',
-      '████████',
-      '  █  █  ',
-      ' █ ██ █ ',
-      '█ █  █ █',
-    ];
-
-    const frameB = [
-      '  ████  ',
-      ' ██████ ',
-      '████████',
-      '██ ██ ██',
-      '████████',
-      ' █ ██ █ ',
-      '█      █',
-      ' █    █ ',
-    ];
-
-    const currentFrame = animFrame % 2 === 0 ? frameA : frameB;
-
-    for (let r = 0; r < 8; r++) {
-      for (let c = 0; c < 8; c++) {
-        if (currentFrame[r][c] === '█') {
-          ctx.fillRect(c * pixelW, r * pixelH, pixelW + 0.5, pixelH + 0.5);
-        }
-      }
-    }
-
-    ctx.restore();
+    CommitRenderer.render(ctx, x, y, width, height, animFrame, color, commitSha);
   }
 
   /**
-   * Draws Armored Pull Request Invader (Heavy cyber cruiser with visible shield ring)
+   * Draws Armored Pull Request Invader (Heavy cyber cruiser with 4-quadrant segmented shield & status badge)
    */
   public static drawArmoredPR(
     ctx: CanvasRenderingContext2D,
@@ -112,84 +101,95 @@ export class Sprites {
     height: number,
     shields: number,
     maxShields: number,
-    prNumber: number = 428,
+    prNumber: number = 42,
     status: string = 'OPEN'
   ): void {
-    ctx.save();
-    ctx.translate(x + width / 2, y + height / 2);
-
-    // Compact Tactical PR Code Badge (Single line to prevent row bleed)
-    ctx.font = 'bold 7.5px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#c084fc';
-    ctx.textAlign = 'center';
-    ctx.fillText(`#PR ${prNumber}`, 0, -height / 2 - 6);
-
-    // Segmented Shield Bar
-    if (shields > 0) {
-      const segW = 6;
-      const segH = 2.5;
-      const gap = 2;
-      const totalW = maxShields * segW + (maxShields - 1) * gap;
-      const startX = -totalW / 2;
-      const barY = -height / 2 - 1;
-
-      for (let s = 0; s < maxShields; s++) {
-        if (s < shields) {
-          ctx.fillStyle = shields > 1 ? '#c084fc' : '#ec4899';
-          ctx.fillRect(startX + s * (segW + gap), barY, segW, segH);
-        } else {
-          ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-          ctx.fillRect(startX + s * (segW + gap), barY, segW, segH);
-        }
-      }
-    }
-
-    // Shield Halo (Strictly contained within cruiser footprint)
-    if (shields > 0) {
-      const shieldRatio = shields / maxShields;
-      ctx.strokeStyle = shieldRatio > 0.6 ? '#c084fc' : '#ec4899';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(0, 0, width * 0.46, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-
-    // Heavy Diamond Cruiser
-    ctx.fillStyle = '#1e1b4b';
-    ctx.strokeStyle = '#a855f7';
-    ctx.lineWidth = 2;
-
-    ctx.beginPath();
-    ctx.moveTo(0, height / 2); // Front prow
-    ctx.lineTo(width / 2, 0);
-    ctx.lineTo(width * 0.35, -height / 2);
-    ctx.lineTo(-width * 0.35, -height / 2);
-    ctx.lineTo(-width / 2, 0);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
-
-    // PR Merge icon badge (two nodes connected by branch line)
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(-width * 0.15, -height * 0.1, 3, 0, Math.PI * 2);
-    ctx.arc(width * 0.15, height * 0.1, 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.strokeStyle = '#38bdf8';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(-width * 0.15, -height * 0.1);
-    ctx.lineTo(width * 0.15, height * 0.1);
-    ctx.stroke();
-
-    ctx.restore();
+    PRRenderer.render(ctx, x, y, width, height, shields, maxShields, prNumber, status);
   }
 
   /**
-   * Draws Issue Bomber (Erratic flying bug with pulsing red core)
+   * Draws Issue Bug Bomber (Biomechanical arachnid drone with animated legs, red eye & targeting reticle)
    */
   public static drawIssueBomber(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    time: number,
+    isDiving: boolean = false
+  ): void {
+    IssueRenderer.render(ctx, x, y, width, height, time, isDiving);
+  }
+
+  /**
+   * Draws Branch Drone (Forked bifurcated switchblade drone)
+   */
+  public static drawBranchDrone(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    time: number,
+    isChild: boolean = false,
+    branchName: string = 'feat/split'
+  ): void {
+    const animFrame = Math.floor(time * 6);
+    BranchRenderer.render(ctx, x, y, width, height, animFrame, isChild ? '#38bdf8' : '#fbbf24');
+
+    if (!isChild) {
+      ctx.save();
+      ctx.font = 'bold 6.5px "JetBrains Mono", monospace';
+      ctx.fillStyle = 'rgba(251, 191, 36, 0.75)';
+      ctx.textAlign = 'center';
+      ctx.fillText(branchName.slice(0, 10), x + width / 2, y - 5);
+      ctx.restore();
+    }
+  }
+
+  /**
+   * Draws Security Sentinel (Heavy cyber tank with digital padlock & deployable firewall barricade)
+   */
+  public static drawSecuritySentinel(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    time: number,
+    firewallActive: boolean,
+    hpRatio: number = 1.0
+  ): void {
+    SecurityRenderer.render(ctx, x, y, width, height, time, firewallActive);
+
+    // Deployable Firewall Laser Barricade
+    if (firewallActive) {
+      ctx.save();
+      const wallW = width * 1.5;
+      const wallY = y + height + 6;
+      ctx.strokeStyle = '#ef4444';
+      ctx.shadowColor = '#ef4444';
+      ctx.shadowBlur = 10;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x + width / 2 - wallW / 2, wallY);
+      ctx.lineTo(x + width / 2 + wallW / 2, wallY);
+      ctx.stroke();
+
+      // Firewall label
+      ctx.font = 'bold 7px "JetBrains Mono", monospace';
+      ctx.fillStyle = '#ef4444';
+      ctx.textAlign = 'center';
+      ctx.fillText('[ FIREWALL ACTIVE ]', x + width / 2, wallY + 11);
+      ctx.restore();
+    }
+  }
+
+  /**
+   * Draws Mystery Octocat (High-speed contributor reconnaissance vessel)
+   */
+  public static drawMysteryOctocat(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
@@ -200,49 +200,38 @@ export class Sprites {
     ctx.save();
     ctx.translate(x + width / 2, y + height / 2);
 
-    const pulse = 0.8 + Math.sin(time * 8) * 0.2;
-    const wingAngle = Math.sin(time * 14) * 0.35;
+    const pulse = 0.85 + Math.sin(time * 8) * 0.15;
 
-    // Wings
-    ctx.strokeStyle = '#ef4444';
+    // Glowing Orbital Aura
+    ctx.fillStyle = `rgba(168, 85, 247, ${0.15 * pulse})`;
+    ctx.beginPath();
+    ctx.arc(0, 0, width * 0.58, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Streamlined Carrier Hull
+    ctx.fillStyle = '#1e1b4b';
+    ctx.strokeStyle = '#c084fc';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-width / 2, -height * 0.2 + wingAngle * 9);
-    ctx.lineTo(0, 0);
-    ctx.lineTo(width / 2, -height * 0.2 - wingAngle * 9);
-    ctx.stroke();
-
-    // Bug Body
-    ctx.fillStyle = '#450a0a';
-    ctx.strokeStyle = '#f87171';
-    ctx.lineWidth = 1.5;
-
-    ctx.beginPath();
-    ctx.ellipse(0, 0, width * 0.35, height * 0.45, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, 0, width * 0.45, height * 0.35, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
-    // Pulsing Hazard Core
-    ctx.fillStyle = `rgba(239, 68, 68, ${pulse})`;
-    ctx.beginPath();
-    ctx.arc(0, height * 0.08, 4.5 * pulse, 0, Math.PI * 2);
-    ctx.fill();
+    // Octocat Silhouette Icon in Center
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = '#c084fc';
+    ctx.shadowBlur = 8;
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('(=^..^=)', 0, 0);
+    ctx.shadowBlur = 0;
 
     ctx.restore();
   }
 
   /**
-   * Draws Procedural CODE BOSS with 10 Distinct Visual Chassis Archetypes:
-   * 01. 'commit_core': Circular mechanical ring with </> reactor & orbiting commit drones
-   * 02. 'the_fortress': Bulky PR armor fortress with 4 orbital deflector plates
-   * 03. 'issue_swarm': Living bio-mechanical swarm with articulated tentacles & bug drones
-   * 04. 'dependency_hydra': Emerald multi-head hydra with linked dependency node conduits
-   * 05. 'merge_conflict': Split dual-color ship (cyan HEAD / red branch) with diff divider
-   * 06. 'contributor_overlord': Star carrier with Octocat command core & fleet docking bays
-   * 07. 'branchlord': Fractal multi-winged golden delta interceptor with branch vanes
-   * 08. 'rebase_phantom': Stealth obsidian-crimson needle dagger with glitch afterimages
-   * 09. 'security_sentinel': Cyber-aegis dreadnought with digital padlock & hexagonal firewalls
-   * 10. 'code_abyss': Gravitational singularity vortex with event horizon & code debris
+   * Draws Procedural CODE BOSS with Multi-Module Destructible Anatomy & Phase Transformations
    */
   public static drawBoss(
     ctx: CanvasRenderingContext2D,
@@ -255,757 +244,16 @@ export class Sprites {
     coreColor: string = '#00e5ff',
     chassisType: string = 'commit_core'
   ): void {
-    ctx.save();
-    ctx.translate(x + width / 2, y + height / 2);
-
-    const isRage = phase >= 3;
-    const primaryColor = isRage ? '#ff0055' : coreColor;
-    const secondaryColor = isRage ? '#f43f5e' : '#a855f7';
-
-    // Universal Rotating Deflector Matrix for Phase 2+
-    if (phase >= 2) {
-      ctx.save();
-      ctx.rotate(time * 1.8);
-      ctx.strokeStyle = secondaryColor;
-      ctx.lineWidth = 2.5;
-      ctx.setLineDash([14, 10]);
-      ctx.beginPath();
-      ctx.arc(0, 0, width * 0.64, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
-
-    switch (chassisType) {
-      // ==========================================
-      // 01. THE COMMIT CORE
-      // ==========================================
-      case 'commit_core': {
-        // Outer rotating gear armature
-        ctx.save();
-        ctx.rotate(time * 0.9);
-        ctx.strokeStyle = primaryColor;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        const teeth = 12;
-        for (let i = 0; i < teeth; i++) {
-          const a = (i / teeth) * Math.PI * 2;
-          const r1 = width * 0.44;
-          const r2 = width * 0.52;
-          ctx.lineTo(Math.cos(a) * r1, Math.sin(a) * r1);
-          ctx.lineTo(Math.cos(a + 0.1) * r2, Math.sin(a + 0.1) * r2);
-          ctx.lineTo(Math.cos(a + 0.2) * r2, Math.sin(a + 0.2) * r2);
-          ctx.lineTo(Math.cos(a + 0.3) * r1, Math.sin(a + 0.3) * r1);
-        }
-        ctx.closePath();
-        ctx.fillStyle = '#0a0d18';
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-
-        // 8 Orbiting Commit Drones
-        for (let i = 0; i < 8; i++) {
-          const a = time * 2.2 + (i * Math.PI * 2) / 8;
-          const cx = Math.cos(a) * (width * 0.56);
-          const cy = Math.sin(a) * (height * 0.52);
-          ctx.fillStyle = i % 2 === 0 ? '#ff0055' : '#00e5ff';
-          ctx.beginPath();
-          ctx.arc(cx, cy, 4, 0, Math.PI * 2);
-          ctx.fill();
-        }
-
-        // Concentric Reactor Housing
-        ctx.fillStyle = '#111827';
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(0, 0, width * 0.28, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // Pulsing Central Reactor
-        const pulse = 0.85 + Math.sin(time * 6) * 0.2;
-        const grad = ctx.createRadialGradient(0, 0, 2, 0, 0, 22 * pulse);
-        grad.addColorStop(0, '#ffffff');
-        grad.addColorStop(0.5, '#ff0055');
-        grad.addColorStop(1, '#3b0764');
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 20 * pulse, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Reactor Symbol: </>
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 15px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('</>', 0, 1);
-        break;
-      }
-
-      // ==========================================
-      // 02. THE FORTRESS
-      // ==========================================
-      case 'the_fortress': {
-        // 4 Deployable Orbital Deflector Pylons
-        const pylonOffsets = [
-          [-width * 0.52, -height * 0.35],
-          [width * 0.52, -height * 0.35],
-          [-width * 0.56, height * 0.25],
-          [width * 0.56, height * 0.25],
-        ];
-        pylonOffsets.forEach(([px, py]) => {
-          ctx.strokeStyle = secondaryColor;
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          ctx.moveTo(0, 0);
-          ctx.lineTo(px, py);
-          ctx.stroke();
-
-          ctx.fillStyle = '#06b6d4';
-          ctx.beginPath();
-          ctx.arc(px, py, 6, 0, Math.PI * 2);
-          ctx.fill();
-        });
-
-        // Heavy Armor Fortress Hull
-        ctx.fillStyle = '#081326';
-        ctx.strokeStyle = '#00e5ff';
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(0, height * 0.46);
-        ctx.lineTo(width * 0.42, height * 0.22);
-        ctx.lineTo(width * 0.48, -height * 0.18);
-        ctx.lineTo(width * 0.3, -height * 0.44);
-        ctx.lineTo(-width * 0.3, -height * 0.44);
-        ctx.lineTo(-width * 0.48, -height * 0.18);
-        ctx.lineTo(-width * 0.42, height * 0.22);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Central PR Hex Shield
-        ctx.fillStyle = '#0f2942';
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        for (let i = 0; i < 6; i++) {
-          const a = (i / 6) * Math.PI * 2 + Math.PI / 6;
-          const hx = Math.cos(a) * 26;
-          const hy = Math.sin(a) * 26;
-          if (i === 0) ctx.moveTo(hx, hy);
-          else ctx.lineTo(hx, hy);
-        }
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // PR Emblem
-        ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 16px monospace';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('PR', 0, 1);
-        break;
-      }
-
-      // ==========================================
-      // 03. THE ISSUE SWARM
-      // ==========================================
-      case 'issue_swarm': {
-        // 6 Articulated Undulating Bio-Tentacles
-        [-1, 1].forEach((dir) => {
-          for (let tIdx = 0; tIdx < 3; tIdx++) {
-            const wave = Math.sin(time * 4 + tIdx * 1.5) * 12;
-            ctx.strokeStyle = secondaryColor;
-            ctx.lineWidth = 3 - tIdx * 0.6;
-            ctx.beginPath();
-            ctx.moveTo(dir * width * 0.18, -height * 0.1 + tIdx * 14);
-            ctx.bezierCurveTo(
-              dir * (width * 0.42 + wave),
-              height * 0.1 + tIdx * 10,
-              dir * (width * 0.52 - wave),
-              height * 0.4 + tIdx * 8,
-              dir * (width * 0.62 + wave * 1.3),
-              height * 0.5 + tIdx * 12
-            );
-            ctx.stroke();
-
-            // Tentacle tip orb
-            ctx.fillStyle = '#ff007f';
-            ctx.beginPath();
-            ctx.arc(dir * (width * 0.62 + wave * 1.3), height * 0.5 + tIdx * 12, 4, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        });
-
-        // Living Chitin Central Bio-Carapace
-        ctx.fillStyle = '#1e082b';
-        ctx.strokeStyle = '#c084fc';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.ellipse(0, 0, width * 0.32, height * 0.36, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // 6 Orbiting Bug Mites
-        for (let b = 0; b < 6; b++) {
-          const bAngle = time * 3.2 + (b * Math.PI * 2) / 6;
-          const bx = Math.cos(bAngle) * (width * 0.46);
-          const by = Math.sin(bAngle) * (height * 0.38);
-          ctx.fillStyle = '#ec4899';
-          ctx.fillRect(bx - 3, by - 3, 6, 6);
-        }
-
-        // Pulsing Cyclops Bio-Eye
-        const eyePupil = Math.sin(time * 5) * 3;
-        ctx.fillStyle = '#090111';
-        ctx.beginPath();
-        ctx.arc(0, 0, 20, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.strokeStyle = '#f43f5e';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        ctx.fillStyle = '#ff0055';
-        ctx.beginPath();
-        ctx.arc(eyePupil, 0, 9, 0, Math.PI * 2);
-        ctx.fill();
-        break;
-      }
-
-      // ==========================================
-      // 04. THE DEPENDENCY HYDRA (CYBERNETIC MULTI-HEADED DRAGON)
-      // ==========================================
-      case 'dependency_hydra': {
-        const headCount = 5;
-        const headCoords: { x: number; y: number; angle: number; idx: number }[] = [];
-        const coreX = 0;
-        const coreY = height * 0.15;
-
-        // 1. Calculate articulated serpentine neck paths and head anchors
-        for (let h = 0; h < headCount; h++) {
-          const spreadRatio = (h - (headCount - 1) / 2) / ((headCount - 1) / 2); // -1.0 to 1.0
-          const baseAngle = -Math.PI / 2 + spreadRatio * 0.95;
-          const slither = Math.sin(time * 2.8 + h * 1.3) * 10;
-          const hDist = width * (0.36 + Math.abs(spreadRatio) * 0.08);
-          const hx = Math.cos(baseAngle) * hDist + slither * 0.6;
-          const hy = Math.sin(baseAngle) * (height * 0.44) + Math.cos(time * 2.2 + h) * 6 - 8;
-          headCoords.push({ x: hx, y: hy, angle: baseAngle, idx: h });
-
-          // Draw Articulated Segmented Vertebrae Neck
-          const segments = 7;
-          for (let s = 1; s <= segments; s++) {
-            const tSeg = s / segments;
-            const segX = coreX + (hx - coreX) * tSeg + Math.sin(time * 3 + h * 1.5 + s * 0.7) * (6 * Math.sin(tSeg * Math.PI));
-            const segY = coreY + (hy - coreY) * tSeg - (1 - tSeg) * 8;
-            const segSize = 5 + (1 - tSeg) * 4;
-
-            // Backbone wire link
-            if (s > 1) {
-              const prevTSeg = (s - 1) / segments;
-              const prevX = coreX + (hx - coreX) * prevTSeg + Math.sin(time * 3 + h * 1.5 + (s - 1) * 0.7) * (6 * Math.sin(prevTSeg * Math.PI));
-              const prevY = coreY + (hy - coreY) * prevTSeg - (1 - prevTSeg) * 8;
-              
-              ctx.strokeStyle = h % 2 === 0 ? 'rgba(16, 185, 129, 0.7)' : 'rgba(56, 189, 248, 0.7)';
-              ctx.lineWidth = 3;
-              ctx.beginPath();
-              ctx.moveTo(prevX, prevY);
-              ctx.lineTo(segX, segY);
-              ctx.stroke();
-            }
-
-            // Segmented Vertebra armor scale
-            ctx.fillStyle = '#061a12';
-            ctx.strokeStyle = h % 2 === 0 ? '#10b981' : '#38bdf8';
-            ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.arc(segX, segY, segSize, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.stroke();
-
-            // Inner cyber conduit node
-            ctx.fillStyle = '#ffffff';
-            ctx.beginPath();
-            ctx.arc(segX, segY, 1.5, 0, Math.PI * 2);
-            ctx.fill();
-          }
-        }
-
-        // 2. Central Nexus / Reactor Body (Intricate Hexagonal Carapace)
-        ctx.save();
-        // Outer energy aura
-        const nexusGrad = ctx.createRadialGradient(coreX, coreY, 5, coreX, coreY, width * 0.28);
-        nexusGrad.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
-        nexusGrad.addColorStop(0.6, 'rgba(6, 78, 59, 0.15)');
-        nexusGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = nexusGrad;
-        ctx.beginPath();
-        ctx.arc(coreX, coreY, width * 0.28, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Main Carapace Plating
-        ctx.fillStyle = '#03140e';
-        ctx.strokeStyle = '#10b981';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(coreX, coreY + height * 0.32);
-        ctx.lineTo(coreX + width * 0.22, coreY + height * 0.1);
-        ctx.lineTo(coreX + width * 0.16, coreY - height * 0.2);
-        ctx.lineTo(coreX - width * 0.16, coreY - height * 0.2);
-        ctx.lineTo(coreX - width * 0.22, coreY + height * 0.1);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Interlocking Inner Shield Plating
-        ctx.fillStyle = '#06281b';
-        ctx.strokeStyle = '#34d399';
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.moveTo(coreX, coreY + height * 0.22);
-        ctx.lineTo(coreX + width * 0.14, coreY + height * 0.06);
-        ctx.lineTo(coreX + width * 0.1, coreY - height * 0.12);
-        ctx.lineTo(coreX - width * 0.1, coreY - height * 0.12);
-        ctx.lineTo(coreX - width * 0.14, coreY + height * 0.06);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Pulsing Quantum Dependency Core
-        const corePulse = 0.85 + Math.sin(time * 5) * 0.2;
-        const coreGrad = ctx.createRadialGradient(coreX, coreY, 2, coreX, coreY, 18 * corePulse);
-        coreGrad.addColorStop(0, '#ffffff');
-        coreGrad.addColorStop(0.4, '#34d399');
-        coreGrad.addColorStop(0.8, '#059669');
-        coreGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = coreGrad;
-        ctx.beginPath();
-        ctx.arc(coreX, coreY, 18 * corePulse, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Orbiting Ring with recursive dependency ticks
-        ctx.strokeStyle = 'rgba(52, 211, 153, 0.6)';
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(coreX, coreY, width * 0.18, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Orbiting Dependency Nodes
-        for (let n = 0; n < 4; n++) {
-          const nAng = time * 2.2 + (n * Math.PI * 2) / 4;
-          const nx = coreX + Math.cos(nAng) * (width * 0.18);
-          const ny = coreY + Math.sin(nAng) * (height * 0.14);
-          ctx.fillStyle = '#10b981';
-          ctx.fillRect(nx - 3, ny - 3, 6, 6);
-          ctx.strokeStyle = '#ffffff';
-          ctx.strokeRect(nx - 3, ny - 3, 6, 6);
-        }
-        ctx.restore();
-
-        // 3. Render 5 Articulated Cyber Dragon Heads with Glowing Visors & Horns
-        headCoords.forEach(({ x: hx, y: hy, angle, idx }) => {
-          ctx.save();
-          ctx.translate(hx, hy);
-          ctx.rotate(angle + Math.PI / 2 + Math.sin(time * 2 + idx) * 0.15);
-
-          const headScale = idx === 2 ? 1.15 : 0.95; // Alpha center head is larger
-          ctx.scale(headScale, headScale);
-
-          // Head Back Horns / Spines
-          ctx.fillStyle = '#064e3b';
-          ctx.strokeStyle = '#10b981';
-          ctx.lineWidth = 1.5;
-          ctx.beginPath();
-          ctx.moveTo(-10, 8);
-          ctx.lineTo(-16, 18);
-          ctx.lineTo(-6, 10);
-          ctx.lineTo(0, 16);
-          ctx.lineTo(6, 10);
-          ctx.lineTo(16, 18);
-          ctx.lineTo(10, 8);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          // Main Dragon Skull (Armored Polygon)
-          ctx.fillStyle = '#021810';
-          ctx.strokeStyle = idx % 2 === 0 ? '#10b981' : '#38bdf8';
-          ctx.lineWidth = 2.2;
-          ctx.beginPath();
-          ctx.moveTo(0, -16); // Snout tip
-          ctx.lineTo(9, -8);  // Right cheek
-          ctx.lineTo(11, 6);  // Right jaw
-          ctx.lineTo(0, 10);  // Skull base
-          ctx.lineTo(-11, 6); // Left jaw
-          ctx.lineTo(-9, -8); // Left cheek
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-
-          // Jaw Razor Fangs
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.moveTo(-6, -6);
-          ctx.lineTo(-4, -12);
-          ctx.lineTo(-2, -6);
-          ctx.lineTo(2, -6);
-          ctx.lineTo(4, -12);
-          ctx.lineTo(6, -6);
-          ctx.fill();
-
-          // Glowing Cyber Visor Eyes
-          const eyeGlow = idx % 2 === 0 ? '#34d399' : '#38bdf8';
-          ctx.fillStyle = eyeGlow;
-          ctx.shadowColor = eyeGlow;
-          ctx.shadowBlur = 6;
-          // Left Eye Slit
-          ctx.beginPath();
-          ctx.moveTo(-7, -2);
-          ctx.lineTo(-2, -5);
-          ctx.lineTo(-3, -1);
-          ctx.closePath();
-          ctx.fill();
-          // Right Eye Slit
-          ctx.beginPath();
-          ctx.moveTo(7, -2);
-          ctx.lineTo(2, -5);
-          ctx.lineTo(3, -1);
-          ctx.closePath();
-          ctx.fill();
-          ctx.shadowBlur = 0;
-
-          // Mouth Plasma Breath Node
-          ctx.fillStyle = '#ffffff';
-          ctx.beginPath();
-          ctx.arc(0, -12, 2.5, 0, Math.PI * 2);
-          ctx.fill();
-
-          ctx.restore();
-        });
-        break;
-      }
-
-
-      // ==========================================
-      // 05. THE MERGE CONFLICT
-      // ==========================================
-      case 'merge_conflict': {
-        const splitOffset = Math.sin(time * 4) * 4;
-
-        // LEFT HALF: HEAD (Cyan)
-        ctx.save();
-        ctx.translate(-splitOffset, 0);
-        ctx.fillStyle = '#041b24';
-        ctx.strokeStyle = '#00e5ff';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(-3, -height * 0.44);
-        ctx.lineTo(-width * 0.34, -height * 0.2);
-        ctx.lineTo(-width * 0.48, height * 0.15);
-        ctx.lineTo(-width * 0.24, height * 0.42);
-        ctx.lineTo(-3, height * 0.32);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#00e5ff';
-        ctx.font = 'bold 11px monospace';
-        ctx.textAlign = 'right';
-        ctx.fillText('<<<< HEAD', -12, 0);
-        ctx.restore();
-
-        // RIGHT HALF: BRANCH (Red/Magenta)
-        ctx.save();
-        ctx.translate(splitOffset, 0);
-        ctx.fillStyle = '#260611';
-        ctx.strokeStyle = '#ff0055';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(3, -height * 0.44);
-        ctx.lineTo(width * 0.34, -height * 0.2);
-        ctx.lineTo(width * 0.48, height * 0.15);
-        ctx.lineTo(width * 0.24, height * 0.42);
-        ctx.lineTo(3, height * 0.32);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = '#ff0055';
-        ctx.font = 'bold 11px monospace';
-        ctx.textAlign = 'left';
-        ctx.fillText('branch >>>>', 12, 0);
-        ctx.restore();
-
-        // Central Divider: =======
-        ctx.strokeStyle = '#facc15';
-        ctx.lineWidth = 2.5;
-        ctx.beginPath();
-        ctx.moveTo(0, -height * 0.42);
-        ctx.lineTo(0, height * 0.38);
-        ctx.stroke();
-        break;
-      }
-
-      // ==========================================
-      // 06. THE CONTRIBUTOR OVERLORD
-      // ==========================================
-      case 'contributor_overlord':
-      case 'octo_destroyer': {
-        // Swept Cyber Tendrils (6 lateral mechanical arms)
-        [-1, 1].forEach((dir) => {
-          [0.2, 0.4, 0.6].forEach((offset, idx) => {
-            const wave = Math.sin(time * 3 + idx) * 8;
-            ctx.strokeStyle = secondaryColor;
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(dir * width * 0.2, -height * 0.1 + idx * 12);
-            ctx.quadraticCurveTo(
-              dir * (width * 0.45 + wave),
-              height * 0.1 + idx * 10,
-              dir * (width * 0.55 + wave * 1.2),
-              height * 0.45 + idx * 6
-            );
-            ctx.stroke();
-          });
-        });
-
-        // Main Octo Fuselage Hull
-        ctx.fillStyle = '#060a14';
-        ctx.strokeStyle = primaryColor;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, height * 0.4);
-        ctx.lineTo(width * 0.35, height * 0.15);
-        ctx.lineTo(width * 0.4, -height * 0.25);
-        ctx.lineTo(width * 0.2, -height * 0.45);
-        ctx.lineTo(0, -height * 0.35);
-        ctx.lineTo(-width * 0.2, -height * 0.45);
-        ctx.lineTo(-width * 0.4, -height * 0.25);
-        ctx.lineTo(-width * 0.35, height * 0.15);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Pulsing Singularity Quantum Core
-        const corePulse = 0.8 + Math.sin(time * 6) * 0.25;
-        const coreGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, 24 * corePulse);
-        coreGrad.addColorStop(0, '#ffffff');
-        coreGrad.addColorStop(0.4, primaryColor);
-        coreGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = coreGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 22 * corePulse, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Dual Command Bridge Visors
-        ctx.fillStyle = isRage ? '#ff0055' : '#38bdf8';
-        ctx.fillRect(-width * 0.22, -height * 0.2, width * 0.16, 5);
-        ctx.fillRect(width * 0.06, -height * 0.2, width * 0.16, 5);
-        break;
-      }
-
-      // ==========================================
-      // 07. THE BRANCHLORD
-      // ==========================================
-      case 'branchlord':
-      case 'quantum_citadel': {
-        // Multi-Layered Fractal Branch Wings
-        const branchLayers = 3;
-        for (let l = 1; l <= branchLayers; l++) {
-          const lWave = Math.sin(time * 3 + l) * 5;
-          const lSpan = width * (0.28 + l * 0.09);
-          const lDepth = height * (0.12 + l * 0.1);
-          ctx.strokeStyle = l % 2 === 0 ? '#facc15' : '#10b981';
-          ctx.lineWidth = 2.2;
-          ctx.beginPath();
-          ctx.moveTo(-lSpan, lDepth + lWave);
-          ctx.lineTo(0, -height * 0.35);
-          ctx.lineTo(lSpan, lDepth + lWave);
-          ctx.stroke();
-
-          // Branch Node Emitters
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(-lSpan - 3, lDepth + lWave - 3, 6, 6);
-          ctx.fillRect(lSpan - 3, lDepth + lWave - 3, 6, 6);
-        }
-
-        // Diamond Central Command Pod
-        ctx.fillStyle = '#1c1917';
-        ctx.strokeStyle = '#fbbf24';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, -height * 0.44);
-        ctx.lineTo(width * 0.22, 0);
-        ctx.lineTo(0, height * 0.44);
-        ctx.lineTo(-width * 0.22, 0);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Pulsing Golden Core
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath();
-        ctx.arc(0, 0, 14, 0, Math.PI * 2);
-        ctx.fill();
-        break;
-      }
-
-      // ==========================================
-      // 08. THE REBASE PHANTOM
-      // ==========================================
-      case 'rebase_phantom': {
-        // Speed Glitch Afterimage Trail
-        ctx.save();
-        ctx.globalAlpha = 0.35;
-        const trailOffset = Math.sin(time * 8) * 8;
-        ctx.fillStyle = '#ef4444';
-        ctx.beginPath();
-        ctx.moveTo(0 + trailOffset, height * 0.45);
-        ctx.lineTo(width * 0.46 + trailOffset, -height * 0.15);
-        ctx.lineTo(0 + trailOffset, -height * 0.48);
-        ctx.lineTo(-width * 0.46 + trailOffset, -height * 0.15);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-
-        // Razor-Sharp Needle Interceptor Hull
-        ctx.fillStyle = '#08080a';
-        ctx.strokeStyle = '#ef4444';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(0, height * 0.45); // Needle tail
-        ctx.lineTo(width * 0.44, -height * 0.12); // Starboard razor
-        ctx.lineTo(width * 0.18, -height * 0.32);
-        ctx.lineTo(0, -height * 0.48); // Nose probe
-        ctx.lineTo(-width * 0.18, -height * 0.32);
-        ctx.lineTo(-width * 0.44, -height * 0.12); // Port razor
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Crimson Spine Conduits
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 1.8;
-        ctx.beginPath();
-        ctx.moveTo(0, -height * 0.42);
-        ctx.lineTo(0, height * 0.38);
-        ctx.stroke();
-
-        // Cockpit Slit
-        ctx.fillStyle = '#ff0055';
-        ctx.fillRect(-width * 0.08, -height * 0.18, width * 0.16, 5);
-        break;
-      }
-
-      // ==========================================
-      // 09. THE SECURITY SENTINEL
-      // ==========================================
-      case 'security_sentinel':
-      case 'dreadnought_carrier': {
-        // 4 Orbiting Hexagonal Firewall Deflectors
-        for (let s = 0; s < 4; s++) {
-          const sAngle = time * 1.6 + (s * Math.PI * 2) / 4;
-          const sx = Math.cos(sAngle) * (width * 0.52);
-          const sy = Math.sin(sAngle) * (height * 0.38);
-          ctx.fillStyle = 'rgba(56, 189, 248, 0.25)';
-          ctx.strokeStyle = '#38bdf8';
-          ctx.lineWidth = 2;
-          ctx.beginPath();
-          for (let h = 0; h < 6; h++) {
-            const ha = (h / 6) * Math.PI * 2;
-            const hx = sx + Math.cos(ha) * 11;
-            const hy = sy + Math.sin(ha) * 11;
-            if (h === 0) ctx.moveTo(hx, hy);
-            else ctx.lineTo(hx, hy);
-          }
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-        }
-
-        // Heavy Cyber-Aegis Hull
-        ctx.fillStyle = '#071220';
-        ctx.strokeStyle = '#0284c7';
-        ctx.lineWidth = 3.5;
-        ctx.beginPath();
-        ctx.moveTo(0, height * 0.44);
-        ctx.lineTo(width * 0.38, height * 0.18);
-        ctx.lineTo(width * 0.42, -height * 0.3);
-        ctx.lineTo(0, -height * 0.42);
-        ctx.lineTo(-width * 0.42, -height * 0.3);
-        ctx.lineTo(-width * 0.38, height * 0.18);
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-
-        // Digital Lock Visor
-        ctx.strokeStyle = '#38bdf8';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(-10, -8, 20, 18);
-        ctx.beginPath();
-        ctx.arc(0, -8, 7, Math.PI, Math.PI * 2);
-        ctx.stroke();
-        break;
-      }
-
-      // ==========================================
-      // 10. THE CODE ABYSS
-      // ==========================================
-      case 'code_abyss':
-      case 'titan_skull':
-      default: {
-        // Swirling Gravitational Matter Accretion Disk
-        ctx.save();
-        ctx.rotate(time * 1.5);
-        ctx.strokeStyle = '#c084fc';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([8, 6]);
-        ctx.beginPath();
-        ctx.arc(0, 0, width * 0.52, 0, Math.PI * 2);
-        ctx.stroke();
-
-        ctx.rotate(-time * 2.5);
-        ctx.strokeStyle = '#ff007f';
-        ctx.setLineDash([12, 10]);
-        ctx.beginPath();
-        ctx.arc(0, 0, width * 0.42, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-
-        // Floating shattered code fragments
-        const frags = ['404', '{}', 'null', 'NaN'];
-        frags.forEach((txt, idx) => {
-          const fAngle = time * 2.0 + (idx * Math.PI * 2) / frags.length;
-          const fx = Math.cos(fAngle) * (width * 0.45);
-          const fy = Math.sin(fAngle) * (height * 0.36);
-          ctx.fillStyle = '#e879f9';
-          ctx.font = '10px monospace';
-          ctx.fillText(txt, fx, fy);
-        });
-
-        // Singularity Black Hole Void
-        ctx.fillStyle = '#000000';
-        ctx.strokeStyle = '#a855f7';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.arc(0, 0, width * 0.28, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-
-        // Inner Singularity Core
-        const singPulse = 0.85 + Math.sin(time * 8) * 0.25;
-        const singGrad = ctx.createRadialGradient(0, 0, 1, 0, 0, 18 * singPulse);
-        singGrad.addColorStop(0, '#ffffff');
-        singGrad.addColorStop(0.5, '#ec4899');
-        singGrad.addColorStop(1, '#000000');
-        ctx.fillStyle = singGrad;
-        ctx.beginPath();
-        ctx.arc(0, 0, 16 * singPulse, 0, Math.PI * 2);
-        ctx.fill();
-        break;
-      }
-    }
-
-    ctx.restore();
+    BossModularRenderer.render(
+      ctx,
+      x,
+      y,
+      width,
+      height,
+      phase,
+      time,
+      coreColor,
+      chassisType
+    );
   }
 }

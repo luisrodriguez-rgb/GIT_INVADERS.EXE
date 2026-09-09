@@ -20,6 +20,35 @@ body[data-theme="matrix"] .hud-cyan {
   color: #00ff66;
   text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
 }
+body[data-theme="matrix"] .lobby-frame-window {
+  background: radial-gradient(circle at 50% 10%, #031809 0%, #020f06 60%, #010803 100%);
+  border-color: rgba(0, 255, 102, 0.35);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(0, 255, 102, 0.05);
+}
+body[data-theme="matrix"] .hangar-left-col,
+body[data-theme="matrix"] .hangar-center-col,
+body[data-theme="matrix"] .boss-encounter-card,
+body[data-theme="matrix"] .boss-genome-card,
+body[data-theme="matrix"] .telemetry-specs-group,
+body[data-theme="matrix"] .special-ability-card,
+body[data-theme="matrix"] .genome-ratings-grid,
+body[data-theme="matrix"] .codex-master-modal,
+body[data-theme="matrix"] .codex-roster-col,
+body[data-theme="matrix"] .codex-dossier-col {
+  background: rgba(2, 14, 6, 0.9);
+  border-color: rgba(0, 255, 102, 0.25);
+}
+body[data-theme="matrix"] .deploy-hero-action-btn {
+  background: linear-gradient(135deg, #00ff66 0%, #059669 60%, #047857 100%);
+  border-color: #00ff66;
+  box-shadow: 0 0 25px rgba(0, 255, 102, 0.5);
+  color: #010903;
+}
+body[data-theme="matrix"] .quick-action-pill-btn {
+  background: rgba(2, 14, 6, 0.85);
+  border-color: rgba(0, 255, 102, 0.3);
+  color: #00ff66;
+}
 
 /* 2. Modo Claro (GitHub Light) */
 body[data-theme="light"] {
@@ -102,40 +131,254 @@ body[data-theme="light"] .overdrive-track {
   border-color: #d0d7de;
 }
 
-/* Light Theme overrides for Lobby */
-body[data-theme="light"] .lobby-card {
+/* Light Theme overrides for 3-Zone Hangar */
+body[data-theme="light"] .lobby-overlay {
+  background: rgba(240, 242, 245, 0.98);
+}
+body[data-theme="light"] .lobby-frame-window {
+  background: radial-gradient(circle at 50% 10%, #ffffff 0%, #f6f8fa 60%, #eaeff5 100%);
+  border-color: #d0d7de;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12);
+}
+body[data-theme="light"] .lobby-header-bar {
+  background: #ffffff;
+  border-bottom-color: #d0d7de;
+}
+body[data-theme="light"] .brand-main-title {
+  color: #1f2328;
+  text-shadow: none;
+}
+body[data-theme="light"] .brand-sub-title {
+  color: #0969da;
+}
+body[data-theme="light"] .octocat-logo-svg {
+  color: #24292f;
+  filter: none;
+}
+body[data-theme="light"] .nav-tabs-pill-row {
+  background: #eaeff5;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .nav-tab-pill {
+  color: #57606a;
+}
+body[data-theme="light"] .nav-tab-pill.active {
+  color: #0969da;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+body[data-theme="light"] .nav-tab-pill.active::after {
+  background: #0969da;
+  box-shadow: none;
+}
+body[data-theme="light"] .repo-pill-badge,
+body[data-theme="light"] .stars-badge-pill,
+body[data-theme="light"] .xp-badge-pill,
+body[data-theme="light"] .settings-cog-btn {
   background: #ffffff;
   border-color: #d0d7de;
   color: #1f2328;
-  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 }
-body[data-theme="light"] .lobby-title {
-  color: #1a7f37;
+body[data-theme="light"] .repo-slug {
+  color: #0969da;
 }
-body[data-theme="light"] .hangar-bay-panel,
-body[data-theme="light"] .pilot-ops-panel,
-body[data-theme="light"] .xp-balance-banner,
-body[data-theme="light"] .career-stats-box {
+body[data-theme="light"] .hangar-left-col,
+body[data-theme="light"] .hangar-center-col,
+body[data-theme="light"] .boss-encounter-card,
+body[data-theme="light"] .boss-genome-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+body[data-theme="light"] .col-section-header {
+  color: #1f2328;
+  border-bottom-color: #d0d7de;
+}
+body[data-theme="light"] .fleet-ship-card {
   background: #f6f8fa;
   border-color: #d0d7de;
-  color: #1f2328;
 }
-body[data-theme="light"] .ship-viewport-box {
+body[data-theme="light"] .fleet-ship-card:hover {
   background: #eaeff5;
-  border-color: #1a7f37;
+  border-color: #0969da;
 }
-body[data-theme="light"] .spec-cell {
-  background: #ffffff;
+body[data-theme="light"] .fleet-ship-card.equipped {
+  background: rgba(9, 105, 218, 0.08);
+  border-color: #0969da;
+  box-shadow: 0 0 8px rgba(9, 105, 218, 0.2);
+}
+body[data-theme="light"] .ship-card-name {
+  color: #1f2328;
+}
+body[data-theme="light"] .ship-card-class {
+  color: #656d76;
+}
+body[data-theme="light"] .equipped-tag-pill {
+  background: #0969da;
+  color: #ffffff;
+}
+body[data-theme="light"] .procedural-ship-box {
+  background: #f6f8fa;
   border-color: #d0d7de;
 }
-body[data-theme="light"] .lobby-skin-chip {
+body[data-theme="light"] .procedural-ship-box.equipped {
+  border-color: #0969da;
+  background: rgba(9, 105, 218, 0.08);
+}
+body[data-theme="light"] .proc-title {
+  color: #1f2328;
+}
+body[data-theme="light"] .proc-tag {
+  color: #0969da;
+}
+body[data-theme="light"] .center-ship-name {
+  color: #1f2328;
+}
+body[data-theme="light"] .center-ship-class {
+  color: #0969da;
+}
+body[data-theme="light"] .center-level-badge {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .lvl-txt {
+  color: #1f2328;
+}
+body[data-theme="light"] .lvl-pips .pip {
+  background: #d0d7de;
+}
+body[data-theme="light"] .lvl-pips .pip.filled {
+  background: #0969da;
+  box-shadow: none;
+}
+body[data-theme="light"] .holo-platform-viewport {
+  background: radial-gradient(circle at 50% 60%, rgba(9, 105, 218, 0.08) 0%, #f6f8fa 80%);
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .stage-chevron-btn {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #0969da;
+}
+body[data-theme="light"] .telemetry-specs-group,
+body[data-theme="light"] .special-ability-card,
+body[data-theme="light"] .genome-ratings-grid {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .spec-name,
+body[data-theme="light"] .g-lbl,
+body[data-theme="light"] .ability-card-title {
+  color: #57606a;
+}
+body[data-theme="light"] .spec-val,
+body[data-theme="light"] .g-val,
+body[data-theme="light"] .ability-desc {
+  color: #1f2328;
+}
+body[data-theme="light"] .stat-pip,
+body[data-theme="light"] .g-track {
+  background: #eaeff5;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .ability-name {
+  color: #0969da;
+}
+body[data-theme="light"] .ability-detail-btn,
+body[data-theme="light"] .boss-info-full-btn,
+body[data-theme="light"] .inspect-genome-cta-btn {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #0969da;
+}
+body[data-theme="light"] .boss-header-label,
+body[data-theme="light"] .genome-title,
+body[data-theme="light"] .boss-card-title {
+  color: #1f2328;
+}
+body[data-theme="light"] .boss-portrait-box {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .boss-concept-quote {
+  color: #57606a;
+}
+body[data-theme="light"] .recommended-ship-chip {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #0969da;
+}
+body[data-theme="light"] .quick-action-pill-btn {
   background: #ffffff;
   border-color: #d0d7de;
   color: #1f2328;
 }
-body[data-theme="light"] .primary-deploy-btn {
-  background: linear-gradient(135deg, #1a7f37, #0969da);
+body[data-theme="light"] .quick-action-pill-btn:hover {
+  background: #f6f8fa;
+  border-color: #0969da;
+  color: #0969da;
+}
+body[data-theme="light"] .deploy-hero-action-btn {
+  background: linear-gradient(135deg, #1a7f37 0%, #0969da 100%);
   color: #ffffff;
+  border-color: #1a7f37;
+  box-shadow: 0 4px 15px rgba(26, 127, 55, 0.35);
+}
+body[data-theme="light"] .deploy-title-main {
+  color: #ffffff;
+}
+body[data-theme="light"] .deploy-sub-meta {
+  color: #e6ffed;
+}
+body[data-theme="light"] .deploy-play-icon {
+  background: #ffffff;
+  color: #1a7f37;
+}
+body[data-theme="light"] .lobby-footer-bar {
+  background: #ffffff;
+  border-top-color: #d0d7de;
+  color: #57606a;
+}
+body[data-theme="light"] .footer-ver,
+body[data-theme="light"] .footer-universe {
+  color: #1f2328;
+}
+body[data-theme="light"] .codex-master-modal {
+  background: #ffffff;
+  border-color: #d0d7de;
+  color: #1f2328;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+body[data-theme="light"] .codex-title-main,
+body[data-theme="light"] .dossier-name {
+  color: #1f2328;
+}
+body[data-theme="light"] .codex-roster-col,
+body[data-theme="light"] .codex-dossier-col {
+  background: #f6f8fa;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .codex-item-card {
+  background: #ffffff;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .codex-item-card.selected {
+  background: rgba(9, 105, 218, 0.1);
+  border-color: #0969da;
+}
+body[data-theme="light"] .codex-item-name {
+  color: #1f2328;
+}
+body[data-theme="light"] .dossier-field-box,
+body[data-theme="light"] .dossier-telemetry-strip,
+body[data-theme="light"] .dossier-viewport-box {
+  background: #ffffff;
+  border-color: #d0d7de;
+}
+body[data-theme="light"] .d-field-val,
+body[data-theme="light"] .t-val {
+  color: #1f2328;
 }
 
 /* 3. Cyberpunk Neon (Fucsia) */
@@ -154,6 +397,16 @@ body[data-theme="cyberpunk"] {
 body[data-theme="cyberpunk"] .header-title {
   color: #ff007f;
   text-shadow: 0 0 12px rgba(255, 0, 127, 0.7);
+}
+body[data-theme="cyberpunk"] .lobby-frame-window {
+  background: radial-gradient(circle at 50% 10%, #200833 0%, #0d0417 60%, #06010a 100%);
+  border-color: rgba(255, 0, 127, 0.4);
+}
+body[data-theme="cyberpunk"] .deploy-hero-action-btn {
+  background: linear-gradient(135deg, #ff007f 0%, #a21caf 60%, #701a75 100%);
+  border-color: #f472b6;
+  box-shadow: 0 0 25px rgba(255, 0, 127, 0.5);
+  color: #ffffff;
 }
 
 /* 4. Cyber Cyan (Azul) - Default */
@@ -185,3 +438,14 @@ body[data-theme="amber"] .header-title {
   color: #ffb000;
   text-shadow: 0 0 10px rgba(255, 176, 0, 0.6);
 }
+body[data-theme="amber"] .lobby-frame-window {
+  background: radial-gradient(circle at 50% 10%, #291400 0%, #120700 60%, #080300 100%);
+  border-color: rgba(255, 176, 0, 0.35);
+}
+body[data-theme="amber"] .deploy-hero-action-btn {
+  background: linear-gradient(135deg, #ffb000 0%, #d97706 60%, #b45309 100%);
+  border-color: #ffd600;
+  box-shadow: 0 0 25px rgba(255, 176, 0, 0.5);
+  color: #0a0400;
+}
+

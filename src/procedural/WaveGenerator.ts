@@ -3,7 +3,7 @@ import { FormationType, NormalizedGameData, WaveDNA, RepositoryDNA } from '../gi
 export interface EnemySpawnPoint {
   x: number;
   y: number;
-  type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency';
+  type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency' | 'branch' | 'security';
   strategy?: 'formation' | 'zigzag' | 'dive' | 'tracking' | 'orbit' | 'swarm';
   phaseOffset?: number;
 }
@@ -250,21 +250,25 @@ export class WaveGenerator {
             const x = startX + c * spacingX;
             const y = startY + r * spacingY;
 
-            let type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency' = 'commit';
+            let type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency' | 'branch' | 'security' = 'commit';
             let strategy: 'formation' | 'zigzag' | 'dive' = 'formation';
 
             if (r === 0) {
-              // Row 0: Agile vanguard bug bombers
+              // Row 0: Agile vanguard bug bombers & branch drones
               if (c === 2 || c === 5) {
                 type = 'issue';
                 strategy = 'zigzag';
+              } else if (c === 0 || c === 7) {
+                type = 'branch';
               } else if (c === 3 || c === 4) {
                 type = 'conflict';
               }
             } else if (r === 1) {
-              // Row 1: Heavy Armored PR Cruisers only at isolated command flanks (c=1, c=6)
+              // Row 1: Heavy Armored PR Cruisers at flanks and Security Sentinel in center
               if (c === 1 || c === 6) {
                 type = 'pr';
+              } else if (c === 3 || c === 4) {
+                type = 'security';
               } else {
                 type = 'commit';
               }

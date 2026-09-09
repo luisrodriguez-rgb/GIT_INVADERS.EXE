@@ -65,7 +65,7 @@ export class IssueBomber extends Entity {
 
   public render(ctx: CanvasRenderingContext2D): void {
     if (!this.isAlive) return;
-    Sprites.drawIssueBomber(ctx, this.x, this.y, this.width, this.height, this.time);
+    Sprites.drawIssueBomber(ctx, this.x, this.y, this.width, this.height, this.time, this.isDiving);
   }
 
   public takeDamage(_amount: number): boolean {

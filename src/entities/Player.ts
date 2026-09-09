@@ -181,7 +181,10 @@ export class Player extends Entity {
       Date.now() * 0.003,
       this.lives / this.maxLives,
       Math.abs(this.vx) > 10,
-      skin.id
+      skin.id,
+      this.vx,
+      this.shootCooldown > (this.baseFireRate * 0.6),
+      1
     );
 
     // 4. Render Merge Hammer Frontal Kinetic Shield Arc

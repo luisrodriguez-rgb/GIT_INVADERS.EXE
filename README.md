@@ -133,18 +133,20 @@ El subsistema `ShipComposer` desacopla la geometría física de la nave en 8 cap
 7. **Structural Damage Layer:** Fisuras metalúrgicas y chispas cuando `HP < 60%`.
 8. **Kinetic Shield Bubble:** Campo de fuerza radial con efecto Fresnel y absorción de impactos.
 
-### 📋 Especificaciones Técnicas de la Flota
+### 📋 Especificaciones Técnicas de la Flota (10 Naves Exclusivas)
 
-| Nave | Arquetipo | Color Hull / Glow | Blindaje | Velocidad | Cadencia | Escudo | Habilidad Táctica | Mecánica en Batalla |
+| Nave | Geometría Física | Paleta Multi-Tono (Hull / Acento / Blindaje) | Blindaje | Velocidad | Cadencia | Escudo | Habilidad Táctica | Mecánica en Batalla |
 | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :--- | :--- |
-| **CYBER FALCON** | `delta` | `#00e5ff` / `#38bdf8` | 60% | 70% | 60% | 50% | `COMPILER BURST` (`SPACE`) | Ráfaga triple de proyectiles de plasma cian de alta precisión. |
-| **PHANTOM VIOLET** | `stealth_needle` | `#c084fc` / `#a855f7` | 40% | 100% | 70% | 30% | `GIT STASH` (`E`) | Desfase de intangibilidad temporal e inmunidad total durante 3.5s. |
-| **SOLAR GOLD** | `hammerhead` | `#fbbf24` / `#f59e0b` | 100% | 30% | 40% | 80% | `MERGE BURST` (`E`) | Absorbe impactos frontales y desata una onda de choque cinética expansiva. |
-| **EMERALD GLITCH** | `trimaran_fork` | `#10b981` / `#34d399` | 50% | 80% | 60% | 50% | `BRANCH SPLIT` (`E`) | Despliega 2 drones tácticos que replican el fuego de armas durante 5s. |
-| **NEON OVERDRIVE** | `arrow_interceptor` | `#ff0055` / `#ff3366` | 40% | 90% | 90% | 20% | `GIT REBASE` (`Q`) | Aceleración hipercinética con embate frontal penetrante e invulnerabilidad. |
-| **QUANTUM WING** | `quantum_boomerang` | `#22d3ee` / `#6366f1` | 50% | 70% | 60% | 60% | `QUANTUM PIERCE` (`SPACE`) | Dispara rayos de plasma continuo con perforación balística multiobjetivo. |
-| **QUANTUM CITADEL** | `octo_saucer` | `#38bdf8` / `#818cf8` | 70% | 60% | 70% | 90% | `OCTO PROTOCOL` (`E`) | Genera un enjambre de 8 micro-drones defensivos que interceptan disparos. |
-| **CODEBREAKER // X** | `dreadnought_x` | `#a855f7` / `#e879f9` | 100% | 50% | 100% | 90% | `GIT PUSH --FORCE` (`SHIFT`) | Desata un superláser colosal que barre la totalidad de la pantalla. |
+| **CYBER FALCON** | `delta_interceptor` | `#00e5ff` Cian / `#38bdf8` Azul Hielo / `#0e263d` Marino | 60% | 70% | 60% | 50% | `COMPILER BURST` (`SPACE`) | Ráfaga triple de proyectiles de plasma cian de alta precisión. |
+| **PHANTOM VIOLET** | `forward_swept` | `#a855f7` Neón Púrpura / `#00f5ff` Menta / `#1d0c33` Amatista | 40% | 100% | 70% | 30% | `GIT STASH` (`E`) | Desfase de intangibilidad temporal e inmunidad total durante 3.5s. |
+| **SOLAR GOLD** | `hammerhead_ram` | `#f59e0b` Oro / `#fbbf24` Latón / `#ef4444` Rojo Furia | 100% | 30% | 40% | 80% | `MERGE BURST` (`E`) | Absorbe impactos frontales y desata una onda de choque cinética expansiva. |
+| **EMERALD GLITCH** | `fractal_asymmetric` | `#10b981` Esmeralda / `#facc15` Amarillo / `#0a291a` Tóxico | 50% | 80% | 60% | 50% | `BRANCH SPLIT` (`E`) | Despliega 2 drones tácticos que replican el fuego de armas durante 5s. |
+| **NEON OVERDRIVE** | `ramjet_dragster` | `#ff0055` Carmesí / `#ff7700` Naranja / `#ffea00` Cyber | 40% | 90% | 90% | 20% | `GIT REBASE` (`Q`) | Aceleración hipercinética con embate frontal penetrante e invulnerabilidad. |
+| **QUANTUM WING** | `quantum_trimaran` | `#06b6d4` Turquesa / `#6366f1` Índigo / `#e0e7ff` Blanco | 50% | 70% | 60% | 60% | `QUANTUM PIERCE` (`SPACE`) | Dispara rayos de plasma continuo con perforación balística multiobjetivo. |
+| **QUANTUM CITADEL** | `toroidal_ring` | `#3b82f6` Azul Real / `#f8fafc` Platino / `#f59e0b` Dorado | 70% | 60% | 70% | 90% | `OCTO PROTOCOL` (`E`) | Genera un enjambre de 8 micro-drones defensivos que interceptan disparos. |
+| **CODEBREAKER // X** | `x_dreadnought` | `#ec4899` Hot Pink / `#10b981` Cyber Lime / `#7c3aed` Violeta | 100% | 50% | 100% | 90% | `GIT PUSH --FORCE` (`SHIFT`) | Desata un superláser colosal que barre la totalidad de la pantalla. |
+| **VOID STALKER** | `stealth_dagger` | `#ef4444` Carmesí Sangre / `#f59e0b` Oro Prisma / `#090a10` Obsidiana | 40% | 95% | 80% | 40% | `TEMPORAL RIFT` (`E`) | Ralentiza proyectiles enemigos un 80% y teletransporta la nave al flanco opuesto. |
+| **SOLAR PHOENIX** | `phoenix_swept` | `#ea580c` Naranja Fénix / `#facc15` Amarillo Solar / `#06b6d4` Cian Ion | 60% | 85% | 85% | 70% | `SUPERNOVA NOVA` (`SPACE`) | Descarga un estallido omnidireccional de plasma que calcina proyectiles e invasores. |
 
 ---
 
