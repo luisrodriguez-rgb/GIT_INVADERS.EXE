@@ -656,8 +656,9 @@ export class ShipGeometry {
   }
 
   /* ------------------------------------------------------------------
-     9. STEALTH DAGGER (Void Stalker)
-     Faceted obsidian needle with twin forward-raked dagger sponsons
+     9. STEALTH DAGGER (Void Stalker - S-09)
+     Faceted assassin needle: Ultra-narrow stiletto fuselage, dual forward
+     razor switchblade sponsons, stealth carbon facets & crimson laser optic.
      ------------------------------------------------------------------ */
   private static renderStealthDagger(
     ctx: CanvasRenderingContext2D,
@@ -666,75 +667,87 @@ export class ShipGeometry {
     dna: ShipVisualDNA,
     time: number
   ): void {
-    // Layer 0: Stealth Carbon Underbody
+    // Layer 0: Stealth Carbon Underchassis (Narrow faceted silhouette)
     const underChassis = new Path2D();
-    underChassis.moveTo(0, -hh * 1.05);
-    underChassis.lineTo(hw * 0.92, hh * 0.75);
-    underChassis.lineTo(hw * 0.45, hh * 0.55);
-    underChassis.lineTo(0, hh * 0.72);
-    underChassis.lineTo(-hw * 0.45, hh * 0.55);
-    underChassis.lineTo(-hw * 0.92, hh * 0.75);
+    underChassis.moveTo(0, -hh * 1.15); // Razor stiletto needle nose
+    underChassis.lineTo(hw * 0.18, -hh * 0.4);
+    underChassis.lineTo(hw * 0.85, -hh * 0.1); // Outward dagger wingtip
+    underChassis.lineTo(hw * 0.52, hh * 0.35);
+    underChassis.lineTo(hw * 0.28, hh * 0.85); // Dual rear stiletto tail
+    underChassis.lineTo(0, hh * 0.6);
+    underChassis.lineTo(-hw * 0.28, hh * 0.85);
+    underChassis.lineTo(-hw * 0.52, hh * 0.35);
+    underChassis.lineTo(-hw * 0.85, -hh * 0.1);
+    underChassis.lineTo(-hw * 0.18, -hh * 0.4);
     underChassis.closePath();
-    ctx.fillStyle = dna.hullShadowColor;
+    ctx.fillStyle = '#020306';
     ctx.fill(underChassis);
 
-    // Layer 1: Faceted Main Diamond Wings
+    // Layer 1: Main Obsidian Faceted Body
     const mainHull = new Path2D();
-    mainHull.moveTo(0, -hh * 1.02);
-    mainHull.lineTo(hw * 0.78, hh * 0.45);
-    mainHull.lineTo(hw * 0.62, hh * 0.72);
-    mainHull.lineTo(hw * 0.2, hh * 0.58);
-    mainHull.lineTo(0, hh * 0.82);
-    mainHull.lineTo(-hw * 0.2, hh * 0.58);
-    mainHull.lineTo(-hw * 0.62, hh * 0.72);
-    mainHull.lineTo(-hw * 0.78, hh * 0.45);
+    mainHull.moveTo(0, -hh * 1.12);
+    mainHull.lineTo(hw * 0.14, -hh * 0.38);
+    mainHull.lineTo(hw * 0.76, -hh * 0.08);
+    mainHull.lineTo(hw * 0.46, hh * 0.3);
+    mainHull.lineTo(hw * 0.22, hh * 0.8);
+    mainHull.lineTo(0, hh * 0.56);
+    mainHull.lineTo(-hw * 0.22, hh * 0.8);
+    mainHull.lineTo(-hw * 0.46, hh * 0.3);
+    mainHull.lineTo(-hw * 0.76, -hh * 0.08);
+    mainHull.lineTo(-hw * 0.14, -hh * 0.38);
     mainHull.closePath();
     ShipMaterials.fillIndustrialMetal(ctx, mainHull, 0, 0, hw * 2, hh * 2, dna);
 
-    // Layer 2: Dual Forward-Raked Razor Dagger Blades
-    const bladeL = new Path2D();
-    bladeL.moveTo(-hw * 0.28, -hh * 0.2);
-    bladeL.lineTo(-hw * 0.78, -hh * 0.55);
-    bladeL.lineTo(-hw * 0.65, hh * 0.25);
-    bladeL.lineTo(-hw * 0.35, hh * 0.15);
-    bladeL.closePath();
-    ShipMaterials.drawBeveledArmorPlate(ctx, bladeL, dna.secondaryAccentColor, dna.plateThickness * 1.2, dna.plateFillColor);
+    // Layer 2: Dual Forward-Reaching Razor Assassin Daggers
+    const daggerL = new Path2D();
+    daggerL.moveTo(-hw * 0.14, -hh * 0.35);
+    daggerL.lineTo(-hw * 0.72, -hh * 0.65); // Reaches far forward!
+    daggerL.lineTo(-hw * 0.6, -hh * 0.05);
+    daggerL.lineTo(-hw * 0.22, hh * 0.1);
+    daggerL.closePath();
+    ShipMaterials.drawBeveledArmorPlate(ctx, daggerL, dna.secondaryAccentColor, dna.plateThickness * 1.3, '#181b2a');
 
-    const bladeR = new Path2D();
-    bladeR.moveTo(hw * 0.28, -hh * 0.2);
-    bladeR.lineTo(hw * 0.78, -hh * 0.55);
-    bladeR.lineTo(hw * 0.65, hh * 0.25);
-    bladeR.lineTo(hw * 0.35, hh * 0.15);
-    bladeR.closePath();
-    ShipMaterials.drawBeveledArmorPlate(ctx, bladeR, dna.secondaryAccentColor, dna.plateThickness * 1.2, dna.plateFillColor);
+    const daggerR = new Path2D();
+    daggerR.moveTo(hw * 0.14, -hh * 0.35);
+    daggerR.lineTo(hw * 0.72, -hh * 0.65); // Reaches far forward!
+    daggerR.lineTo(hw * 0.6, -hh * 0.05);
+    daggerR.lineTo(hw * 0.22, hh * 0.1);
+    daggerR.closePath();
+    ShipMaterials.drawBeveledArmorPlate(ctx, daggerR, dna.secondaryAccentColor, dna.plateThickness * 1.3, '#181b2a');
 
-    // Layer 3: Central Crimson Assassin Spine
+    // Layer 3: Central Crimson Assassin Spine & Optical Slit
     const assassinSpine = new Path2D();
-    assassinSpine.moveTo(0, -hh * 1.05);
-    assassinSpine.lineTo(hw * 0.12, hh * 0.1);
-    assassinSpine.lineTo(hw * 0.18, hh * 0.65);
-    assassinSpine.lineTo(-hw * 0.18, hh * 0.65);
-    assassinSpine.lineTo(-hw * 0.12, hh * 0.1);
+    assassinSpine.moveTo(0, -hh * 1.14);
+    assassinSpine.lineTo(hw * 0.09, -hh * 0.2);
+    assassinSpine.lineTo(hw * 0.12, hh * 0.62);
+    assassinSpine.lineTo(-hw * 0.12, hh * 0.62);
+    assassinSpine.lineTo(-hw * 0.09, -hh * 0.2);
     assassinSpine.closePath();
-    ShipMaterials.drawBeveledArmorPlate(ctx, assassinSpine, dna.accentColor, dna.plateThickness, dna.plateFillColor);
+    ShipMaterials.drawBeveledArmorPlate(ctx, assassinSpine, dna.accentColor, dna.plateThickness, '#0f0814');
 
-    // Laser Sight Line
+    // Glowing Laser Target Line down the needle
+    ctx.save();
     ctx.strokeStyle = dna.accentColor;
-    ctx.lineWidth = 1.2;
+    ctx.lineWidth = 1.4;
+    ctx.shadowColor = dna.accentColor;
+    ctx.shadowBlur = 8;
     ctx.beginPath();
-    ctx.moveTo(0, -hh * 1.05);
-    ctx.lineTo(0, hh * 0.4);
+    ctx.moveTo(0, -hh * 1.15);
+    ctx.lineTo(0, hh * 0.45);
     ctx.stroke();
 
-    ShipSurfaceDetails.drawRivets(ctx, [
-      { x: -hw * 0.45, y: hh * 0.15 },
-      { x: hw * 0.45, y: hh * 0.15 },
-    ]);
+    // Crosshair Sensor Slit
+    ctx.beginPath();
+    ctx.moveTo(-hw * 0.15, -hh * 0.1);
+    ctx.lineTo(hw * 0.15, -hh * 0.1);
+    ctx.stroke();
+    ctx.restore();
   }
 
   /* ------------------------------------------------------------------
-     10. PHOENIX SWEPT (Solar Phoenix)
-     Triple swept aerodynamic plumage wings, solar thermal canards
+     10. PHOENIX SWEPT (Solar Phoenix - S-10)
+     Majestic Avian Plumage: 3-tiered swept solar wings, radiant plume
+     canards, central fusion sun core, and thermal plasma flares.
      ------------------------------------------------------------------ */
   private static renderPhoenixSwept(
     ctx: CanvasRenderingContext2D,
@@ -743,67 +756,86 @@ export class ShipGeometry {
     dna: ShipVisualDNA,
     time: number
   ): void {
-    // Layer 0: Solar Thermal Glow Aura
+    // Layer 0: Solar Thermal Corona Aura
     ctx.save();
-    const pulse = 0.8 + Math.sin(time * 6) * 0.2;
-    const auraGrad = ctx.createRadialGradient(0, hh * 0.2, 10, 0, hh * 0.2, hw * 1.1);
-    auraGrad.addColorStop(0, 'rgba(234, 88, 12, 0.2)');
-    auraGrad.addColorStop(0.6, 'rgba(250, 204, 21, 0.08)');
+    const pulse = 0.85 + Math.sin(time * 5.5) * 0.15;
+    const auraGrad = ctx.createRadialGradient(0, 0, 8, 0, 0, hw * 1.25);
+    auraGrad.addColorStop(0, 'rgba(250, 204, 21, 0.28)');
+    auraGrad.addColorStop(0.5, 'rgba(234, 88, 12, 0.14)');
     auraGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = auraGrad;
     ctx.beginPath();
-    ctx.arc(0, hh * 0.2, hw * 1.1 * pulse, 0, Math.PI * 2);
+    ctx.arc(0, 0, hw * 1.2 * pulse, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
-    // Layer 1: Triple Swept Plumage Wings
+    // Layer 1: Triple Stepped Avian Plumage Wings
     const featherWings = new Path2D();
-    featherWings.moveTo(0, -hh * 0.95);
-    featherWings.lineTo(hw * 0.35, -hh * 0.3);
-    featherWings.lineTo(hw * 0.98, hh * 0.25); // Outer feather
-    featherWings.lineTo(hw * 0.75, hh * 0.4);
-    featherWings.lineTo(hw * 0.88, hh * 0.65); // Mid feather
-    featherWings.lineTo(hw * 0.6, hh * 0.68);
-    featherWings.lineTo(hw * 0.68, hh * 0.88); // Inner feather
-    featherWings.lineTo(0, hh * 0.65);
-    featherWings.lineTo(-hw * 0.68, hh * 0.88);
-    featherWings.lineTo(-hw * 0.6, hh * 0.68);
-    featherWings.lineTo(-hw * 0.88, hh * 0.65);
-    featherWings.lineTo(-hw * 0.75, hh * 0.4);
-    featherWings.lineTo(-hw * 0.98, hh * 0.25);
-    featherWings.lineTo(-hw * 0.35, -hh * 0.3);
+    featherWings.moveTo(0, -hh * 0.92);
+    featherWings.lineTo(hw * 0.32, -hh * 0.25);
+    // Tier 1 Feather (Upper Wingtip)
+    featherWings.lineTo(hw * 1.05, hh * 0.05);
+    featherWings.lineTo(hw * 0.82, hh * 0.22);
+    // Tier 2 Feather (Mid Flap)
+    featherWings.lineTo(hw * 0.95, hh * 0.48);
+    featherWings.lineTo(hw * 0.68, hh * 0.58);
+    // Tier 3 Feather (Inner Flap)
+    featherWings.lineTo(hw * 0.75, hh * 0.82);
+    featherWings.lineTo(hw * 0.42, hh * 0.68);
+    featherWings.lineTo(0, hh * 0.78);
+    // Left Wing (Symmetric)
+    featherWings.lineTo(-hw * 0.42, hh * 0.68);
+    featherWings.lineTo(-hw * 0.75, hh * 0.82);
+    featherWings.lineTo(-hw * 0.68, hh * 0.58);
+    featherWings.lineTo(-hw * 0.95, hh * 0.48);
+    featherWings.lineTo(-hw * 0.82, hh * 0.22);
+    featherWings.lineTo(-hw * 1.05, hh * 0.05);
+    featherWings.lineTo(-hw * 0.32, -hh * 0.25);
     featherWings.closePath();
     ShipMaterials.fillIndustrialMetal(ctx, featherWings, 0, 0, hw * 2, hh * 2, dna);
 
-    // Layer 2: Radiant Solar Plume Canards
+    // Layer 2: Radiant Solar Plumage Canards (Wings of fire)
     const canardsL = new Path2D();
-    canardsL.moveTo(-hw * 0.15, -hh * 0.6);
-    canardsL.lineTo(-hw * 0.58, -hh * 0.1);
-    canardsL.lineTo(-hw * 0.35, hh * 0.1);
-    canardsL.lineTo(-hw * 0.12, -hh * 0.15);
+    canardsL.moveTo(-hw * 0.12, -hh * 0.75);
+    canardsL.lineTo(-hw * 0.62, -hh * 0.28);
+    canardsL.lineTo(-hw * 0.38, hh * 0.02);
+    canardsL.lineTo(-hw * 0.1, -hh * 0.15);
     canardsL.closePath();
-    ShipMaterials.drawBeveledArmorPlate(ctx, canardsL, dna.secondaryAccentColor, dna.plateThickness, dna.plateFillColor);
+    ShipMaterials.drawBeveledArmorPlate(ctx, canardsL, dna.secondaryAccentColor, dna.plateThickness * 1.2, '#381606');
 
     const canardsR = new Path2D();
-    canardsR.moveTo(hw * 0.15, -hh * 0.6);
-    canardsR.lineTo(hw * 0.58, -hh * 0.1);
-    canardsR.lineTo(hw * 0.35, hh * 0.1);
-    canardsR.lineTo(hw * 0.12, -hh * 0.15);
+    canardsR.moveTo(hw * 0.12, -hh * 0.75);
+    canardsR.lineTo(hw * 0.62, -hh * 0.28);
+    canardsR.lineTo(hw * 0.38, hh * 0.02);
+    canardsR.lineTo(hw * 0.1, -hh * 0.15);
     canardsR.closePath();
-    ShipMaterials.drawBeveledArmorPlate(ctx, canardsR, dna.secondaryAccentColor, dna.plateThickness, dna.plateFillColor);
+    ShipMaterials.drawBeveledArmorPlate(ctx, canardsR, dna.secondaryAccentColor, dna.plateThickness * 1.2, '#381606');
 
-    // Layer 3: Central Solar Heart Fuselage
-    const solarCoreSpine = new Path2D();
-    solarCoreSpine.moveTo(0, -hh * 0.98);
-    solarCoreSpine.lineTo(hw * 0.18, -hh * 0.05);
-    solarCoreSpine.lineTo(hw * 0.16, hh * 0.75);
-    solarCoreSpine.lineTo(-hw * 0.16, hh * 0.75);
-    solarCoreSpine.lineTo(-hw * 0.18, -hh * 0.05);
-    solarCoreSpine.closePath();
-    ShipMaterials.drawBeveledArmorPlate(ctx, solarCoreSpine, dna.accentColor, dna.plateThickness * 1.2, dna.plateFillColor);
+    // Layer 3: Central Fusion Sun-Heart Fuselage
+    const solarCore = new Path2D();
+    solarCore.moveTo(0, -hh * 0.98);
+    solarCore.lineTo(hw * 0.2, -hh * 0.15);
+    solarCore.lineTo(hw * 0.16, hh * 0.72);
+    solarCore.lineTo(-hw * 0.16, hh * 0.72);
+    solarCore.lineTo(-hw * 0.2, -hh * 0.15);
+    solarCore.closePath();
+    ShipMaterials.drawBeveledArmorPlate(ctx, solarCore, dna.accentColor, dna.plateThickness * 1.4, '#4a1f09');
 
-    // Radiator Vents (Cyan Ion glow)
-    ShipSurfaceDetails.drawEnergyConduit(ctx, -hw * 0.22, hh * 0.25, -hw * 0.45, hh * 0.55, -hw * 0.35, hh * 0.35, dna.tertiaryDecalColor);
-    ShipSurfaceDetails.drawEnergyConduit(ctx, hw * 0.22, hh * 0.25, hw * 0.45, hh * 0.55, hw * 0.35, hh * 0.35, dna.tertiaryDecalColor);
+    // Blazing Core Glow (Center fusion orb)
+    ctx.save();
+    const coreGrad = ctx.createRadialGradient(0, 0, 2, 0, 0, hw * 0.22);
+    coreGrad.addColorStop(0, '#ffffff');
+    coreGrad.addColorStop(0.4, '#facc15');
+    coreGrad.addColorStop(0.8, '#ea580c');
+    coreGrad.addColorStop(1, 'rgba(234, 88, 12, 0)');
+    ctx.fillStyle = coreGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, hw * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // Dual Radiator Energy Arcs
+    ShipSurfaceDetails.drawEnergyConduit(ctx, -hw * 0.24, hh * 0.2, -hw * 0.52, hh * 0.5, -hw * 0.38, hh * 0.32, dna.tertiaryDecalColor);
+    ShipSurfaceDetails.drawEnergyConduit(ctx, hw * 0.24, hh * 0.2, hw * 0.52, hh * 0.5, hw * 0.38, hh * 0.32, dna.tertiaryDecalColor);
   }
 }

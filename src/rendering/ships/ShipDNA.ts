@@ -165,6 +165,9 @@ export class ShipDNAGenerator {
         break;
 
       case 'codebreaker_x':
+      case 'codebreaker':
+      case 'codebreaker____x':
+      case 'codebreaker___x':
       case 'dreadnought':
         hullFamily = 'x_dreadnought';
         wingFamily = 'quad_x';
@@ -191,6 +194,8 @@ export class ShipDNAGenerator {
         break;
 
       case 'hyper_void':
+      case 'void_stalker':
+      case 'void':
         hullFamily = 'stealth_dagger';
         wingFamily = 'dagger_wings';
         engineFamily = 'twin_ion';
@@ -199,6 +204,8 @@ export class ShipDNAGenerator {
         break;
 
       case 'solar_flare':
+      case 'solar_phoenix':
+      case 'phoenix':
         hullFamily = 'phoenix_swept';
         wingFamily = 'phoenix_wings';
         engineFamily = 'singular_afterburner';
@@ -318,7 +325,29 @@ export class ShipDNAGenerator {
         glow: '#ef4444',
         glass: 'rgba(239, 68, 68, 0.5)',
       },
+      void_stalker: {
+        hullBase: '#090a10',
+        hullHighlight: '#181b2a',
+        hullShadow: '#020305',
+        plateFill: '#111422',
+        accent: '#ef4444',
+        secondaryAccent: '#f59e0b',
+        tertiaryDecal: '#ffffff',
+        glow: '#ef4444',
+        glass: 'rgba(239, 68, 68, 0.5)',
+      },
       solar_flare: {
+        hullBase: '#260e04',
+        hullHighlight: '#4a1f09',
+        hullShadow: '#0e0501',
+        plateFill: '#381606',
+        accent: '#ea580c',
+        secondaryAccent: '#facc15',
+        tertiaryDecal: '#06b6d4',
+        glow: '#f97316',
+        glass: 'rgba(250, 204, 21, 0.5)',
+      },
+      solar_phoenix: {
         hullBase: '#260e04',
         hullHighlight: '#4a1f09',
         hullShadow: '#0e0501',
@@ -331,7 +360,8 @@ export class ShipDNAGenerator {
       },
     };
 
-    const p = palettes[skin.id] || palettes.cyber_falcon;
+    const normKey = (skin.id || '').toLowerCase().replace(/[\s\/\-]+/g, '_');
+    const p = palettes[skin.id] || palettes[normKey] || palettes.cyber_falcon;
     const accent = (skin as any).primaryColor || (skin as any).hullColor || p.accent;
     const glow = (skin as any).trailColor || (skin as any).glowColor || p.glow;
 
@@ -379,12 +409,20 @@ export class ShipDNAGenerator {
       quantum_wing: { id: 'quantum_wing', name: 'QUANTUM WING', armor: 50, speed: 70, fireRate: 60, hullColor: '#06b6d4', glowColor: '#6366f1' },
       quantum_citadel: { id: 'quantum_citadel', name: 'QUANTUM CITADEL', armor: 70, speed: 60, fireRate: 70, hullColor: '#3b82f6', glowColor: '#e2e8f0' },
       codebreaker_x: { id: 'codebreaker_x', name: 'CODEBREAKER // X', armor: 100, speed: 50, fireRate: 100, hullColor: '#ec4899', glowColor: '#7c3aed' },
+      codebreaker: { id: 'codebreaker_x', name: 'CODEBREAKER // X', armor: 100, speed: 50, fireRate: 100, hullColor: '#ec4899', glowColor: '#7c3aed' },
+      codebreaker____x: { id: 'codebreaker_x', name: 'CODEBREAKER // X', armor: 100, speed: 50, fireRate: 100, hullColor: '#ec4899', glowColor: '#7c3aed' },
+      codebreaker___x: { id: 'codebreaker_x', name: 'CODEBREAKER // X', armor: 100, speed: 50, fireRate: 100, hullColor: '#ec4899', glowColor: '#7c3aed' },
       dreadnought: { id: 'codebreaker_x', name: 'CODEBREAKER // X', armor: 100, speed: 50, fireRate: 100, hullColor: '#ec4899', glowColor: '#7c3aed' },
       hyper_void: { id: 'hyper_void', name: 'VOID STALKER', armor: 40, speed: 95, fireRate: 80, hullColor: '#ef4444', glowColor: '#f59e0b' },
+      void_stalker: { id: 'hyper_void', name: 'VOID STALKER', armor: 40, speed: 95, fireRate: 80, hullColor: '#ef4444', glowColor: '#f59e0b' },
+      void: { id: 'hyper_void', name: 'VOID STALKER', armor: 40, speed: 95, fireRate: 80, hullColor: '#ef4444', glowColor: '#f59e0b' },
       solar_flare: { id: 'solar_flare', name: 'SOLAR PHOENIX', armor: 60, speed: 85, fireRate: 85, hullColor: '#ea580c', glowColor: '#facc15' },
+      solar_phoenix: { id: 'solar_flare', name: 'SOLAR PHOENIX', armor: 60, speed: 85, fireRate: 85, hullColor: '#ea580c', glowColor: '#facc15' },
+      phoenix: { id: 'solar_flare', name: 'SOLAR PHOENIX', armor: 60, speed: 85, fireRate: 85, hullColor: '#ea580c', glowColor: '#facc15' },
     };
 
-    const preset = skins[skinId] || skins.cyber_falcon;
+    const normalized = (skinId || '').toLowerCase().replace(/[\s\/\-]+/g, '_');
+    const preset = skins[skinId] || skins[normalized] || skins.cyber_falcon;
     const skinMock: any = {
       id: preset.id,
       name: preset.name,

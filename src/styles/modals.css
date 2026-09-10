@@ -13,7 +13,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 8px;
+  overflow: hidden;
   box-sizing: border-box;
 }
 

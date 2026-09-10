@@ -66,7 +66,7 @@ export class Lobby {
   public show(): void {
     this.container.style.display = 'flex';
     this.render();
-    if (this.activeTab === 'HANGAR') {
+    if (this.activeTab === 'HANGAR' || this.activeTab === 'PLAY') {
       this.startAnimations();
     }
   }
@@ -207,10 +207,14 @@ export class Lobby {
     `;
 
     this.bindEvents();
-    if (this.activeTab === 'HANGAR') {
+    if (this.activeTab === 'HANGAR' || this.activeTab === 'PLAY') {
       this.initCanvases();
-      this.drawMiniThumbs();
+      if (this.activeTab === 'HANGAR') {
+        this.drawMiniThumbs();
+      }
       this.startAnimations();
+    } else {
+      this.stopAnimations();
     }
   }
 
@@ -933,6 +937,22 @@ export class Lobby {
   }
 
   /**
+   * Converts hex color to rgba string with custom alpha
+   */
+  private hexToRgba(hex: string, alpha: number): string {
+    let c = (hex || '#00e5ff').replace('#', '');
+    if (c.length === 3) {
+      c = c.split('').map(char => char + char).join('');
+    }
+    const num = parseInt(c, 16);
+    if (isNaN(num)) return `rgba(0, 229, 255, ${alpha})`;
+    const r = (num >> 16) & 255;
+    const g = (num >> 8) & 255;
+    const b = num & 255;
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  /**
    * Draws the stunning 3D isometric glowing circular hangar landing platform
    */
   private drawHoloShipPlatform(): void {
@@ -947,18 +967,21 @@ export class Lobby {
     const platformY = h * 0.74;
     const t = this.animTime;
     const dna = this.getSelectedDNA();
+    const theme = this.themeManager.currentTheme;
+    const primaryColor = theme.primaryAccent || '#00e5ff';
+    const secondaryColor = theme.secondaryAccent || '#38bdf8';
 
     // 1. Cinematic Hangar Radial Lighting
     const radialGrad = ctx.createRadialGradient(centerX, platformY - 20, 10, centerX, platformY - 20, w * 0.45);
-    radialGrad.addColorStop(0, 'rgba(0, 180, 255, 0.2)');
-    radialGrad.addColorStop(0.5, 'rgba(0, 90, 200, 0.06)');
+    radialGrad.addColorStop(0, this.hexToRgba(primaryColor, 0.22));
+    radialGrad.addColorStop(0.5, this.hexToRgba(secondaryColor, 0.07));
     radialGrad.addColorStop(1, 'rgba(3, 7, 18, 0)');
     ctx.fillStyle = radialGrad;
     ctx.fillRect(0, 0, w, h);
 
     // 2. Perspective Floor Grid Lines
     ctx.save();
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.08)';
+    ctx.strokeStyle = this.hexToRgba(primaryColor, 0.09);
     ctx.lineWidth = 1;
     for (let x = -w * 0.5; x <= w * 1.5; x += 36) {
       ctx.beginPath();
@@ -976,16 +999,16 @@ export class Lobby {
     ctx.save();
     ctx.beginPath();
     ctx.ellipse(centerX, platformY, radiusX + 8, radiusY + 4, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.04)';
+    ctx.fillStyle = this.hexToRgba(primaryColor, 0.04);
     ctx.fill();
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.4)';
+    ctx.strokeStyle = this.hexToRgba(primaryColor, 0.45);
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
     // Inner Neon Ring with rotating segment dashes
     ctx.beginPath();
     ctx.ellipse(centerX, platformY, radiusX * 0.78, radiusY * 0.78, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.75)';
+    ctx.strokeStyle = this.hexToRgba(primaryColor, 0.85);
     ctx.lineWidth = 2;
     ctx.setLineDash([14, 8]);
     ctx.lineDashOffset = -t * 20;
@@ -995,9 +1018,9 @@ export class Lobby {
     // Core Center Pad
     ctx.beginPath();
     ctx.ellipse(centerX, platformY, radiusX * 0.42, radiusY * 0.42, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.15)';
+    ctx.fillStyle = this.hexToRgba(primaryColor, 0.18);
     ctx.fill();
-    ctx.strokeStyle = '#00e5ff';
+    ctx.strokeStyle = primaryColor;
     ctx.lineWidth = 1.8;
     ctx.stroke();
     ctx.restore();
@@ -1147,12 +1170,15 @@ export class Lobby {
     const h = this.radarCanvas.height;
     const t = this.animTime;
     const dna = this.getSelectedDNA();
+    const theme = this.themeManager.currentTheme;
+    const primaryColor = theme.primaryAccent || '#00e5ff';
+    const secondaryColor = theme.secondaryAccent || '#38bdf8';
 
     ctx.clearRect(0, 0, w, h);
 
     // 1. Dark CRT Cyber Space Backdrop
     const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 20, w / 2, h / 2, w * 0.65);
-    bgGrad.addColorStop(0, 'rgba(0, 35, 65, 0.45)');
+    bgGrad.addColorStop(0, this.hexToRgba(primaryColor, 0.2));
     bgGrad.addColorStop(0.7, 'rgba(4, 12, 28, 0.88)');
     bgGrad.addColorStop(1, 'rgba(2, 6, 16, 0.96)');
     ctx.fillStyle = bgGrad;
@@ -1160,7 +1186,7 @@ export class Lobby {
 
     // 2. Coordinate Grid Lines
     ctx.save();
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.08)';
+    ctx.strokeStyle = this.hexToRgba(primaryColor, 0.09);
     ctx.lineWidth = 1;
     for (let x = 0; x <= w; x += 22) {
       ctx.beginPath();
@@ -1183,15 +1209,15 @@ export class Lobby {
     for (let r = 1; r <= 3; r++) {
       ctx.beginPath();
       ctx.arc(rx, ry, (maxRadius / 3) * r, 0, Math.PI * 2);
-      ctx.strokeStyle = r === 3 ? 'rgba(0, 229, 255, 0.3)' : 'rgba(0, 229, 255, 0.14)';
+      ctx.strokeStyle = r === 3 ? this.hexToRgba(primaryColor, 0.35) : this.hexToRgba(primaryColor, 0.16);
       ctx.stroke();
     }
 
     // Sweep Angle
     const sweepAngle = (t * 2.4) % (Math.PI * 2);
     const sweepGrad = ctx.createRadialGradient(rx, ry, 0, rx, ry, maxRadius);
-    sweepGrad.addColorStop(0, 'rgba(0, 229, 255, 0.35)');
-    sweepGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+    sweepGrad.addColorStop(0, this.hexToRgba(primaryColor, 0.38));
+    sweepGrad.addColorStop(1, this.hexToRgba(primaryColor, 0));
     ctx.fillStyle = sweepGrad;
     ctx.beginPath();
     ctx.moveTo(rx, ry);
@@ -1200,7 +1226,7 @@ export class Lobby {
     ctx.fill();
 
     // Radar Center Crosshair
-    ctx.fillStyle = '#00e5ff';
+    ctx.fillStyle = primaryColor;
     ctx.fillRect(rx - 2, ry - 2, 4, 4);
 
     // 4. Orbital Wave Insertion Trajectory (Curved Path)
@@ -1215,7 +1241,7 @@ export class Lobby {
     ctx.bezierCurveTo(p1.x - 15, p1.y, p1.x, p1.y, p1.x, p1.y);
     ctx.bezierCurveTo(p2.x - 15, p2.y, p2.x, p2.y, p2.x, p2.y);
     ctx.bezierCurveTo(p3.x - 15, p3.y, p3.x, p3.y, p3.x, p3.y);
-    ctx.strokeStyle = 'rgba(0, 229, 255, 0.55)';
+    ctx.strokeStyle = this.hexToRgba(primaryColor, 0.65);
     ctx.lineWidth = 2;
     ctx.setLineDash([5, 4]);
     ctx.lineDashOffset = -t * 24;
@@ -1224,17 +1250,17 @@ export class Lobby {
 
     // 5. Waypoints along trajectory
     const nodes = [
-      { pt: p0, label: 'INSERCIÓN', color: '#00e5ff' },
-      { pt: p1, label: 'W1: RECON', color: '#10b981' },
-      { pt: p2, label: 'W2: PR FLANK', color: '#38bdf8' },
-      { pt: p3, label: 'BOSS CORE', color: '#f43f5e' },
+      { pt: p0, label: 'INSERCIÓN', color: primaryColor },
+      { pt: p1, label: 'W1: RECON', color: theme.prColor || '#10b981' },
+      { pt: p2, label: 'W2: PR FLANK', color: secondaryColor },
+      { pt: p3, label: 'BOSS CORE', color: theme.issueColor || '#f43f5e' },
     ];
 
     nodes.forEach((n, idx) => {
       const pulse = Math.sin(t * 4 + idx) * 3 + 4;
       ctx.beginPath();
       ctx.arc(n.pt.x, n.pt.y, pulse + 2, 0, Math.PI * 2);
-      ctx.fillStyle = n.color === '#f43f5e' ? 'rgba(244, 63, 94, 0.25)' : 'rgba(0, 229, 255, 0.25)';
+      ctx.fillStyle = this.hexToRgba(n.color, 0.25);
       ctx.fill();
 
       ctx.beginPath();
@@ -1249,7 +1275,7 @@ export class Lobby {
     });
 
     // 6. Coordinates & Sub-orbital HUD overlay
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.75)';
+    ctx.fillStyle = this.hexToRgba(primaryColor, 0.75);
     ctx.font = '7.5px monospace';
     ctx.fillText(`COORDS: LAT 37°46'N // LNG 122°24'W`, 8, 12);
     ctx.fillText(`ALT: 382.4 KM // VEL: 7.66 KM/S`, 8, 22);
@@ -1292,7 +1318,7 @@ export class Lobby {
         skin.id,
         0,
         false,
-        0
+        1
       );
     });
   }
@@ -1314,7 +1340,6 @@ export class Lobby {
       this.activeTab = 'PLAY';
       SFX.playLaser('player');
       this.render();
-      this.stopAnimations();
     });
 
     const navStore = this.container.querySelector('#navStoreBtn');
@@ -1513,6 +1538,7 @@ export class Lobby {
         const themeId = (e.target as HTMLSelectElement).value as ThemeId;
         this.themeManager.setTheme(themeId);
         SFX.playPowerup();
+        this.render();
       });
 
       const langSelect = this.container.querySelector('#settingsLangSelect') as HTMLSelectElement | null;

@@ -1,8 +1,12 @@
 /* ===================================================
-   THEME PALETTES
+   GIT_INVADERS.EXE - UNIFIED MULTI-THEME ARCHITECTURE
+   Full styling coverage for Hangar, Misión, Códice,
+   Estadísticas, and Tienda across all 5 themes.
    =================================================== */
 
-/* 1. Matrix Phosphor (Oscuro) */
+/* ===================================================
+   1. MATRIX PHOSPHOR (Oscuro)
+   =================================================== */
 body[data-theme="matrix"] {
   --bg-cabinet: #020b04;
   --bg-bezel: #031407;
@@ -11,20 +15,46 @@ body[data-theme="matrix"] {
   --border-secondary: #10b981;
   --text-main: #e6ffed;
   --text-muted: #4ade80;
+
+  --theme-primary: #00ff66;
+  --theme-secondary: #10b981;
+  --theme-accent: #a3e635;
+  --theme-glow: rgba(0, 255, 102, 0.5);
+  --theme-glow-soft: rgba(0, 255, 102, 0.18);
+  --theme-border-card: rgba(0, 255, 102, 0.32);
+  --theme-border-subtle: rgba(0, 255, 102, 0.16);
+  --theme-bg-card: rgba(2, 14, 6, 0.93);
+  --theme-bg-card-alt: rgba(3, 24, 10, 0.88);
+  --theme-hero-btn-bg: linear-gradient(135deg, #00ff66 0%, #059669 60%, #047857 100%);
+  --theme-hero-btn-color: #010903;
+
   background-image: 
-    radial-gradient(circle at 50% 20%, rgba(0, 255, 102, 0.1) 0%, transparent 60%),
+    radial-gradient(circle at 50% 20%, rgba(0, 255, 102, 0.12) 0%, transparent 60%),
     linear-gradient(to bottom, #010602, #020e05);
 }
+
 body[data-theme="matrix"] .header-title,
 body[data-theme="matrix"] .hud-cyan {
   color: #00ff66;
   text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
 }
+
 body[data-theme="matrix"] .lobby-frame-window {
   background: radial-gradient(circle at 50% 10%, #031809 0%, #020f06 60%, #010803 100%);
   border-color: rgba(0, 255, 102, 0.35);
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(0, 255, 102, 0.05);
 }
+
+body[data-theme="matrix"] .brand-sub-title,
+body[data-theme="matrix"] .tac-section-num,
+body[data-theme="matrix"] .radar-header-label,
+body[data-theme="matrix"] .codex-title-sub,
+body[data-theme="matrix"] .ability-name,
+body[data-theme="matrix"] .center-ship-class,
+body[data-theme="matrix"] .dossier-type-tag {
+  color: #00ff66 !important;
+}
+
 body[data-theme="matrix"] .hangar-left-col,
 body[data-theme="matrix"] .hangar-center-col,
 body[data-theme="matrix"] .boss-encounter-card,
@@ -34,23 +64,324 @@ body[data-theme="matrix"] .special-ability-card,
 body[data-theme="matrix"] .genome-ratings-grid,
 body[data-theme="matrix"] .codex-master-modal,
 body[data-theme="matrix"] .codex-roster-col,
-body[data-theme="matrix"] .codex-dossier-col {
-  background: rgba(2, 14, 6, 0.9);
-  border-color: rgba(0, 255, 102, 0.25);
-}
-body[data-theme="matrix"] .deploy-hero-action-btn {
-  background: linear-gradient(135deg, #00ff66 0%, #059669 60%, #047857 100%);
-  border-color: #00ff66;
-  box-shadow: 0 0 25px rgba(0, 255, 102, 0.5);
-  color: #010903;
-}
-body[data-theme="matrix"] .quick-action-pill-btn {
-  background: rgba(2, 14, 6, 0.85);
-  border-color: rgba(0, 255, 102, 0.3);
-  color: #00ff66;
+body[data-theme="matrix"] .codex-dossier-col,
+body[data-theme="matrix"] .tactical-radar-card,
+body[data-theme="matrix"] .tac-mode-card,
+body[data-theme="matrix"] .stat-overview-card,
+body[data-theme="matrix"] .panel-store-window,
+body[data-theme="matrix"] .store-item-card {
+  background: rgba(2, 14, 6, 0.92) !important;
+  border-color: rgba(0, 255, 102, 0.28) !important;
 }
 
-/* 2. Modo Claro (GitHub Light) */
+body[data-theme="matrix"] .fleet-ship-card.equipped,
+body[data-theme="matrix"] .codex-item-card.selected,
+body[data-theme="matrix"] .codex-item-card.ship-entry.selected {
+  background: rgba(0, 255, 102, 0.18) !important;
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 12px rgba(0, 255, 102, 0.35) !important;
+}
+
+body[data-theme="matrix"] .equipped-tag-pill,
+body[data-theme="matrix"] .tac-badge.cyan,
+body[data-theme="matrix"] .tac-status-tag,
+body[data-theme="matrix"] .codex-item-code.cyan,
+body[data-theme="matrix"] .dossier-code-chip.cyan,
+body[data-theme="matrix"] .dossier-category-badge.cyan {
+  background: rgba(0, 255, 102, 0.2) !important;
+  border-color: #00ff66 !important;
+  color: #00ff66 !important;
+}
+
+body[data-theme="matrix"] .codex-filter-pill.cyan.active {
+  background: rgba(0, 255, 102, 0.25) !important;
+  border-color: #00ff66 !important;
+  color: #00ff66 !important;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.4) !important;
+}
+
+body[data-theme="matrix"] .deploy-hero-action-btn,
+body[data-theme="matrix"] .tac-launch-btn.cyan,
+body[data-theme="matrix"] .store-action-btn.btn-buy {
+  background: linear-gradient(135deg, #00ff66 0%, #059669 60%, #047857 100%) !important;
+  border-color: #00ff66 !important;
+  box-shadow: 0 0 20px rgba(0, 255, 102, 0.45) !important;
+  color: #010903 !important;
+}
+
+body[data-theme="matrix"] .quick-action-pill-btn,
+body[data-theme="matrix"] .tactical-quick-btn,
+body[data-theme="matrix"] .tac-card-btn {
+  background: rgba(2, 14, 6, 0.85) !important;
+  border-color: rgba(0, 255, 102, 0.35) !important;
+  color: #00ff66 !important;
+}
+
+body[data-theme="matrix"] .quick-action-pill-btn:hover,
+body[data-theme="matrix"] .tactical-quick-btn:hover {
+  background: rgba(0, 255, 102, 0.2) !important;
+  box-shadow: 0 0 10px rgba(0, 255, 102, 0.35) !important;
+}
+
+body[data-theme="matrix"] .stat-num.cyan {
+  color: #00ff66 !important;
+  text-shadow: 0 0 10px rgba(0, 255, 102, 0.6) !important;
+}
+
+
+/* ===================================================
+   2. CYBERPUNK NEON (Fucsia / Magenta)
+   =================================================== */
+body[data-theme="cyberpunk"] {
+  --bg-cabinet: #0d061a;
+  --bg-bezel: #190933;
+  --bg-screen: #07030e;
+  --border-primary: #ff007f;
+  --border-secondary: #00f0ff;
+  --text-main: #fdf2f8;
+  --text-muted: #f472b6;
+
+  --theme-primary: #ff007f;
+  --theme-secondary: #00f0ff;
+  --theme-accent: #ffd600;
+  --theme-glow: rgba(255, 0, 127, 0.5);
+  --theme-glow-soft: rgba(255, 0, 127, 0.2);
+  --theme-border-card: rgba(255, 0, 127, 0.35);
+  --theme-border-subtle: rgba(255, 0, 127, 0.18);
+  --theme-bg-card: rgba(18, 6, 30, 0.93);
+  --theme-bg-card-alt: rgba(32, 10, 52, 0.88);
+  --theme-hero-btn-bg: linear-gradient(135deg, #ff007f 0%, #c026d3 60%, #9333ea 100%);
+  --theme-hero-btn-color: #ffffff;
+
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(255, 0, 127, 0.16) 0%, transparent 60%),
+    linear-gradient(to bottom, #07030e, #130626);
+}
+
+body[data-theme="cyberpunk"] .header-title,
+body[data-theme="cyberpunk"] .hud-cyan {
+  color: #ff007f;
+  text-shadow: 0 0 12px rgba(255, 0, 127, 0.7);
+}
+
+body[data-theme="cyberpunk"] .lobby-frame-window {
+  background: radial-gradient(circle at 50% 10%, #200833 0%, #0d0417 60%, #06010a 100%);
+  border-color: rgba(255, 0, 127, 0.4);
+  box-shadow: 0 0 35px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(255, 0, 127, 0.08);
+}
+
+body[data-theme="cyberpunk"] .brand-sub-title,
+body[data-theme="cyberpunk"] .tac-section-num,
+body[data-theme="cyberpunk"] .radar-header-label,
+body[data-theme="cyberpunk"] .codex-title-sub,
+body[data-theme="cyberpunk"] .ability-name,
+body[data-theme="cyberpunk"] .center-ship-class,
+body[data-theme="cyberpunk"] .dossier-type-tag {
+  color: #ff007f !important;
+}
+
+body[data-theme="cyberpunk"] .hangar-left-col,
+body[data-theme="cyberpunk"] .hangar-center-col,
+body[data-theme="cyberpunk"] .boss-encounter-card,
+body[data-theme="cyberpunk"] .boss-genome-card,
+body[data-theme="cyberpunk"] .telemetry-specs-group,
+body[data-theme="cyberpunk"] .special-ability-card,
+body[data-theme="cyberpunk"] .genome-ratings-grid,
+body[data-theme="cyberpunk"] .codex-master-modal,
+body[data-theme="cyberpunk"] .codex-roster-col,
+body[data-theme="cyberpunk"] .codex-dossier-col,
+body[data-theme="cyberpunk"] .tactical-radar-card,
+body[data-theme="cyberpunk"] .tac-mode-card,
+body[data-theme="cyberpunk"] .stat-overview-card,
+body[data-theme="cyberpunk"] .panel-store-window,
+body[data-theme="cyberpunk"] .store-item-card {
+  background: rgba(18, 6, 32, 0.92) !important;
+  border-color: rgba(255, 0, 127, 0.3) !important;
+}
+
+body[data-theme="cyberpunk"] .fleet-ship-card.equipped,
+body[data-theme="cyberpunk"] .codex-item-card.selected,
+body[data-theme="cyberpunk"] .codex-item-card.ship-entry.selected {
+  background: rgba(255, 0, 127, 0.2) !important;
+  border-color: #ff007f !important;
+  box-shadow: 0 0 14px rgba(255, 0, 127, 0.4) !important;
+}
+
+body[data-theme="cyberpunk"] .equipped-tag-pill,
+body[data-theme="cyberpunk"] .tac-badge.cyan,
+body[data-theme="cyberpunk"] .tac-status-tag,
+body[data-theme="cyberpunk"] .codex-item-code.cyan,
+body[data-theme="cyberpunk"] .dossier-code-chip.cyan,
+body[data-theme="cyberpunk"] .dossier-category-badge.cyan {
+  background: rgba(255, 0, 127, 0.22) !important;
+  border-color: #ff007f !important;
+  color: #ff007f !important;
+}
+
+body[data-theme="cyberpunk"] .codex-filter-pill.cyan.active {
+  background: rgba(255, 0, 127, 0.28) !important;
+  border-color: #ff007f !important;
+  color: #ff007f !important;
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.45) !important;
+}
+
+body[data-theme="cyberpunk"] .deploy-hero-action-btn,
+body[data-theme="cyberpunk"] .tac-launch-btn.cyan,
+body[data-theme="cyberpunk"] .store-action-btn.btn-buy {
+  background: linear-gradient(135deg, #ff007f 0%, #c026d3 60%, #9333ea 100%) !important;
+  border-color: #f472b6 !important;
+  box-shadow: 0 0 25px rgba(255, 0, 127, 0.5) !important;
+  color: #ffffff !important;
+}
+
+body[data-theme="cyberpunk"] .quick-action-pill-btn,
+body[data-theme="cyberpunk"] .tactical-quick-btn,
+body[data-theme="cyberpunk"] .tac-card-btn {
+  background: rgba(20, 6, 36, 0.85) !important;
+  border-color: rgba(255, 0, 127, 0.35) !important;
+  color: #ff007f !important;
+}
+
+body[data-theme="cyberpunk"] .quick-action-pill-btn:hover,
+body[data-theme="cyberpunk"] .tactical-quick-btn:hover {
+  background: rgba(255, 0, 127, 0.22) !important;
+  box-shadow: 0 0 12px rgba(255, 0, 127, 0.4) !important;
+}
+
+body[data-theme="cyberpunk"] .stat-num.cyan {
+  color: #ff007f !important;
+  text-shadow: 0 0 10px rgba(255, 0, 127, 0.6) !important;
+}
+
+
+/* ===================================================
+   3. AMBER CRT (Terminal)
+   =================================================== */
+body[data-theme="amber"] {
+  --bg-cabinet: #140800;
+  --bg-bezel: #240f02;
+  --bg-screen: #0a0400;
+  --border-primary: #ffb000;
+  --border-secondary: #ea580c;
+  --text-main: #fffbeb;
+  --text-muted: #f59e0b;
+
+  --theme-primary: #ffb000;
+  --theme-secondary: #ea580c;
+  --theme-accent: #ffd600;
+  --theme-glow: rgba(255, 176, 0, 0.5);
+  --theme-glow-soft: rgba(255, 176, 0, 0.18);
+  --theme-border-card: rgba(255, 176, 0, 0.32);
+  --theme-border-subtle: rgba(255, 176, 0, 0.16);
+  --theme-bg-card: rgba(24, 10, 2, 0.93);
+  --theme-bg-card-alt: rgba(38, 16, 4, 0.88);
+  --theme-hero-btn-bg: linear-gradient(135deg, #ffb000 0%, #d97706 60%, #b45309 100%);
+  --theme-hero-btn-color: #0a0400;
+
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(255, 176, 0, 0.14) 0%, transparent 60%),
+    linear-gradient(to bottom, #090300, #170901);
+}
+
+body[data-theme="amber"] .header-title,
+body[data-theme="amber"] .hud-cyan {
+  color: #ffb000;
+  text-shadow: 0 0 10px rgba(255, 176, 0, 0.6);
+}
+
+body[data-theme="amber"] .lobby-frame-window {
+  background: radial-gradient(circle at 50% 10%, #291400 0%, #120700 60%, #080300 100%);
+  border-color: rgba(255, 176, 0, 0.35);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.95), inset 0 0 20px rgba(255, 176, 0, 0.06);
+}
+
+body[data-theme="amber"] .brand-sub-title,
+body[data-theme="amber"] .tac-section-num,
+body[data-theme="amber"] .radar-header-label,
+body[data-theme="amber"] .codex-title-sub,
+body[data-theme="amber"] .ability-name,
+body[data-theme="amber"] .center-ship-class,
+body[data-theme="amber"] .dossier-type-tag {
+  color: #ffb000 !important;
+}
+
+body[data-theme="amber"] .hangar-left-col,
+body[data-theme="amber"] .hangar-center-col,
+body[data-theme="amber"] .boss-encounter-card,
+body[data-theme="amber"] .boss-genome-card,
+body[data-theme="amber"] .telemetry-specs-group,
+body[data-theme="amber"] .special-ability-card,
+body[data-theme="amber"] .genome-ratings-grid,
+body[data-theme="amber"] .codex-master-modal,
+body[data-theme="amber"] .codex-roster-col,
+body[data-theme="amber"] .codex-dossier-col,
+body[data-theme="amber"] .tactical-radar-card,
+body[data-theme="amber"] .tac-mode-card,
+body[data-theme="amber"] .stat-overview-card,
+body[data-theme="amber"] .panel-store-window,
+body[data-theme="amber"] .store-item-card {
+  background: rgba(22, 10, 2, 0.92) !important;
+  border-color: rgba(255, 176, 0, 0.3) !important;
+}
+
+body[data-theme="amber"] .fleet-ship-card.equipped,
+body[data-theme="amber"] .codex-item-card.selected,
+body[data-theme="amber"] .codex-item-card.ship-entry.selected {
+  background: rgba(255, 176, 0, 0.18) !important;
+  border-color: #ffb000 !important;
+  box-shadow: 0 0 12px rgba(255, 176, 0, 0.35) !important;
+}
+
+body[data-theme="amber"] .equipped-tag-pill,
+body[data-theme="amber"] .tac-badge.cyan,
+body[data-theme="amber"] .tac-status-tag,
+body[data-theme="amber"] .codex-item-code.cyan,
+body[data-theme="amber"] .dossier-code-chip.cyan,
+body[data-theme="amber"] .dossier-category-badge.cyan {
+  background: rgba(255, 176, 0, 0.2) !important;
+  border-color: #ffb000 !important;
+  color: #ffb000 !important;
+}
+
+body[data-theme="amber"] .codex-filter-pill.cyan.active {
+  background: rgba(255, 176, 0, 0.25) !important;
+  border-color: #ffb000 !important;
+  color: #ffb000 !important;
+  box-shadow: 0 0 10px rgba(255, 176, 0, 0.4) !important;
+}
+
+body[data-theme="amber"] .deploy-hero-action-btn,
+body[data-theme="amber"] .tac-launch-btn.cyan,
+body[data-theme="amber"] .store-action-btn.btn-buy {
+  background: linear-gradient(135deg, #ffb000 0%, #d97706 60%, #b45309 100%) !important;
+  border-color: #ffd600 !important;
+  box-shadow: 0 0 22px rgba(255, 176, 0, 0.45) !important;
+  color: #0a0400 !important;
+}
+
+body[data-theme="amber"] .quick-action-pill-btn,
+body[data-theme="amber"] .tactical-quick-btn,
+body[data-theme="amber"] .tac-card-btn {
+  background: rgba(24, 10, 2, 0.85) !important;
+  border-color: rgba(255, 176, 0, 0.35) !important;
+  color: #ffb000 !important;
+}
+
+body[data-theme="amber"] .quick-action-pill-btn:hover,
+body[data-theme="amber"] .tactical-quick-btn:hover {
+  background: rgba(255, 176, 0, 0.22) !important;
+  box-shadow: 0 0 10px rgba(255, 176, 0, 0.35) !important;
+}
+
+body[data-theme="amber"] .stat-num.cyan {
+  color: #ffb000 !important;
+  text-shadow: 0 0 10px rgba(255, 176, 0, 0.6) !important;
+}
+
+
+/* ===================================================
+   4. MODO CLARO (GitHub Light)
+   =================================================== */
 body[data-theme="light"] {
   --bg-cabinet: #eaeff5;
   --bg-bezel: #ffffff;
@@ -60,392 +391,160 @@ body[data-theme="light"] {
   --border-secondary: #0969da;
   --text-main: #1f2328;
   --text-muted: #656d76;
+
+  --theme-primary: #0969da;
+  --theme-secondary: #1a7f37;
+  --theme-accent: #0969da;
+  --theme-glow: rgba(9, 105, 218, 0.25);
+  --theme-glow-soft: rgba(9, 105, 218, 0.1);
+  --theme-border-card: #d0d7de;
+  --theme-border-subtle: #e1e4e8;
+  --theme-bg-card: #ffffff;
+  --theme-bg-card-alt: #f6f8fa;
+  --theme-hero-btn-bg: linear-gradient(135deg, #1a7f37 0%, #0969da 100%);
+  --theme-hero-btn-color: #ffffff;
+
   background-image: 
     radial-gradient(circle at 50% 20%, rgba(26, 127, 55, 0.08) 0%, transparent 60%),
     linear-gradient(to bottom, #e1e7ed, #f6f8fa);
 }
+
 body[data-theme="light"] .arcade-header,
 body[data-theme="light"] .monitor-wrapper,
 body[data-theme="light"] .terminal-card,
-body[data-theme="light"] .modal-card {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #1f2328;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-}
-body[data-theme="light"] .header-title {
-  color: #1a7f37;
-  text-shadow: none;
-}
-body[data-theme="light"] .hud-top,
-body[data-theme="light"] .hud-bottom {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: #d0d7de;
-  color: #1f2328;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-}
-body[data-theme="light"] .hud-label,
-body[data-theme="light"] .hud-tag,
-body[data-theme="light"] .power-key {
-  color: #57606a;
-}
-body[data-theme="light"] .hud-val,
-body[data-theme="light"] .hud-stat b,
-body[data-theme="light"] .power-val {
-  color: #1f2328;
-}
-body[data-theme="light"] .power-slot {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .power-slot.power-ready {
-  background: rgba(9, 105, 218, 0.12);
-  border-color: #0969da;
-  color: #0969da;
-}
-body[data-theme="light"] .theme-dropdown {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #1f2328;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-body[data-theme="light"] .theme-dropdown option {
-  background: #ffffff;
-  color: #1f2328;
-}
-body[data-theme="light"] .control-chip {
-  background: rgba(0, 0, 0, 0.05);
-  border-color: #d0d7de;
-  color: #57606a;
-}
-body[data-theme="light"] .control-chip.active {
-  background: rgba(26, 127, 55, 0.12);
-  border-color: #1a7f37;
-  color: #1a7f37;
-}
-body[data-theme="light"] .overdrive-label {
-  color: #1f2328;
-}
-body[data-theme="light"] .overdrive-track {
-  background: rgba(0, 0, 0, 0.08);
-  border-color: #d0d7de;
+body[data-theme="light"] .modal-card,
+body[data-theme="light"] .lobby-frame-window {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+  color: #1f2328 !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Light Theme overrides for 3-Zone Hangar */
-body[data-theme="light"] .lobby-overlay {
-  background: rgba(240, 242, 245, 0.98);
+body[data-theme="light"] .header-title {
+  color: #1a7f37 !important;
+  text-shadow: none !important;
 }
-body[data-theme="light"] .lobby-frame-window {
-  background: radial-gradient(circle at 50% 10%, #ffffff 0%, #f6f8fa 60%, #eaeff5 100%);
-  border-color: #d0d7de;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12);
+
+body[data-theme="light"] .brand-sub-title,
+body[data-theme="light"] .tac-section-num,
+body[data-theme="light"] .radar-header-label,
+body[data-theme="light"] .codex-title-sub,
+body[data-theme="light"] .ability-name,
+body[data-theme="light"] .center-ship-class,
+body[data-theme="light"] .dossier-type-tag {
+  color: #0969da !important;
 }
-body[data-theme="light"] .lobby-header-bar {
-  background: #ffffff;
-  border-bottom-color: #d0d7de;
-}
-body[data-theme="light"] .brand-main-title {
-  color: #1f2328;
-  text-shadow: none;
-}
-body[data-theme="light"] .brand-sub-title {
-  color: #0969da;
-}
-body[data-theme="light"] .octocat-logo-svg {
-  color: #24292f;
-  filter: none;
-}
-body[data-theme="light"] .nav-tabs-pill-row {
-  background: #eaeff5;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .nav-tab-pill {
-  color: #57606a;
-}
-body[data-theme="light"] .nav-tab-pill.active {
-  color: #0969da;
-  background: #ffffff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-body[data-theme="light"] .nav-tab-pill.active::after {
-  background: #0969da;
-  box-shadow: none;
-}
-body[data-theme="light"] .repo-pill-badge,
-body[data-theme="light"] .stars-badge-pill,
-body[data-theme="light"] .xp-badge-pill,
-body[data-theme="light"] .settings-cog-btn {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #1f2328;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-}
-body[data-theme="light"] .repo-slug {
-  color: #0969da;
-}
+
 body[data-theme="light"] .hangar-left-col,
 body[data-theme="light"] .hangar-center-col,
 body[data-theme="light"] .boss-encounter-card,
-body[data-theme="light"] .boss-genome-card {
-  background: #ffffff;
-  border-color: #d0d7de;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-body[data-theme="light"] .col-section-header {
-  color: #1f2328;
-  border-bottom-color: #d0d7de;
-}
-body[data-theme="light"] .fleet-ship-card {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .fleet-ship-card:hover {
-  background: #eaeff5;
-  border-color: #0969da;
-}
-body[data-theme="light"] .fleet-ship-card.equipped {
-  background: rgba(9, 105, 218, 0.08);
-  border-color: #0969da;
-  box-shadow: 0 0 8px rgba(9, 105, 218, 0.2);
-}
-body[data-theme="light"] .ship-card-name {
-  color: #1f2328;
-}
-body[data-theme="light"] .ship-card-class {
-  color: #656d76;
-}
-body[data-theme="light"] .equipped-tag-pill {
-  background: #0969da;
-  color: #ffffff;
-}
-body[data-theme="light"] .procedural-ship-box {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .procedural-ship-box.equipped {
-  border-color: #0969da;
-  background: rgba(9, 105, 218, 0.08);
-}
-body[data-theme="light"] .proc-title {
-  color: #1f2328;
-}
-body[data-theme="light"] .proc-tag {
-  color: #0969da;
-}
-body[data-theme="light"] .center-ship-name {
-  color: #1f2328;
-}
-body[data-theme="light"] .center-ship-class {
-  color: #0969da;
-}
-body[data-theme="light"] .center-level-badge {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .lvl-txt {
-  color: #1f2328;
-}
-body[data-theme="light"] .lvl-pips .pip {
-  background: #d0d7de;
-}
-body[data-theme="light"] .lvl-pips .pip.filled {
-  background: #0969da;
-  box-shadow: none;
-}
-body[data-theme="light"] .holo-platform-viewport {
-  background: radial-gradient(circle at 50% 60%, rgba(9, 105, 218, 0.08) 0%, #f6f8fa 80%);
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .stage-chevron-btn {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #0969da;
-}
+body[data-theme="light"] .boss-genome-card,
 body[data-theme="light"] .telemetry-specs-group,
 body[data-theme="light"] .special-ability-card,
-body[data-theme="light"] .genome-ratings-grid {
-  background: #f6f8fa;
-  border-color: #d0d7de;
+body[data-theme="light"] .genome-ratings-grid,
+body[data-theme="light"] .codex-master-modal,
+body[data-theme="light"] .codex-roster-col,
+body[data-theme="light"] .codex-dossier-col,
+body[data-theme="light"] .tactical-radar-card,
+body[data-theme="light"] .tac-mode-card,
+body[data-theme="light"] .stat-overview-card,
+body[data-theme="light"] .panel-store-window,
+body[data-theme="light"] .store-item-card {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+  color: #1f2328 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
-body[data-theme="light"] .spec-name,
-body[data-theme="light"] .g-lbl,
-body[data-theme="light"] .ability-card-title {
-  color: #57606a;
+
+body[data-theme="light"] .fleet-ship-card,
+body[data-theme="light"] .codex-item-card,
+body[data-theme="light"] .wave-sequence-telemetry,
+body[data-theme="light"] .pilot-mission-readiness-strip,
+body[data-theme="light"] .dossier-viewport-box,
+body[data-theme="light"] .dossier-field-box,
+body[data-theme="light"] .dossier-telemetry-strip {
+  background: #f6f8fa !important;
+  border-color: #d0d7de !important;
 }
+
+body[data-theme="light"] .fleet-ship-card.equipped,
+body[data-theme="light"] .codex-item-card.selected,
+body[data-theme="light"] .codex-item-card.ship-entry.selected {
+  background: rgba(9, 105, 218, 0.08) !important;
+  border-color: #0969da !important;
+  box-shadow: 0 0 8px rgba(9, 105, 218, 0.2) !important;
+}
+
+body[data-theme="light"] .equipped-tag-pill,
+body[data-theme="light"] .tac-badge.cyan,
+body[data-theme="light"] .tac-status-tag,
+body[data-theme="light"] .codex-item-code.cyan,
+body[data-theme="light"] .dossier-code-chip.cyan,
+body[data-theme="light"] .dossier-category-badge.cyan {
+  background: rgba(9, 105, 218, 0.12) !important;
+  border-color: #0969da !important;
+  color: #0969da !important;
+}
+
+body[data-theme="light"] .deploy-hero-action-btn,
+body[data-theme="light"] .tac-launch-btn.cyan,
+body[data-theme="light"] .store-action-btn.btn-buy {
+  background: linear-gradient(135deg, #1a7f37 0%, #0969da 100%) !important;
+  color: #ffffff !important;
+  border-color: #1a7f37 !important;
+  box-shadow: 0 4px 15px rgba(26, 127, 55, 0.35) !important;
+}
+
+body[data-theme="light"] .quick-action-pill-btn,
+body[data-theme="light"] .tactical-quick-btn,
+body[data-theme="light"] .tac-card-btn {
+  background: #ffffff !important;
+  border-color: #d0d7de !important;
+  color: #1f2328 !important;
+}
+
+body[data-theme="light"] .stat-num.cyan {
+  color: #0969da !important;
+}
+
+body[data-theme="light"] .tactical-headline,
+body[data-theme="light"] .codex-title-main,
+body[data-theme="light"] .dossier-name,
+body[data-theme="light"] .ship-card-name,
+body[data-theme="light"] .center-ship-name,
 body[data-theme="light"] .spec-val,
 body[data-theme="light"] .g-val,
-body[data-theme="light"] .ability-desc {
-  color: #1f2328;
-}
-body[data-theme="light"] .stat-pip,
-body[data-theme="light"] .g-track {
-  background: #eaeff5;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .ability-name {
-  color: #0969da;
-}
-body[data-theme="light"] .ability-detail-btn,
-body[data-theme="light"] .boss-info-full-btn,
-body[data-theme="light"] .inspect-genome-cta-btn {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #0969da;
-}
-body[data-theme="light"] .boss-header-label,
-body[data-theme="light"] .genome-title,
-body[data-theme="light"] .boss-card-title {
-  color: #1f2328;
-}
-body[data-theme="light"] .boss-portrait-box {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .boss-concept-quote {
-  color: #57606a;
-}
-body[data-theme="light"] .recommended-ship-chip {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #0969da;
-}
-body[data-theme="light"] .quick-action-pill-btn {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #1f2328;
-}
-body[data-theme="light"] .quick-action-pill-btn:hover {
-  background: #f6f8fa;
-  border-color: #0969da;
-  color: #0969da;
-}
-body[data-theme="light"] .deploy-hero-action-btn {
-  background: linear-gradient(135deg, #1a7f37 0%, #0969da 100%);
-  color: #ffffff;
-  border-color: #1a7f37;
-  box-shadow: 0 4px 15px rgba(26, 127, 55, 0.35);
-}
-body[data-theme="light"] .deploy-title-main {
-  color: #ffffff;
-}
-body[data-theme="light"] .deploy-sub-meta {
-  color: #e6ffed;
-}
-body[data-theme="light"] .deploy-play-icon {
-  background: #ffffff;
-  color: #1a7f37;
-}
-body[data-theme="light"] .lobby-footer-bar {
-  background: #ffffff;
-  border-top-color: #d0d7de;
-  color: #57606a;
-}
-body[data-theme="light"] .footer-ver,
-body[data-theme="light"] .footer-universe {
-  color: #1f2328;
-}
-body[data-theme="light"] .codex-master-modal {
-  background: #ffffff;
-  border-color: #d0d7de;
-  color: #1f2328;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-}
-body[data-theme="light"] .codex-title-main,
-body[data-theme="light"] .dossier-name {
-  color: #1f2328;
-}
-body[data-theme="light"] .codex-roster-col,
-body[data-theme="light"] .codex-dossier-col {
-  background: #f6f8fa;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .codex-item-card {
-  background: #ffffff;
-  border-color: #d0d7de;
-}
-body[data-theme="light"] .codex-item-card.selected {
-  background: rgba(9, 105, 218, 0.1);
-  border-color: #0969da;
-}
-body[data-theme="light"] .codex-item-name {
-  color: #1f2328;
-}
-body[data-theme="light"] .dossier-field-box,
-body[data-theme="light"] .dossier-telemetry-strip,
-body[data-theme="light"] .dossier-viewport-box {
-  background: #ffffff;
-  border-color: #d0d7de;
-}
 body[data-theme="light"] .d-field-val,
 body[data-theme="light"] .t-val {
-  color: #1f2328;
+  color: #1f2328 !important;
 }
 
-/* 3. Cyberpunk Neon (Fucsia) */
-body[data-theme="cyberpunk"] {
-  --bg-cabinet: #0d061a;
-  --bg-bezel: #190933;
-  --bg-screen: #07030e;
-  --border-primary: #ff007f;
-  --border-secondary: #00f0ff;
-  --text-main: #fdf2f8;
-  --text-muted: #f472b6;
-  background-image: 
-    radial-gradient(circle at 50% 20%, rgba(255, 0, 127, 0.15) 0%, transparent 60%),
-    linear-gradient(to bottom, #07030e, #130626);
-}
-body[data-theme="cyberpunk"] .header-title {
-  color: #ff007f;
-  text-shadow: 0 0 12px rgba(255, 0, 127, 0.7);
-}
-body[data-theme="cyberpunk"] .lobby-frame-window {
-  background: radial-gradient(circle at 50% 10%, #200833 0%, #0d0417 60%, #06010a 100%);
-  border-color: rgba(255, 0, 127, 0.4);
-}
-body[data-theme="cyberpunk"] .deploy-hero-action-btn {
-  background: linear-gradient(135deg, #ff007f 0%, #a21caf 60%, #701a75 100%);
-  border-color: #f472b6;
-  box-shadow: 0 0 25px rgba(255, 0, 127, 0.5);
-  color: #ffffff;
-}
 
-/* 4. Cyber Cyan (Azul) - Default */
+/* ===================================================
+   5. CYBER CYAN (Azul) - Default
+   =================================================== */
 body[data-theme="cyan"] {
   --bg-cabinet: #040b17;
   --bg-bezel: #0a1628;
   --bg-screen: #030813;
   --border-primary: #00e5ff;
   --border-secondary: #38bdf8;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+
+  --theme-primary: #00e5ff;
+  --theme-secondary: #38bdf8;
+  --theme-accent: #f59e0b;
+  --theme-glow: rgba(0, 229, 255, 0.45);
+  --theme-glow-soft: rgba(0, 229, 255, 0.16);
+  --theme-border-card: rgba(0, 229, 255, 0.28);
+  --theme-border-subtle: rgba(0, 229, 255, 0.14);
+  --theme-bg-card: rgba(6, 14, 28, 0.92);
+  --theme-bg-card-alt: rgba(10, 22, 44, 0.85);
+  --theme-hero-btn-bg: linear-gradient(135deg, #00e5ff 0%, #0284c7 60%, #0369a1 100%);
+  --theme-hero-btn-color: #020712;
+
   background-image: 
     radial-gradient(circle at 50% 20%, rgba(0, 229, 255, 0.12) 0%, transparent 60%),
     linear-gradient(to bottom, #020611, #081122);
 }
-
-/* 5. Amber CRT (Terminal) */
-body[data-theme="amber"] {
-  --bg-cabinet: #140800;
-  --bg-bezel: #240f02;
-  --bg-screen: #0a0400;
-  --border-primary: #ffb000;
-  --border-secondary: #ea580c;
-  --text-main: #fffbeb;
-  --text-muted: #f59e0b;
-  background-image: 
-    radial-gradient(circle at 50% 20%, rgba(255, 176, 0, 0.12) 0%, transparent 60%),
-    linear-gradient(to bottom, #090300, #170901);
-}
-body[data-theme="amber"] .header-title {
-  color: #ffb000;
-  text-shadow: 0 0 10px rgba(255, 176, 0, 0.6);
-}
-body[data-theme="amber"] .lobby-frame-window {
-  background: radial-gradient(circle at 50% 10%, #291400 0%, #120700 60%, #080300 100%);
-  border-color: rgba(255, 176, 0, 0.35);
-}
-body[data-theme="amber"] .deploy-hero-action-btn {
-  background: linear-gradient(135deg, #ffb000 0%, #d97706 60%, #b45309 100%);
-  border-color: #ffd600;
-  box-shadow: 0 0 25px rgba(255, 176, 0, 0.5);
-  color: #0a0400;
-}
-

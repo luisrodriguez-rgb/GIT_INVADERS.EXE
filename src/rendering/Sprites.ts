@@ -12,6 +12,7 @@
  */
 
 import { ShipComposer, ShipDesign } from './ShipComposer';
+import { ShipDNAGenerator } from './ships/ShipDNA';
 import { CommitRenderer } from './enemies/CommitRenderer';
 import { PRRenderer } from './enemies/PRRenderer';
 import { IssueRenderer } from './enemies/IssueRenderer';
@@ -41,15 +42,7 @@ export class Sprites {
     isFiring: boolean = false,
     lod: number = 1
   ): void {
-    const baseDesign = ShipComposer.createPreset(shipId);
-    const design: ShipDesign = {
-      ...baseDesign,
-      hull: {
-        ...baseDesign.hull,
-        primaryColor: hullColor || baseDesign.hull.primaryColor,
-        accentColor: glowColor || baseDesign.hull.accentColor,
-      },
-    };
+    const dna = ShipDNAGenerator.fromSkinId(shipId, hullColor, glowColor);
 
     ShipComposer.render(
       ctx,
@@ -57,7 +50,7 @@ export class Sprites {
       y + height / 2,
       width,
       height,
-      design,
+      dna,
       {
         time: time || Date.now() * 0.003,
         hpRatio,
