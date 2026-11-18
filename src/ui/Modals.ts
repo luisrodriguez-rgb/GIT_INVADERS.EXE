@@ -1,16 +1,29 @@
 import { BossBlueprint } from '../github/Types';
 import { GameState } from '../core/GameState';
-import { Store } from '../store/Store';
 import { SFX } from '../audio/SFX';
 import { Sprites } from '../rendering/Sprites';
 import { I18n } from '../i18n/I18n';
 import { ARCHETYPE_DATABASE } from '../procedural/BossGenerator';
+import { Security } from '../utils/Security';
 
 export class Modals {
   private overlay: HTMLElement;
+  private activeKeyHandler: ((e: KeyboardEvent) => void) | null = null;
+  private activeAnimId: number | null = null;
 
   constructor(overlay: HTMLElement) {
     this.overlay = overlay;
+  }
+
+  private clearActiveListeners(): void {
+    if (this.activeKeyHandler) {
+      window.removeEventListener('keydown', this.activeKeyHandler);
+      this.activeKeyHandler = null;
+    }
+    if (this.activeAnimId !== null) {
+      cancelAnimationFrame(this.activeAnimId);
+      this.activeAnimId = null;
+    }
   }
 
   public showPause(
@@ -19,6 +32,7 @@ export class Modals {
     onStore: () => void,
     onAbort: () => void
   ): void {
+    this.clearActiveListeners();
     const t = I18n.getInstance().t;
     this.overlay.style.display = 'flex';
     this.overlay.innerHTML = `
@@ -84,12 +98,19 @@ export class Modals {
   }
 
   public showBossBlueprint(blueprint: BossBlueprint, onEngage: () => void): void {
+    this.clearActiveListeners();
     this.overlay.style.display = 'flex';
-    let bossAnimId: number | null = null;
 
     const archetypeKey = blueprint.archetype || 'commit_core';
     const archetypeData = blueprint.archetypeData || ARCHETYPE_DATABASE[archetypeKey] || ARCHETYPE_DATABASE.commit_core;
-    const modifierTitle = blueprint.modifierTitle || `${archetypeData.title} // BASE ARCHETYPE`;
+    const safeLangColor = Security.escapeHtml(blueprint.languageColor || '#00e5ff');
+    const safeRepo = Security.escapeHtml(blueprint.repoName);
+    const safeLang = Security.escapeHtml(blueprint.language);
+    const safeMod = Security.escapeHtml(blueprint.mutation || 'STANDARD');
+    const safeTitle = Security.escapeHtml(archetypeData.title);
+    const safeCodeNum = Security.escapeHtml(archetypeData.codeNumber);
+    const safeCanonRepo = Security.escapeHtml(archetypeData.canonicalRepo);
+    const safeQuote = Security.escapeHtml(archetypeData.conceptQuote);
 
     const octocatSvg = `
       <svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" style="vertical-align: middle; margin-right: 6px; color: #ff0055;">
@@ -118,18 +139,18 @@ export class Modals {
             <span>GIT_INVADERS.EXE // CODE BOSS DATABASE</span>
           </div>
           <div class="target-badge" style="color: #00e5ff; border-color: rgba(0, 229, 255, 0.4); background: rgba(0, 229, 255, 0.1);">
-            TARGET: ${blueprint.repoName}
+            TARGET: ${safeRepo}
           </div>
         </div>
 
         <!-- Boss Code & Archetype Title -->
         <div class="boss-infographic-header" style="text-align: left; padding: 4px 6px; margin-bottom: 4px;">
           <div style="font-size: 1.15rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; display: flex; justify-content: space-between; align-items: center;">
-            <span>${archetypeData.codeNumber}. ${archetypeData.title}</span>
-            <span style="font-size: 0.72rem; color: #38bdf8; font-family: var(--font-mono);">${archetypeData.canonicalRepo}</span>
+            <span>${safeCodeNum}. ${safeTitle}</span>
+            <span style="font-size: 0.72rem; color: #38bdf8; font-family: var(--font-mono);">${safeCanonRepo}</span>
           </div>
           <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono); margin-top: 2px;">
-            LENGUAJES: <b style="color: ${blueprint.languageColor};">${blueprint.language}</b> // MOD: <b style="color: #f43f5e;">${blueprint.mutation || 'STANDARD'}</b>
+            LENGUAJES: <b style="color: ${safeLangColor};">${safeLang}</b> // MOD: <b style="color: #f43f5e;">${safeMod}</b>
           </div>
         </div>
 
@@ -157,7 +178,7 @@ export class Modals {
             ${renderRatingBlocks(archetypeData.speedRating, '#38bdf8')}
           </div>
           <div class="stat-rating-row" style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; font-family: var(--font-mono);">
-            <span style="color: #a855f7; font-weight: 800; width: 90px;">${archetypeData.specialStatName}</span>
+            <span style="color: #a855f7; font-weight: 800; width: 90px;">${Security.escapeHtml(archetypeData.specialStatName)}</span>
             ${renderRatingBlocks(archetypeData.specialStatValue, '#c084fc')}
           </div>
         </div>
@@ -169,9 +190,9 @@ export class Modals {
             ${archetypeData.abilities
               .map(
                 (ab) => `
-              <div class="ability-card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 4px; padding: 5px; text-align: center;" title="${ab.description}">
-                <div style="font-size: 0.8rem; color: #00e5ff; font-family: var(--font-mono); margin-bottom: 2px;">${ab.icon}</div>
-                <div style="font-size: 0.65rem; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ab.name}</div>
+              <div class="ability-card" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 4px; padding: 5px; text-align: center;" title="${Security.escapeHtml(ab.description)}">
+                <div style="font-size: 0.8rem; color: #00e5ff; font-family: var(--font-mono); margin-bottom: 2px;">${Security.escapeHtml(ab.icon)}</div>
+                <div style="font-size: 0.65rem; font-weight: 800; color: #ffffff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${Security.escapeHtml(ab.name)}</div>
               </div>
             `
               )
@@ -181,7 +202,7 @@ export class Modals {
 
         <!-- Concept Quote Box -->
         <div class="boss-concept-quote" style="background: rgba(255, 0, 85, 0.08); border-left: 3px solid #ff0055; padding: 6px 10px; font-size: 0.72rem; font-style: italic; color: #cbd5e1; margin: 6px 0; font-family: var(--font-mono);">
-          "${archetypeData.conceptQuote}"
+          "${safeQuote}"
         </div>
 
         <!-- Launch Button -->
@@ -226,17 +247,15 @@ export class Modals {
             blueprint.languageColor || '#ff0055',
             blueprint.archetype || blueprint.chassisType || 'commit_core'
           );
-          bossAnimId = requestAnimationFrame(renderBossLoop);
+          this.activeAnimId = requestAnimationFrame(renderBossLoop);
         };
-        bossAnimId = requestAnimationFrame(renderBossLoop);
+        this.activeAnimId = requestAnimationFrame(renderBossLoop);
       }
     }
 
     const btn = this.overlay.querySelector('#engageBossBtn');
     const handleAction = () => {
-      if (bossAnimId !== null) cancelAnimationFrame(bossAnimId);
       this.hide();
-      window.removeEventListener('keydown', handleKey);
       onEngage();
     };
 
@@ -247,6 +266,7 @@ export class Modals {
       }
     };
 
+    this.activeKeyHandler = handleKey;
     btn?.addEventListener('click', handleAction);
     window.addEventListener('keydown', handleKey);
   }
@@ -270,6 +290,7 @@ export class Modals {
     onPrimary: () => void,
     onSecondary?: () => void
   ): void {
+    this.clearActiveListeners();
     const t = I18n.getInstance().t;
     this.overlay.style.display = 'flex';
     const isNewRecord = state.score >= state.highScore && state.score > 0;
@@ -288,7 +309,7 @@ export class Modals {
           <h2 class="${isVictory ? 'text-green' : 'text-cyan'}">
             ${isVictory ? t.modalVictoryTitle : t.modalGameOverTitle}
           </h2>
-          <div class="target-badge">[+] TARGET: ${state.currentWave > 0 ? 'sketion' : 'CORE'}</div>
+          <div class="target-badge">[+] TARGET: ${Security.escapeHtml(state.repoName || (state.currentWave > 0 ? 'sketion' : 'CORE'))}</div>
         </div>
 
         <div class="report-grid-two-col">
@@ -362,7 +383,6 @@ export class Modals {
 
     const handleAction = () => {
       this.hide();
-      window.removeEventListener('keydown', handleKey);
       onPrimary();
     };
 
@@ -373,10 +393,10 @@ export class Modals {
       }
     };
 
+    this.activeKeyHandler = handleKey;
     primaryBtn?.addEventListener('click', handleAction);
     secondaryBtn?.addEventListener('click', () => {
       this.hide();
-      window.removeEventListener('keydown', handleKey);
       onSecondary?.();
     });
     window.addEventListener('keydown', handleKey);
@@ -386,6 +406,7 @@ export class Modals {
    * Displays the Boss DNA / Genome Card modal with deterministic seed and multidimensional matrix.
    */
   public showBossDnaCard(blueprint: BossBlueprint): void {
+    this.clearActiveListeners();
     const genome = blueprint.genome;
     const archetypeData = blueprint.archetypeData;
     const matrix = genome.behaviorMatrix;
@@ -398,15 +419,15 @@ export class Modals {
             <span>GIT_INVADERS.EXE // BOSS GENOME TELEMETRY</span>
           </div>
           <div class="target-badge" style="color: #ffd600; border-color: #ffd600; background: rgba(255, 214, 0, 0.1);">
-            SEED: #${genome.seed}
+            SEED: #${Security.escapeHtml(genome.seed)}
           </div>
         </div>
 
         <div style="font-size: 1.05rem; font-weight: 900; color: #ffffff; letter-spacing: 1px; margin-bottom: 2px;">
-          ${archetypeData.codeNumber}. ${archetypeData.title}
+          ${Security.escapeHtml(archetypeData.codeNumber)}. ${Security.escapeHtml(archetypeData.title)}
         </div>
         <div style="font-size: 0.74rem; color: #38bdf8; margin-bottom: 10px;">
-          MUTATION: <b style="color: #f43f5e;">${blueprint.mutation || 'STANDARD'}</b> // STACK: <b style="color: ${blueprint.languageColor};">${blueprint.language.toUpperCase()} HEAVY</b>
+          MUTATION: <b style="color: #f43f5e;">${Security.escapeHtml(blueprint.mutation || 'STANDARD')}</b> // STACK: <b style="color: ${Security.escapeHtml(blueprint.languageColor)};">${Security.escapeHtml(blueprint.language.toUpperCase())} HEAVY</b>
         </div>
 
         <!-- Genome Stats Specs Table -->
@@ -425,16 +446,16 @@ export class Modals {
         </div>
         <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; font-size: 0.72rem;">
           <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #00e5ff; padding: 4px 8px; border-radius: 2px;">
-            <b style="color: #00e5ff;">[VISUAL]:</b> ${matrix.visual}
+            <b style="color: #00e5ff;">[VISUAL]:</b> ${Security.escapeHtml(matrix.visual)}
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #ef4444; padding: 4px 8px; border-radius: 2px;">
-            <b style="color: #ef4444;">[COMBAT]:</b> ${matrix.combat}
+            <b style="color: #ef4444;">[COMBAT]:</b> ${Security.escapeHtml(matrix.combat)}
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #a855f7; padding: 4px 8px; border-radius: 2px;">
-            <b style="color: #a855f7;">[SPAWN]:</b> ${matrix.spawn}
+            <b style="color: #a855f7;">[SPAWN]:</b> ${Security.escapeHtml(matrix.spawn)}
           </div>
           <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #facc15; padding: 4px 8px; border-radius: 2px;">
-            <b style="color: #facc15;">[AUDIO]:</b> ${matrix.audio} (${genome.audioBpm} BPM)
+            <b style="color: #facc15;">[AUDIO]:</b> ${Security.escapeHtml(matrix.audio)} (${genome.audioBpm} BPM)
           </div>
         </div>
 
@@ -447,7 +468,6 @@ export class Modals {
     const closeBtn = this.overlay.querySelector('#closeDnaCardBtn');
     const handleClose = () => {
       this.hide();
-      window.removeEventListener('keydown', handleKey);
     };
     const handleKey = (e: KeyboardEvent) => {
       if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
@@ -455,6 +475,7 @@ export class Modals {
         handleClose();
       }
     };
+    this.activeKeyHandler = handleKey;
     closeBtn?.addEventListener('click', handleClose);
     window.addEventListener('keydown', handleKey);
   }
@@ -463,6 +484,7 @@ export class Modals {
    * Displays the "WHY THIS BOSS?" causal reasoning telemetry modal.
    */
   public showWhyThisBoss(blueprint: BossBlueprint): void {
+    this.clearActiveListeners();
     const fp = blueprint.fingerprint;
     const whyReasons = blueprint.whyReasons || [];
     const stack = blueprint.mutationStack;
@@ -485,19 +507,19 @@ export class Modals {
             <span>GIT_INVADERS.EXE // CAUSAL REASONING TELEMETRY</span>
           </div>
           <div class="target-badge" style="color: #ffd600; border-color: #ffd600; background: rgba(255, 214, 0, 0.1);">
-            TARGET: ${blueprint.repoName.toUpperCase()}
+            TARGET: ${Security.escapeHtml(blueprint.repoName.toUpperCase())}
           </div>
         </div>
 
         <div style="font-size: 0.96rem; font-weight: 900; color: #ffffff; letter-spacing: 0.8px; margin-bottom: 2px;">
-          WHY THIS CODE BOSS: ${archetypeData.title}
+          WHY THIS CODE BOSS: ${Security.escapeHtml(archetypeData.title)}
         </div>
         <div style="font-size: 0.72rem; color: #38bdf8; margin-bottom: 10px;">
           CHAIN: <b>METRICS → REPOSITORY FINGERPRINT → ARCHETYPE → MUTATIONS</b>
         </div>
 
         <!-- 6D ASCII Fingerprint Panel -->
-        <div style="background: #02050b; border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.65rem; color: #00e5ff; line-height: 1.4; white-space: pre-wrap;">${asciiBars.join('\n')}</div>
+        <div style="background: #02050b; border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 4px; padding: 8px 12px; margin-bottom: 10px; font-size: 0.65rem; color: #00e5ff; line-height: 1.4; white-space: pre-wrap;">${Security.escapeHtml(asciiBars.join('\n'))}</div>
 
         <!-- Causal Reasons List -->
         <div style="font-size: 0.68rem; color: #94a3b8; font-weight: 800; letter-spacing: 1px; margin-bottom: 6px;">
@@ -507,17 +529,17 @@ export class Modals {
           ${whyReasons.map(r => `
             <div style="background: rgba(15, 23, 42, 0.7); border-left: 3px solid #00e5ff; padding: 5px 8px; border-radius: 2px; display: flex; justify-content: space-between; align-items: center;">
               <div>
-                <span style="color: #94a3b8; font-weight: 800;">${r.icon || '[*]'} ${r.metric}:</span>
-                <b style="color: #ffffff; margin-left: 4px;">${r.value}</b>
+                <span style="color: #94a3b8; font-weight: 800;">${Security.escapeHtml(r.icon || '[*]')} ${Security.escapeHtml(r.metric)}:</span>
+                <b style="color: #ffffff; margin-left: 4px;">${Security.escapeHtml(r.value)}</b>
               </div>
-              <span style="color: #38bdf8; font-weight: 700; text-align: right;">→ ${r.result}</span>
+              <span style="color: #38bdf8; font-weight: 700; text-align: right;">→ ${Security.escapeHtml(r.result)}</span>
             </div>
           `).join('')}
         </div>
 
         <!-- Mutation Stack Summary -->
         <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.3); border-radius: 4px; padding: 6px 10px; margin-bottom: 12px; font-size: 0.68rem; color: #f43f5e;">
-          <b>ACTIVE MUTATION STACK:</b> ${stack?.compositeTitle || blueprint.modifierTitle || 'STANDARD'}
+          <b>ACTIVE MUTATION STACK:</b> ${Security.escapeHtml(stack?.compositeTitle || blueprint.modifierTitle || 'STANDARD')}
         </div>
 
         <button class="launch-btn" id="closeWhyModalBtn" style="background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff; padding: 8px; width: 100%; border-radius: 4px; font-weight: 800; cursor: pointer;">
@@ -529,7 +551,6 @@ export class Modals {
     const closeBtn = this.overlay.querySelector('#closeWhyModalBtn');
     const handleClose = () => {
       this.hide();
-      window.removeEventListener('keydown', handleKey);
     };
     const handleKey = (e: KeyboardEvent) => {
       if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
@@ -537,6 +558,7 @@ export class Modals {
         handleClose();
       }
     };
+    this.activeKeyHandler = handleKey;
     closeBtn?.addEventListener('click', handleClose);
     window.addEventListener('keydown', handleKey);
   }
@@ -545,6 +567,7 @@ export class Modals {
    * Displays the Boss Codex / Bestiary grid of all 10 Archetypes.
    */
   public showBossCodex(defeatedEntries: any[]): void {
+    this.clearActiveListeners();
     const archetypes = Object.values(ARCHETYPE_DATABASE);
 
     const cardsHtml = archetypes.map((arch) => {
@@ -554,24 +577,24 @@ export class Modals {
       return `
         <div style="background: ${isDefeated ? 'rgba(16, 185, 129, 0.08)' : 'rgba(15, 23, 42, 0.6)'}; border: 1px solid ${isDefeated ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.08)'}; border-radius: 4px; padding: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 0.68rem;">
           <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="color: ${isDefeated ? '#10b981' : '#64748b'}; font-weight: 900;">#${arch.codeNumber}</span>
+            <span style="color: ${isDefeated ? '#10b981' : '#64748b'}; font-weight: 900;">#${Security.escapeHtml(arch.codeNumber)}</span>
             <span style="font-size: 0.58rem; padding: 1px 5px; border-radius: 2px; font-weight: 800; background: ${isDefeated ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)'}; color: ${isDefeated ? '#10b981' : '#64748b'};">
               ${isDefeated ? 'DEFEATED' : 'CLASSIFIED'}
             </span>
           </div>
           <div style="font-size: 0.76rem; font-weight: 900; color: ${isDefeated ? '#ffffff' : '#94a3b8'};">
-            ${arch.title}
+            ${Security.escapeHtml(arch.title)}
           </div>
           <div style="font-size: 0.6rem; color: var(--text-muted); line-height: 1.2;">
-            ${arch.profileDescription}
+            ${Security.escapeHtml(arch.profileDescription)}
           </div>
           ${isDefeated ? `
             <div style="margin-top: auto; font-size: 0.58rem; color: #38bdf8; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px;">
-              SEED: #${entry.seed} // MUTATION: <b style="color:#f43f5e">${entry.mutation}</b>
+              SEED: #${Security.escapeHtml(entry.seed)} // MUTATION: <b style="color:#f43f5e">${Security.escapeHtml(entry.mutation)}</b>
             </div>
           ` : `
             <div style="margin-top: auto; font-size: 0.58rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 4px;">
-              ENCOUNTER TARGET: ${arch.canonicalRepo}
+              ENCOUNTER TARGET: ${Security.escapeHtml(arch.canonicalRepo)}
             </div>
           `}
         </div>
@@ -604,7 +627,6 @@ export class Modals {
     const closeBtn = this.overlay.querySelector('#closeCodexBtn');
     const handleClose = () => {
       this.hide();
-      window.removeEventListener('keydown', handleKey);
     };
     const handleKey = (e: KeyboardEvent) => {
       if (e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
@@ -612,11 +634,13 @@ export class Modals {
         handleClose();
       }
     };
+    this.activeKeyHandler = handleKey;
     closeBtn?.addEventListener('click', handleClose);
     window.addEventListener('keydown', handleKey);
   }
 
   public hide(): void {
+    this.clearActiveListeners();
     this.overlay.style.display = 'none';
   }
 }

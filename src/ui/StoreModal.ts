@@ -3,6 +3,7 @@ import { SFX } from '../audio/SFX';
 import { Sprites } from '../rendering/Sprites';
 import { ThemeManager, THEMES, ThemeId } from '../themes/ThemeManager';
 import { I18n } from '../i18n/I18n';
+import { Security } from '../utils/Security';
 
 export class StoreModal {
   private overlay: HTMLElement;
@@ -91,13 +92,13 @@ export class StoreModal {
             <button class="bay-nav-btn" id="bayPrevShipBtn">[ ◀ ]</button>
             <div class="bay-hologram-title">
               <span class="bay-hologram-label">SHIP HOLOGRAM [ 0${this.selectedShipIndex + 1} / 0${this.store.SKINS.length} ]</span>
-              <span class="bay-ship-name">${selectedShip.name.toUpperCase()}</span>
-              <span class="bay-ship-tag">${selectedShip.classTag}</span>
+              <span class="bay-ship-name">${Security.escapeHtml(selectedShip.name.toUpperCase())}</span>
+              <span class="bay-ship-tag">${Security.escapeHtml(selectedShip.classTag)}</span>
               <div class="bay-palette-row" style="display:flex; align-items:center; justify-content:center; gap:6px; margin-top:4px;">
-                <span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${selectedShip.hullColor}; box-shadow:0 0 6px ${selectedShip.hullColor};"></span>
-                <span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${selectedShip.glowColor}; box-shadow:0 0 6px ${selectedShip.glowColor};"></span>
-                ${selectedShip.secondaryColor ? `<span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${selectedShip.secondaryColor}; box-shadow:0 0 6px ${selectedShip.secondaryColor};"></span>` : ''}
-                <span class="bay-palette-desc" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#94a3b8; letter-spacing:0.5px;">${selectedShip.paletteDescription || `${selectedShip.hullColor} // ${selectedShip.glowColor}`}</span>
+                <span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${Security.escapeHtml(selectedShip.hullColor)}; box-shadow:0 0 6px ${Security.escapeHtml(selectedShip.hullColor)};"></span>
+                <span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${Security.escapeHtml(selectedShip.glowColor)}; box-shadow:0 0 6px ${Security.escapeHtml(selectedShip.glowColor)};"></span>
+                ${selectedShip.secondaryColor ? `<span class="bay-palette-dot" style="display:inline-block; width:8px; height:8px; border-radius:50%; background:${Security.escapeHtml(selectedShip.secondaryColor)}; box-shadow:0 0 6px ${Security.escapeHtml(selectedShip.secondaryColor)};"></span>` : ''}
+                <span class="bay-palette-desc" style="font-family:'JetBrains Mono',monospace; font-size:10px; color:#94a3b8; letter-spacing:0.5px;">${Security.escapeHtml(selectedShip.paletteDescription || `${selectedShip.hullColor} // ${selectedShip.glowColor}`)}</span>
               </div>
             </div>
             <button class="bay-nav-btn" id="bayNextShipBtn">[ ▶ ]</button>
@@ -132,15 +133,15 @@ export class StoreModal {
 
           <div class="bay-ability-card">
             <div class="bay-ability-header">
-              <span class="bay-ability-title">ABILITY: ${selectedShip.ability.name}</span>
-              <span class="bay-ability-key">[ ${selectedShip.ability.triggerKey} ]</span>
+              <span class="bay-ability-title">ABILITY: ${Security.escapeHtml(selectedShip.ability.name)}</span>
+              <span class="bay-ability-key">[ ${Security.escapeHtml(selectedShip.ability.triggerKey)} ]</span>
             </div>
-            <div class="bay-ability-desc">${selectedShip.ability.description}</div>
+            <div class="bay-ability-desc">${Security.escapeHtml(selectedShip.ability.description)}</div>
           </div>
 
           <div class="bay-actions-row">
-            <button class="bay-action-primary store-action-btn ${actionBtnClass}" id="bayShipActionBtn" data-skin="${selectedShip.id}">
-              ${actionBtnText}
+            <button class="bay-action-primary store-action-btn ${actionBtnClass}" id="bayShipActionBtn" data-skin="${Security.escapeHtml(selectedShip.id)}">
+              ${Security.escapeHtml(actionBtnText)}
             </button>
             <button class="bay-action-upgrade" id="bayGoToModulesBtn">[ UPGRADE MODULES ]</button>
           </div>
@@ -237,17 +238,17 @@ export class StoreModal {
         const isActive = currentThemeId === key;
         themesHtml += `
           <div class="store-item-card ${isActive ? 'item-equipped' : ''}">
-            <div class="store-item-icon" style="background: ${th.primaryAccent}22; border-color: ${th.primaryAccent}; color: ${th.primaryAccent};">
+            <div class="store-item-icon" style="background: ${Security.escapeHtml(th.primaryAccent)}22; border-color: ${Security.escapeHtml(th.primaryAccent)}; color: ${Security.escapeHtml(th.primaryAccent)};">
               [CRT]
             </div>
             <div class="store-item-details">
               <div class="store-item-header">
-                <span class="store-item-name">${th.name.toUpperCase()}</span>
+                <span class="store-item-name">${Security.escapeHtml(th.name.toUpperCase())}</span>
                 <span class="store-item-level">${isActive ? 'ACTIVE PALETTE' : 'UNLOCKED'}</span>
               </div>
               <div class="store-item-desc">Hardware CRT palette with ${Math.round(th.crtScanlineOpacity * 100)}% phosphor scanlines.</div>
             </div>
-            <button class="store-action-btn ${isActive ? 'btn-equipped' : 'btn-buy'}" data-theme="${th.id}">
+            <button class="store-action-btn ${isActive ? 'btn-equipped' : 'btn-buy'}" data-theme="${Security.escapeHtml(th.id)}">
               ${isActive ? 'ACTIVE' : 'APPLY'}
             </button>
           </div>

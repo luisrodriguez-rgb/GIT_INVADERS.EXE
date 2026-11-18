@@ -2,9 +2,24 @@ import { GitHubMetrics, NormalizedGameData, SampleCommit, SamplePR, SampleIssue 
 import { DataNormalizer } from './Normalizer';
 import { GitHubCache } from './Cache';
 import { DataSynthesizer } from './DataSynthesizer';
+import { Security } from '../utils/Security';
 
 export class GitHubClient {
   private static BASE_URL = 'https://api.github.com';
+  private static FETCH_TIMEOUT_MS = 7000;
+
+  private static async fetchWithTimeout(url: string, init: RequestInit = {}): Promise<Response> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.FETCH_TIMEOUT_MS);
+    try {
+      return await fetch(url, {
+        ...init,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
 
   /**
    * Fetches GitHub profile data or falls back gracefully if rate-limited
@@ -14,6 +29,11 @@ export class GitHubClient {
     onStatusUpdate?: (msg: string) => void
   ): Promise<NormalizedGameData> {
     const cleanUser = username.trim().replace(/^@/, '');
+    if (!Security.isValidGitHubIdentifier(cleanUser)) {
+      onStatusUpdate?.(`[SECURITY] Invalid GitHub handle rejected; engaging procedural mode.`);
+      return DataSynthesizer.generateFallback('pilot');
+    }
+    const encodedUser = encodeURIComponent(cleanUser);
     const cacheKey = `user_${cleanUser}`;
 
     const cached = GitHubCache.get<NormalizedGameData>(cacheKey);
@@ -24,7 +44,7 @@ export class GitHubClient {
 
     try {
       onStatusUpdate?.(`QUERYING GITHUB API: /users/${cleanUser}...`);
-      const userRes = await fetch(`${this.BASE_URL}/users/${cleanUser}`, {
+      const userRes = await this.fetchWithTimeout(`${this.BASE_URL}/users/${encodedUser}`, {
         headers: { Accept: 'application/vnd.github.v3+json' },
       });
 
@@ -42,8 +62,8 @@ export class GitHubClient {
 
       // Fetch user repos to inspect activity
       onStatusUpdate?.(`SCANNING REPOSITORIES FOR ${cleanUser}...`);
-      const reposRes = await fetch(
-        `${this.BASE_URL}/users/${cleanUser}/repos?sort=pushed&per_page=8`,
+      const reposRes = await this.fetchWithTimeout(
+        `${this.BASE_URL}/users/${encodedUser}/repos?sort=pushed&per_page=8`,
         { headers: { Accept: 'application/vnd.github.v3+json' } }
       );
 
@@ -133,6 +153,11 @@ export class GitHubClient {
     }
 
     const [owner, repo] = parts;
+    if (!Security.isValidGitHubIdentifier(owner) || !Security.isValidGitHubIdentifier(repo)) {
+      throw new Error("Identificador de repositorio inválido. Usa solo caracteres alfanuméricos, '.', '_' o '-'.");
+    }
+    const encodedOwner = encodeURIComponent(owner);
+    const encodedRepo = encodeURIComponent(repo);
     const cacheKey = `repo_${owner}_${repo}`;
 
     const cached = GitHubCache.get<NormalizedGameData>(cacheKey);
@@ -143,7 +168,7 @@ export class GitHubClient {
 
     try {
       onStatusUpdate?.(`QUERYING REPO: /repos/${owner}/${repo}...`);
-      const repoRes = await fetch(`${this.BASE_URL}/repos/${owner}/${repo}`, {
+      const repoRes = await this.fetchWithTimeout(`${this.BASE_URL}/repos/${encodedOwner}/${encodedRepo}`, {
         headers: { Accept: 'application/vnd.github.v3+json' },
       });
 
@@ -159,9 +184,10 @@ export class GitHubClient {
       onStatusUpdate?.(`SCANNING COMMITS FOR ${repo}...`);
       let commits: SampleCommit[] = [];
       try {
-        const commitRes = await fetch(`${this.BASE_URL}/repos/${owner}/${repo}/commits?per_page=6`, {
-          headers: { Accept: 'application/vnd.github.v3+json' },
-        });
+        const commitRes = await this.fetchWithTimeout(
+          `${this.BASE_URL}/repos/${encodedOwner}/${encodedRepo}/commits?per_page=6`,
+          { headers: { Accept: 'application/vnd.github.v3+json' } }
+        );
         if (commitRes.ok) {
           const rawCommits = await commitRes.json();
           commits = rawCommits.map((c: any) => ({
@@ -176,9 +202,10 @@ export class GitHubClient {
       onStatusUpdate?.(`SCANNING PULL REQUESTS...`);
       let prs: SamplePR[] = [];
       try {
-        const prRes = await fetch(`${this.BASE_URL}/repos/${owner}/${repo}/pulls?state=all&per_page=4`, {
-          headers: { Accept: 'application/vnd.github.v3+json' },
-        });
+        const prRes = await this.fetchWithTimeout(
+          `${this.BASE_URL}/repos/${encodedOwner}/${encodedRepo}/pulls?state=all&per_page=4`,
+          { headers: { Accept: 'application/vnd.github.v3+json' } }
+        );
         if (prRes.ok) {
           const rawPRs = await prRes.json();
           prs = rawPRs.map((p: any) => ({
