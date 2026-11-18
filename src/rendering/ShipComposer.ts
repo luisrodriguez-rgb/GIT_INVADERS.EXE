@@ -203,9 +203,13 @@ export class ShipComposer {
       recoilOffset,
       recoilOffset
     );
+    const bankAngle =
+      lod === 0 && (options.vx ?? 0) === 0
+        ? Math.sin(time * 1.1) * 0.16
+        : Math.max(-0.32, Math.min(0.32, (options.vx ?? 0) / 360));
     ShipAnimation.applyTransform(ctx, centerX, centerY, anim);
 
-    // 3. Engine Propulsion Assembly (Back Layer)
+    // 3. Engine Propulsion Assembly (Back Layer, Z = -2)
     let thrustState: EngineThrustState = 'IDLE';
     if (state.hpRatio < 0.25) {
       thrustState = 'DAMAGE';
@@ -215,20 +219,48 @@ export class ShipComposer {
       thrustState = 'ACCELERATE';
     }
 
+    ctx.save();
+    ctx.translate(bankAngle * 3.5, 0);
     this.renderEngineAssembly(ctx, halfW, halfH, dna, thrustState, time, lod);
+    ctx.restore();
 
-    // 4. Physical Hull & Wings (Middle Layer - Geometry, Materials, Bevels)
-    ShipGeometry.renderShipHull(ctx, width, height, dna, time);
+    // 4. 2.5D Extruded Elevation Silhouette Stack (exact hull shape extruded vertically for 3D depth)
+    const hullOffsets = lod === 0 ? [8, 5, 2.5] : [5.5, 2.8];
+    const shadowDna: ShipVisualDNA = {
+      ...dna,
+      hullHighlightColor: '#1e293b',
+      hullBaseColor: '#090f1d',
+      hullShadowColor: '#020612',
+      accentColor: '#0f172a',
+      secondaryAccentColor: '#1e293b',
+    };
+    for (let i = 0; i < hullOffsets.length; i++) {
+      const dy = hullOffsets[i];
+      ctx.save();
+      ctx.translate(bankAngle * (hullOffsets.length - i) * 1.3, dy);
+      ctx.globalAlpha = 0.45 + i * 0.2;
+      ShipGeometry.renderShipHull(ctx, width * 0.99, height * 0.99, shadowDna, time, bankAngle);
+      ctx.restore();
+    }
 
-    // 5. Macro / Micro Surface Details (LOD 0)
+    // 5. Physical Hull & Wings (2.5D Multi-Layer Parallax Stack)
+    ShipGeometry.renderShipHull(ctx, width, height, dna, time, bankAngle);
+
+    // 5. Macro / Micro Surface Details (LOD 0, Z = +6)
+    ctx.save();
+    ctx.translate(-bankAngle * 6.0, 0);
     if (lod === 0) {
       this.renderShowcaseDecals(ctx, halfW, halfH, dna, time);
     }
 
-    // 6. Weapon Hardpoints & Cannons
+    // 6. Weapon Hardpoints & Cannons (Z = +7)
+    ctx.translate(-bankAngle * 1.5, 0);
     this.renderWeaponAssembly(ctx, halfW, halfH, dna, options.isFiring ?? false);
+    ctx.restore();
 
-    // 7. Pilot Canopy & Fusion Reactor Core
+    // 7. Pilot Canopy & Fusion Reactor Core (Top Layer Z = +11)
+    ctx.save();
+    ctx.translate(-bankAngle * 11.0, -Math.abs(bankAngle) * 2.0);
     ShipCockpit.renderCockpit(
       ctx,
       0,
@@ -238,13 +270,14 @@ export class ShipComposer {
       dna.accentColor,
       time
     );
+    ctx.restore();
 
     // 8. Navigation Strobe Beacons
     ShipLighting.renderNavLights(
       ctx,
-      -halfW * 0.82,
+      -halfW * 0.82 - bankAngle * 3,
       halfH * 0.58,
-      halfW * 0.82,
+      halfW * 0.82 - bankAngle * 3,
       halfH * 0.58,
       time
     );

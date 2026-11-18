@@ -20,41 +20,45 @@ export class ShipCockpit {
     time: number
   ): void {
     ctx.save();
+    const hw = width * 0.55;
+    const hh = height * 0.55;
 
-    // 1. Titanium Frame Base Outer
+    // 1. Silver-Titanium Multi-Strut Canopy Collar
+    ctx.fillStyle = '#334155';
+    ctx.strokeStyle = '#cbd5e1';
+    ctx.lineWidth = 1.3;
     ctx.beginPath();
-    ctx.moveTo(cx, cy - height / 2 - 2);
-    ctx.lineTo(cx + width / 2 + 2, cy + height / 2);
-    ctx.lineTo(cx - width / 2 - 2, cy + height / 2);
+    ctx.moveTo(cx, cy - hh - 3);
+    ctx.lineTo(cx + hw + 2.5, cy + hh * 0.35);
+    ctx.lineTo(cx + hw * 0.65, cy + hh + 1);
+    ctx.lineTo(cx - hw * 0.65, cy + hh + 1);
+    ctx.lineTo(cx - hw - 2.5, cy + hh * 0.35);
     ctx.closePath();
-    ctx.fillStyle = '#060d18';
     ctx.fill();
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 1.2;
     ctx.stroke();
 
-    // 2. Glass Canopy with Optical Refraction
-    ShipMaterials.renderCockpitGlass(ctx, cx, cy, width / 2, height / 2, 'rgba(0, 229, 255, 0.35)');
+    // 2. Luminous Refractive Canopy Visor
+    ShipMaterials.renderCockpitGlass(ctx, cx, cy, hw * 0.78, hh * 0.85, accentColor);
 
-    // 3. Interior HUD Glow (Subtle 2Hz breathing light)
-    const hudPulse = 0.5 + Math.sin(time * 3.5) * 0.3;
-    ctx.save();
+    // 3. Cross Frame Strut & Upper HUD Gleam
+    ctx.strokeStyle = 'rgba(226, 232, 240, 0.7)';
+    ctx.lineWidth = 1.1;
     ctx.beginPath();
-    ctx.arc(cx, cy + 1, 2.5, 0, Math.PI * 2);
+    ctx.moveTo(cx - hw * 0.55, cy - hh * 0.15);
+    ctx.lineTo(cx + hw * 0.55, cy - hh * 0.15);
+    ctx.moveTo(cx, cy - hh * 0.85);
+    ctx.lineTo(cx, cy + hh * 0.8);
+    ctx.stroke();
+
+    // 4. Dorsal Cockpit Avionics Core Glow
+    const hudPulse = 0.65 + Math.sin(time * 4.0) * 0.3;
     ctx.fillStyle = accentColor;
     ctx.globalAlpha = hudPulse;
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 6;
-    ctx.fill();
-    ctx.restore();
-
-    // 4. Canopy Top Frame Latch
+    ctx.shadowBlur = 7;
     ctx.beginPath();
-    ctx.moveTo(cx - 2, cy - height / 2);
-    ctx.lineTo(cx + 2, cy - height / 2);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
+    ctx.arc(cx, cy + 1, 2.6, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }

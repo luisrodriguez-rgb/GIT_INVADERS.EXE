@@ -25,55 +25,61 @@ export class ShipMaterials {
   ): void {
     ctx.save();
 
-    // 1. Deep Base Ambient Shadow
+    // 1. High-Contrast Mecha Metallic Shading (Bright ceramic/steel highlight -> rich mid -> shadow edge)
     const grad = ctx.createLinearGradient(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
     grad.addColorStop(0, dna.hullHighlightColor);
-    grad.addColorStop(0.35, dna.hullBaseColor);
-    grad.addColorStop(0.85, dna.hullShadowColor);
-    grad.addColorStop(1, '#000000');
+    grad.addColorStop(0.28, '#475569');
+    grad.addColorStop(0.55, dna.hullBaseColor);
+    grad.addColorStop(1, dna.hullShadowColor);
 
     ctx.fillStyle = grad;
     ctx.fill(path);
 
-    // 2. Specular Bevel Line (Subtle top/left highlight)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
-    ctx.lineWidth = dna.bevelWidth;
+    // 2. Crisp Illuminated Outer Rim & Specular Highlight
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.lineWidth = Math.max(1.2, dna.bevelWidth);
     ctx.stroke(path);
 
-    // 3. Inner shadow stroke for depth
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
-    ctx.lineWidth = 1;
+    // 3. Signature Trim Glow
+    ctx.strokeStyle = dna.accentColor;
+    ctx.lineWidth = 1.1;
+    ctx.shadowColor = dna.accentColor;
+    ctx.shadowBlur = 4;
     ctx.stroke(path);
 
     ctx.restore();
   }
 
   /**
-   * Fills an armor plate with bevels (custom plate base + bright upper bevel + lower shadow).
+   * Fills an armor plate with bevels (bright ceramic/metallic sheen + upper specular + neon trim).
    */
   public static drawBeveledArmorPlate(
     ctx: CanvasRenderingContext2D,
     path: Path2D,
     accentColor: string = '#00e5ff',
     thickness: number = 2,
-    plateFillColor: string = '#0a1628'
+    plateFillColor: string = '#334155'
   ): void {
     ctx.save();
 
-    // Main plate fill with custom material base
-    ctx.fillStyle = plateFillColor;
+    // Brushed metallic plate sheen instead of flat dark fill
+    const sheen = ctx.createLinearGradient(0, -35, 0, 35);
+    sheen.addColorStop(0, '#e2e8f0');
+    sheen.addColorStop(0.22, plateFillColor);
+    sheen.addColorStop(1, '#0f172a');
+    ctx.fillStyle = sheen;
     ctx.fill(path);
 
-    // Upper highlight rim (light source reflection)
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-    ctx.lineWidth = thickness * 0.75;
+    // Upper specular edge
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.65)';
+    ctx.lineWidth = Math.max(1.1, thickness * 0.75);
     ctx.stroke(path);
 
-    // Accent edge trace (5% neon rule)
+    // Neon rim accent
     ctx.strokeStyle = accentColor;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.1;
     ctx.shadowColor = accentColor;
-    ctx.shadowBlur = 4;
+    ctx.shadowBlur = 5;
     ctx.stroke(path);
 
     ctx.restore();

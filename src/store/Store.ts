@@ -1,4 +1,5 @@
-import { BossBlueprint, BossCodexEntry, RepositoryArtifact } from '../github/Types';
+import { BossBlueprint, BossCodexEntry, RepositoryArtifact, RepositoryDNA } from '../github/Types';
+import { Security } from '../utils/Security';
 
 export interface ShipStats {
   armor: number; // 0 - 100
@@ -53,6 +54,9 @@ export class Store {
   private static instance: Store;
   private static STORAGE_KEY = 'git_invaders_player_profile';
 
+  public useProceduralShip: boolean = false;
+  public activeProceduralDNA: RepositoryDNA | null = null;
+
   public profile: PlayerProfile = {
     totalXp: 0,
     availableXp: 0,
@@ -75,6 +79,10 @@ export class Store {
       'codebreaker_x',
       'hyper_void',
       'solar_flare',
+      'aegis_valkyrie',
+      'chrono_seraph',
+      'obsidian_hydra',
+      'starforge_omega',
     ],
     bossCodex: [],
     artifacts: [],
@@ -264,6 +272,86 @@ export class Store {
         mechanic: 'Estallido solar omnidireccional',
       },
       description: 'Caza de plumaje aerodinámico triple con reactores de combustión solar y blindaje compuesto dorado.',
+    },
+    {
+      id: 'aegis_valkyrie',
+      name: 'AEGIS VALKYRIE',
+      classTag: 'Valkiria Orbital | Escudo Reflector',
+      hullColor: '#38bdf8',
+      glowColor: '#facc15',
+      secondaryColor: '#f43f5e',
+      paletteDescription: 'Titanio Polar + Oro Solar + Carmesí',
+      cost: 1700,
+      unlocked: true,
+      stats: { armor: 85, speed: 80, fireRate: 75, shield: 95 },
+      ability: {
+        id: 'valkyrie_aegis',
+        name: 'VALKYRIE AEGIS',
+        triggerKey: 'E',
+        description: 'Despliega barrera áurea reflectora y lanza 4 micro-misiles sin gastar munición.',
+        mechanic: 'Escudo reflector + 4 misiles',
+      },
+      description: 'Caza valkiria de alas en flecha invertida con estabilizadores áureos y escudo reflector integrado.',
+    },
+    {
+      id: 'chrono_seraph',
+      name: 'CHRONO SERAPH',
+      classTag: 'Arcángel Cuántico | Singularidad',
+      hullColor: '#c084fc',
+      glowColor: '#22d3ee',
+      secondaryColor: '#f472b6',
+      paletteDescription: 'Amatista Prisma + Cian Polar + Magenta',
+      cost: 1850,
+      unlocked: true,
+      stats: { armor: 65, speed: 90, fireRate: 85, shield: 85 },
+      ability: {
+        id: 'seraph_halo',
+        name: 'SERAPH HALO',
+        triggerKey: 'E',
+        description: 'Pulso de halo temporal 360° con abanico de 6 lanzas cuánticas y sobrecarga.',
+        mechanic: 'Onda 360° + 6 lanzas cuánticas',
+      },
+      description: 'Interceptor angelical de seis alas prismáticas con aro de singularidad rotatorio dorsal.',
+    },
+    {
+      id: 'obsidian_hydra',
+      name: 'OBSIDIAN HYDRA',
+      classTag: 'Caza Multi-Cañón | Enjambre Pesado',
+      hullColor: '#10b981',
+      glowColor: '#34d399',
+      secondaryColor: '#06b6d4',
+      paletteDescription: 'Basalto Negro + Esmeralda + Cian Veneno',
+      cost: 1950,
+      unlocked: true,
+      stats: { armor: 90, speed: 65, fireRate: 95, shield: 75 },
+      ability: {
+        id: 'hydra_barrage',
+        name: 'HYDRA BARRAGE',
+        triggerKey: 'E',
+        description: 'Desata una salva de 4 misiles teledirigidos y 3 esferas de plasma ácido.',
+        mechanic: '4 misiles + 3 plasmas pesados',
+      },
+      description: 'Tricasco blindado de obsidiana con triple proa de colmillo y 5 cañones de plasma ácido.',
+    },
+    {
+      id: 'starforge_omega',
+      name: 'STARFORGE OMEGA',
+      classTag: 'Supremacía | Cañón Orbital',
+      hullColor: '#f97316',
+      glowColor: '#38bdf8',
+      secondaryColor: '#fbbf24',
+      paletteDescription: 'Forja Naranja + Titanio + Azul Reactor',
+      cost: 2200,
+      unlocked: true,
+      stats: { armor: 95, speed: 75, fireRate: 100, shield: 90 },
+      ability: {
+        id: 'omega_railstorm',
+        name: 'OMEGA RAILSTORM',
+        triggerKey: 'E',
+        description: 'Dispara una tormenta electromagnética triple y recarga 3 misiles.',
+        mechanic: 'Superláser + 2 lanzas + 3 misiles',
+      },
+      description: 'Crucero de supremacía estelar con cuernos de aceleración magnética y núcleo de fusión central.',
     },
   ];
 
@@ -470,11 +558,32 @@ export class Store {
     try {
       const saved = localStorage.getItem(Store.STORAGE_KEY);
       if (saved) {
-        this.profile = { ...this.profile, ...JSON.parse(saved) };
-        if (!this.profile.bossCodex) this.profile.bossCodex = [];
-        if (!this.profile.artifacts) this.profile.artifacts = [];
+        const parsed = Security.safeJsonParse<Partial<PlayerProfile>>(saved, {});
+        this.profile.totalXp = Security.clampInt(parsed.totalXp, this.profile.totalXp, 0, 10_000_000);
+        this.profile.availableXp = Security.clampInt(parsed.availableXp, this.profile.availableXp, 0, 10_000_000);
+        this.profile.level = Security.clampInt(parsed.level, this.profile.level, 1, 50);
+        this.profile.fireRateLevel = Security.clampInt(parsed.fireRateLevel, this.profile.fireRateLevel, 1, 5);
+        this.profile.thrusterLevel = Security.clampInt(parsed.thrusterLevel, this.profile.thrusterLevel, 1, 5);
+        this.profile.quantumPiercing = Boolean(parsed.quantumPiercing);
+        this.profile.startingShield = Boolean(parsed.startingShield);
+        this.profile.rebaseSlowMoUnlocked = Boolean(parsed.rebaseSlowMoUnlocked);
+
+        if (typeof parsed.rankName === 'string' && parsed.rankName.length <= 40) {
+          this.profile.rankName = parsed.rankName;
+        }
+        const validSkinIds = new Set(this.SKINS.map((s) => s.id));
+        if (typeof parsed.activeSkinId === 'string' && validSkinIds.has(parsed.activeSkinId)) {
+          this.profile.activeSkinId = parsed.activeSkinId;
+        }
+        if (Array.isArray(parsed.unlockedSkins)) {
+          this.profile.unlockedSkins = parsed.unlockedSkins.filter(
+            (id): id is string => typeof id === 'string' && validSkinIds.has(id)
+          );
+        }
+        this.profile.bossCodex = Array.isArray(parsed.bossCodex) ? parsed.bossCodex.slice(0, 100) : [];
+        this.profile.artifacts = Array.isArray(parsed.artifacts) ? parsed.artifacts.slice(0, 100) : [];
       }
-      // Ensure all 8 ships in SKINS are unlocked
+      // Ensure all ships in SKINS are unlocked
       const allShipIds = this.SKINS.map((s) => s.id);
       this.profile.unlockedSkins = Array.from(new Set([...(this.profile.unlockedSkins || []), ...allShipIds]));
     } catch {}

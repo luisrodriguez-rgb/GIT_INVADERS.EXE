@@ -17,6 +17,10 @@ export type HullFamily =
   | 'toroidal_ring'
   | 'stealth_dagger'
   | 'phoenix_swept'
+  | 'valkyrie_swept'
+  | 'seraph_wings'
+  | 'hydra_tri_hull'
+  | 'starforge_cruiser'
   | 'delta'
   | 'needle'
   | 'dreadnought'
@@ -34,6 +38,10 @@ export type WingFamily =
   | 'orbital_ring'
   | 'dagger_wings'
   | 'phoenix_wings'
+  | 'valkyrie_wings'
+  | 'seraph_halo_wings'
+  | 'hydra_fangs'
+  | 'omega_prongs'
   | 'sweep'
   | 'split'
   | 'fold'
@@ -212,6 +220,38 @@ export class ShipDNAGenerator {
         weaponFamily = 'plasma_spread';
         materialFamily = 'cyber_neon';
         break;
+
+      case 'aegis_valkyrie':
+        hullFamily = 'valkyrie_swept';
+        wingFamily = 'valkyrie_wings';
+        engineFamily = 'twin_ion';
+        weaponFamily = 'heavy_cannon';
+        materialFamily = 'titanium_brushed';
+        break;
+
+      case 'chrono_seraph':
+        hullFamily = 'seraph_wings';
+        wingFamily = 'seraph_halo_wings';
+        engineFamily = 'warp_ring';
+        weaponFamily = 'quantum_beam';
+        materialFamily = 'cyber_neon';
+        break;
+
+      case 'obsidian_hydra':
+        hullFamily = 'hydra_tri_hull';
+        wingFamily = 'hydra_fangs';
+        engineFamily = 'quad_plasma';
+        weaponFamily = 'plasma_spread';
+        materialFamily = 'stealth_matte';
+        break;
+
+      case 'starforge_omega':
+        hullFamily = 'starforge_cruiser';
+        wingFamily = 'omega_prongs';
+        engineFamily = 'heavy_thruster';
+        weaponFamily = 'distributed_array';
+        materialFamily = 'gold_armor';
+        break;
     }
 
     // Curated Multi-Tone Palettes (Zero boring mono-color repetition)
@@ -227,136 +267,180 @@ export class ShipDNAGenerator {
       glass: string;
     }> = {
       cyber_falcon: {
-        hullBase: '#0a1c2e',
-        hullHighlight: '#183f66',
-        hullShadow: '#030a12',
-        plateFill: '#0e263d',
+        hullBase: '#334155',
+        hullHighlight: '#e2e8f0',
+        hullShadow: '#0f172a',
+        plateFill: '#94a3b8',
         accent: '#00e5ff',
         secondaryAccent: '#38bdf8',
         tertiaryDecal: '#f59e0b',
         glow: '#38bdf8',
-        glass: 'rgba(0, 229, 255, 0.45)',
+        glass: 'rgba(0, 229, 255, 0.65)',
       },
       neon_overdrive: {
-        hullBase: '#260512',
-        hullHighlight: '#4a0b25',
-        hullShadow: '#0d0206',
-        plateFill: '#330718',
+        hullBase: '#881337',
+        hullHighlight: '#fda4af',
+        hullShadow: '#2a0511',
+        plateFill: '#be123c',
         accent: '#ff0055',
-        secondaryAccent: '#ff7700',
+        secondaryAccent: '#fb923c',
         tertiaryDecal: '#ffea00',
         glow: '#ff7700',
-        glass: 'rgba(255, 119, 0, 0.5)',
+        glass: 'rgba(255, 119, 0, 0.65)',
       },
       phantom_violet: {
-        hullBase: '#140824',
-        hullHighlight: '#2c124d',
-        hullShadow: '#08020f',
-        plateFill: '#1d0c33',
-        accent: '#a855f7',
+        hullBase: '#4c1d95',
+        hullHighlight: '#e9d5ff',
+        hullShadow: '#1e0b3b',
+        plateFill: '#6d28d9',
+        accent: '#c084fc',
         secondaryAccent: '#00f5ff',
-        tertiaryDecal: '#c084fc',
+        tertiaryDecal: '#f0abfc',
         glow: '#c084fc',
-        glass: 'rgba(168, 85, 247, 0.45)',
+        glass: 'rgba(192, 132, 252, 0.65)',
       },
       quantum_wing: {
-        hullBase: '#041a22',
-        hullHighlight: '#0a3748',
-        hullShadow: '#010a0e',
-        plateFill: '#082836',
-        accent: '#06b6d4',
-        secondaryAccent: '#6366f1',
+        hullBase: '#155e75',
+        hullHighlight: '#cffafe',
+        hullShadow: '#082f49',
+        plateFill: '#0e7490',
+        accent: '#22d3ee',
+        secondaryAccent: '#818cf8',
         tertiaryDecal: '#e0e7ff',
         glow: '#6366f1',
-        glass: 'rgba(99, 102, 241, 0.45)',
+        glass: 'rgba(34, 211, 238, 0.65)',
       },
       solar_gold: {
-        hullBase: '#241804',
-        hullHighlight: '#473009',
-        hullShadow: '#0d0801',
-        plateFill: '#362406',
-        accent: '#f59e0b',
-        secondaryAccent: '#fbbf24',
+        hullBase: '#92400e',
+        hullHighlight: '#fef08a',
+        hullShadow: '#451a03',
+        plateFill: '#d97706',
+        accent: '#fbbf24',
+        secondaryAccent: '#fde047',
         tertiaryDecal: '#ef4444',
         glow: '#fbbf24',
-        glass: 'rgba(251, 191, 36, 0.45)',
+        glass: 'rgba(251, 191, 36, 0.65)',
       },
       codebreaker_x: {
-        hullBase: '#1b0720',
-        hullHighlight: '#3a1044',
-        hullShadow: '#0a020d',
-        plateFill: '#260a2d',
-        accent: '#ec4899',
-        secondaryAccent: '#10b981',
-        tertiaryDecal: '#7c3aed',
-        glow: '#7c3aed',
-        glass: 'rgba(236, 72, 153, 0.45)',
+        hullBase: '#701a75',
+        hullHighlight: '#fbcfe8',
+        hullShadow: '#2e0632',
+        plateFill: '#9d174d',
+        accent: '#f472b6',
+        secondaryAccent: '#34d399',
+        tertiaryDecal: '#a78bfa',
+        glow: '#a78bfa',
+        glass: 'rgba(244, 114, 182, 0.65)',
       },
       emerald_glitch: {
-        hullBase: '#051b11',
-        hullHighlight: '#0d3925',
-        hullShadow: '#010b07',
-        plateFill: '#0a291a',
+        hullBase: '#065f46',
+        hullHighlight: '#a7f3d0',
+        hullShadow: '#022c22',
+        plateFill: '#047857',
         accent: '#10b981',
         secondaryAccent: '#facc15',
         tertiaryDecal: '#38bdf8',
         glow: '#a3e635',
-        glass: 'rgba(16, 185, 129, 0.45)',
+        glass: 'rgba(52, 211, 153, 0.65)',
       },
       quantum_citadel: {
-        hullBase: '#0c152b',
-        hullHighlight: '#1c2e59',
-        hullShadow: '#040712',
-        plateFill: '#142245',
-        accent: '#3b82f6',
+        hullBase: '#1e3a8a',
+        hullHighlight: '#bfdbfe',
+        hullShadow: '#0f172a',
+        plateFill: '#3b82f6',
+        accent: '#60a5fa',
         secondaryAccent: '#f8fafc',
-        tertiaryDecal: '#f59e0b',
+        tertiaryDecal: '#fbbf24',
         glow: '#e2e8f0',
-        glass: 'rgba(59, 130, 246, 0.45)',
+        glass: 'rgba(96, 165, 250, 0.65)',
       },
       hyper_void: {
-        hullBase: '#090a10',
-        hullHighlight: '#181b2a',
-        hullShadow: '#020305',
-        plateFill: '#111422',
+        hullBase: '#3f3f46',
+        hullHighlight: '#e4e4e7',
+        hullShadow: '#18181b',
+        plateFill: '#7f1d1d',
         accent: '#ef4444',
-        secondaryAccent: '#f59e0b',
+        secondaryAccent: '#fbbf24',
         tertiaryDecal: '#ffffff',
         glow: '#ef4444',
-        glass: 'rgba(239, 68, 68, 0.5)',
+        glass: 'rgba(239, 68, 68, 0.65)',
       },
       void_stalker: {
-        hullBase: '#090a10',
-        hullHighlight: '#181b2a',
-        hullShadow: '#020305',
-        plateFill: '#111422',
+        hullBase: '#3f3f46',
+        hullHighlight: '#e4e4e7',
+        hullShadow: '#18181b',
+        plateFill: '#7f1d1d',
         accent: '#ef4444',
-        secondaryAccent: '#f59e0b',
+        secondaryAccent: '#fbbf24',
         tertiaryDecal: '#ffffff',
         glow: '#ef4444',
-        glass: 'rgba(239, 68, 68, 0.5)',
+        glass: 'rgba(239, 68, 68, 0.65)',
       },
       solar_flare: {
-        hullBase: '#260e04',
-        hullHighlight: '#4a1f09',
-        hullShadow: '#0e0501',
-        plateFill: '#381606',
-        accent: '#ea580c',
-        secondaryAccent: '#facc15',
-        tertiaryDecal: '#06b6d4',
+        hullBase: '#9a3412',
+        hullHighlight: '#fed7aa',
+        hullShadow: '#431407',
+        plateFill: '#ea580c',
+        accent: '#fb923c',
+        secondaryAccent: '#fde047',
+        tertiaryDecal: '#22d3ee',
         glow: '#f97316',
-        glass: 'rgba(250, 204, 21, 0.5)',
+        glass: 'rgba(250, 204, 21, 0.65)',
       },
       solar_phoenix: {
-        hullBase: '#260e04',
-        hullHighlight: '#4a1f09',
-        hullShadow: '#0e0501',
-        plateFill: '#381606',
-        accent: '#ea580c',
-        secondaryAccent: '#facc15',
-        tertiaryDecal: '#06b6d4',
+        hullBase: '#9a3412',
+        hullHighlight: '#fed7aa',
+        hullShadow: '#431407',
+        plateFill: '#ea580c',
+        accent: '#fb923c',
+        secondaryAccent: '#fde047',
+        tertiaryDecal: '#22d3ee',
         glow: '#f97316',
-        glass: 'rgba(250, 204, 21, 0.5)',
+        glass: 'rgba(250, 204, 21, 0.65)',
+      },
+      aegis_valkyrie: {
+        hullBase: '#1e3a5f',
+        hullHighlight: '#f1f5f9',
+        hullShadow: '#0c1e35',
+        plateFill: '#64748b',
+        accent: '#38bdf8',
+        secondaryAccent: '#facc15',
+        tertiaryDecal: '#fb7185',
+        glow: '#facc15',
+        glass: 'rgba(56, 189, 248, 0.65)',
+      },
+      chrono_seraph: {
+        hullBase: '#4c1d95',
+        hullHighlight: '#fae8ff',
+        hullShadow: '#1e1b4b',
+        plateFill: '#7e22ce',
+        accent: '#c084fc',
+        secondaryAccent: '#22d3ee',
+        tertiaryDecal: '#f472b6',
+        glow: '#22d3ee',
+        glass: 'rgba(34, 211, 238, 0.65)',
+      },
+      obsidian_hydra: {
+        hullBase: '#064e3b',
+        hullHighlight: '#a7f3d0',
+        hullShadow: '#022c22',
+        plateFill: '#059669',
+        accent: '#34d399',
+        secondaryAccent: '#a3e635',
+        tertiaryDecal: '#22d3ee',
+        glow: '#34d399',
+        glass: 'rgba(52, 211, 153, 0.65)',
+      },
+      starforge_omega: {
+        hullBase: '#9a3412',
+        hullHighlight: '#ffedd5',
+        hullShadow: '#2e1005',
+        plateFill: '#c2410c',
+        accent: '#fb923c',
+        secondaryAccent: '#38bdf8',
+        tertiaryDecal: '#fde047',
+        glow: '#38bdf8',
+        glass: 'rgba(249, 115, 22, 0.65)',
       },
     };
 
@@ -419,6 +503,10 @@ export class ShipDNAGenerator {
       solar_flare: { id: 'solar_flare', name: 'SOLAR PHOENIX', armor: 60, speed: 85, fireRate: 85, hullColor: '#ea580c', glowColor: '#facc15' },
       solar_phoenix: { id: 'solar_flare', name: 'SOLAR PHOENIX', armor: 60, speed: 85, fireRate: 85, hullColor: '#ea580c', glowColor: '#facc15' },
       phoenix: { id: 'solar_flare', name: 'SOLAR PHOENIX', armor: 60, speed: 85, fireRate: 85, hullColor: '#ea580c', glowColor: '#facc15' },
+      aegis_valkyrie: { id: 'aegis_valkyrie', name: 'AEGIS VALKYRIE', armor: 85, speed: 80, fireRate: 75, hullColor: '#38bdf8', glowColor: '#facc15' },
+      chrono_seraph: { id: 'chrono_seraph', name: 'CHRONO SERAPH', armor: 65, speed: 90, fireRate: 85, hullColor: '#c084fc', glowColor: '#22d3ee' },
+      obsidian_hydra: { id: 'obsidian_hydra', name: 'OBSIDIAN HYDRA', armor: 90, speed: 65, fireRate: 95, hullColor: '#10b981', glowColor: '#34d399' },
+      starforge_omega: { id: 'starforge_omega', name: 'STARFORGE OMEGA', armor: 95, speed: 75, fireRate: 100, hullColor: '#f97316', glowColor: '#38bdf8' },
     };
 
     const normalized = (skinId || '').toLowerCase().replace(/[\s\/\-]+/g, '_');
