@@ -1,5 +1,8 @@
 import { Entity } from './Entity';
 
+/**
+ * Biomechanical cyber-cephalopod / jellyfish dependency carrier with tentacles and spore nodes.
+ */
 export class DependencyDrone extends Entity {
   public hp: number = 25;
   public maxHp: number = 25;
@@ -9,7 +12,7 @@ export class DependencyDrone extends Entity {
   public children: DependencyDrone[] = [];
   public pkgName: string;
   public orbitAngle: number = 0;
-  public orbitRadius: number = 16;
+  public orbitRadius: number = 18;
   public orbitSpeed: number = 1.8;
   public animTimer: number = 0;
 
@@ -22,15 +25,14 @@ export class DependencyDrone extends Entity {
       this.hp = 50;
       this.maxHp = 50;
       this.scoreValue = 75;
-      this.width = 30;
-      this.height = 24;
+      this.width = 34;
+      this.height = 28;
     }
   }
 
-  public update(dt: number, bounds: { width: number; height: number }): void {
-    this.animTimer += dt * 5;
+  public update(dt: number, _bounds: { width: number; height: number }): void {
+    this.animTimer += dt * 4.5;
 
-    // Child nodes orbit their root package parent dynamically
     if (this.parent && this.parent.isAlive) {
       this.orbitAngle += dt * this.orbitSpeed;
       this.x = this.parent.centerX + Math.cos(this.orbitAngle) * this.orbitRadius - this.width / 2;
@@ -45,10 +47,10 @@ export class DependencyDrone extends Entity {
     if (!this.isAlive) return;
 
     ctx.save();
-    // 1. Draw dependency connection line to parent node
+    // 1. Bio-cable tether to root organism
     if (this.parent && this.parent.isAlive) {
-      ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(16, 185, 129, 0.45)';
+      ctx.lineWidth = 1.2;
       ctx.setLineDash([3, 3]);
       ctx.beginPath();
       ctx.moveTo(this.centerX, this.centerY);
@@ -57,36 +59,61 @@ export class DependencyDrone extends Entity {
       ctx.setLineDash([]);
     }
 
-    // 2. Drone Node (Hexagon / Package Box)
-    const color = this.isRoot ? '#f59e0b' : '#38bdf8';
+    ctx.translate(this.centerX, this.centerY);
+    const hw = this.width / 2;
+    const hh = this.height / 2;
+    const color = this.isRoot ? '#10b981' : '#38bdf8';
+    const accent = this.isRoot ? '#facc15' : '#a855f7';
+
+    // 2. Undulating Biomechanical Tentacles
+    const tentacleCount = this.isRoot ? 4 : 2;
     ctx.strokeStyle = color;
-    ctx.fillStyle = `${color}22`;
-    ctx.lineWidth = this.isRoot ? 2 : 1.2;
+    ctx.lineWidth = this.isRoot ? 1.8 : 1.2;
+    for (let i = 0; i < tentacleCount; i++) {
+      const tx = -hw * 0.48 + (i / Math.max(1, tentacleCount - 1)) * hw * 0.96;
+      const sway = Math.sin(this.animTimer + i * 1.4) * 4;
+      ctx.beginPath();
+      ctx.moveTo(tx, hh * 0.15);
+      ctx.quadraticCurveTo(tx + sway, hh * 0.65, tx - sway * 0.7, hh * 1.05);
+      ctx.stroke();
 
+      ctx.fillStyle = accent;
+      ctx.beginPath();
+      ctx.arc(tx - sway * 0.7, hh * 1.05, 1.4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // 3. Domed Cephalopod Carapace Bell
+    const bell = new Path2D();
+    bell.moveTo(-hw * 0.88, hh * 0.15);
+    bell.quadraticCurveTo(-hw * 0.7, -hh * 0.92, 0, -hh * 0.92);
+    bell.quadraticCurveTo(hw * 0.7, -hh * 0.92, hw * 0.88, hh * 0.15);
+    bell.lineTo(hw * 0.45, hh * 0.35);
+    bell.lineTo(-hw * 0.45, hh * 0.35);
+    bell.closePath();
+
+    const domeGrad = ctx.createRadialGradient(0, -hh * 0.3, 1, 0, 0, hw);
+    domeGrad.addColorStop(0, this.isRoot ? '#34d399' : '#7dd3fc');
+    domeGrad.addColorStop(0.55, this.isRoot ? '#064e3b' : '#0c4a6e');
+    domeGrad.addColorStop(1, '#020617');
+    ctx.fillStyle = domeGrad;
+    ctx.fill(bell);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = this.isRoot ? 1.8 : 1.2;
+    ctx.stroke(bell);
+
+    // 4. Twin Alien Predator Eyes & Core Synapse
+    ctx.fillStyle = accent;
     ctx.beginPath();
-    ctx.rect(this.x, this.y, this.width, this.height);
+    ctx.ellipse(-hw * 0.28, -hh * 0.1, 2.2, 1.4, -0.3, 0, Math.PI * 2);
+    ctx.ellipse(hw * 0.28, -hh * 0.1, 2.2, 1.4, 0.3, 0, Math.PI * 2);
     ctx.fill();
-    ctx.stroke();
 
-    // Package cross lines
-    ctx.beginPath();
-    ctx.moveTo(this.x, this.y);
-    ctx.lineTo(this.x + this.width, this.y + this.height);
-    ctx.moveTo(this.x + this.width, this.y);
-    ctx.lineTo(this.x, this.y + this.height);
-    ctx.stroke();
-
-    // Center pulse
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(this.centerX, this.centerY, this.isRoot ? 4 : 2.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Node label
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '700 6.5px monospace';
+    // Compact label
+    ctx.fillStyle = '#e2e8f0';
+    ctx.font = '700 6px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(this.pkgName, this.centerX, this.y - 3);
+    ctx.fillText(this.pkgName.slice(0, 8), 0, -hh - 3);
 
     ctx.restore();
   }

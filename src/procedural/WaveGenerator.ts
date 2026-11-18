@@ -3,7 +3,17 @@ import { FormationType, NormalizedGameData, WaveDNA, RepositoryDNA } from '../gi
 export interface EnemySpawnPoint {
   x: number;
   y: number;
-  type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency' | 'branch' | 'security';
+  type:
+    | 'commit'
+    | 'pr'
+    | 'issue'
+    | 'conflict'
+    | 'dependency'
+    | 'branch'
+    | 'security'
+    | 'hotfix'
+    | 'tech_debt'
+    | 'pipeline';
   strategy?: 'formation' | 'zigzag' | 'dive' | 'tracking' | 'orbit' | 'swarm';
   phaseOffset?: number;
 }
@@ -63,17 +73,23 @@ export class WaveGenerator {
             const x = startX + c * spacingX;
             const y = startY + r * spacingY;
 
-            let type: 'commit' | 'pr' | 'issue' = 'commit';
+            let type: EnemySpawnPoint['type'] = 'commit';
             let strategy: 'formation' | 'zigzag' | 'dive' = 'formation';
 
             if (c === 0 || c === countInRow - 1) {
-              // Outer flanks: Heavy Armored PR cruisers
-              type = 'pr';
+              // Outer flanks: Heavy Armored PR cruisers & Security Sentinels
+              type = r === 2 ? 'security' : r === 4 ? 'tech_debt' : 'pr';
               strategy = 'formation';
             } else if (r === 0 || (r === 1 && (c === 1 || c === 2))) {
-              // Vanguard tip: Agile Bug Bombers
-              type = 'issue';
+              // Vanguard tip: Agile Bug Bombers, Hotfix Interceptors & Branch Drones
+              type = r === 0 && c === 0 ? 'branch' : r === 1 ? 'hotfix' : 'issue';
               strategy = 'dive';
+            } else if (r === 3 && (c === 2 || c === countInRow - 3)) {
+              type = c === 2 ? 'pipeline' : 'dependency';
+            } else if (r === 2 && (c === 2 || c === countInRow - 3)) {
+              type = 'branch';
+            } else if (r === 4 && (c === 4 || c === 5)) {
+              type = 'conflict';
             }
 
             points.push({
@@ -101,22 +117,24 @@ export class WaveGenerator {
 
           for (let c = 0; c < count; c++) {
             const x = startX + c * spacingX;
-            let type: 'commit' | 'pr' | 'issue' | 'conflict' = 'commit';
+            let type: EnemySpawnPoint['type'] = 'commit';
             let strategy: 'formation' | 'zigzag' | 'dive' = 'formation';
 
-            // Top and bottom apex: Bug Bombers
+            // Top and bottom apex: Bug Bombers & Hotfix Interceptors
             if (r === 0 || r === 4) {
-              type = 'issue';
+              type = c === 0 && r === 0 ? 'branch' : r === 4 ? 'hotfix' : 'issue';
               strategy = 'zigzag';
             } else if (r === 2) {
-              // Center row: Armored PRs and Conflicts
+              // Center row: Security Sentinel, Tech Debt Juggernauts, Pipeline Turrets & Conflicts
               if (c === 2 || c === 3) {
-                type = 'conflict';
+                type = c === 2 ? 'tech_debt' : 'security';
               } else if (c === 1 || c === 4) {
-                type = 'pr';
+                type = c === 1 ? 'pipeline' : 'pr';
+              } else if (c === 0 || c === 5) {
+                type = 'dependency';
               }
             } else if ((r === 1 || r === 3) && (c === 0 || c === count - 1)) {
-              type = 'pr';
+              type = r === 1 ? 'pr' : 'hotfix';
             }
 
             points.push({
@@ -150,11 +168,17 @@ export class WaveGenerator {
             const x = center.x + Math.cos(angle) * radius;
             const y = center.y + Math.sin(angle) * (radius * 0.72);
 
-            let type: 'commit' | 'pr' | 'issue' = 'commit';
+            let type: EnemySpawnPoint['type'] = 'commit';
             if (i === 0) {
-              type = 'pr';
+              type = cIdx === 2 ? 'tech_debt' : cIdx === 0 ? 'pipeline' : 'pr';
             } else if (i === 1 || i === 4) {
-              type = 'issue';
+              type = i === 4 && cIdx === 1 ? 'branch' : i === 1 && cIdx !== 2 ? 'hotfix' : 'issue';
+            } else if (i === 3 && cIdx < 2) {
+              type = 'dependency';
+            } else if (i === 5 && cIdx === 2) {
+              type = 'security';
+            } else if (i === 2 && cIdx === 2) {
+              type = 'conflict';
             }
 
             points.push({
@@ -185,14 +209,14 @@ export class WaveGenerator {
           points.push({
             x: leftWingX - 28,
             y,
-            type: r % 2 === 0 ? 'pr' : 'commit',
+            type: r === 2 ? 'security' : r === 4 ? 'tech_debt' : r % 2 === 0 ? 'pr' : 'commit',
             strategy: 'formation',
             phaseOffset: r * 0.4,
           });
           points.push({
             x: leftWingX + 28,
             y,
-            type: 'commit',
+            type: r === 1 ? 'pipeline' : r === 3 ? 'branch' : 'commit',
             strategy: 'formation',
             phaseOffset: r * 0.4 + 0.2,
           });
@@ -201,31 +225,31 @@ export class WaveGenerator {
           points.push({
             x: rightWingX - 28,
             y,
-            type: 'commit',
+            type: r === 1 ? 'conflict' : r === 3 ? 'pipeline' : 'commit',
             strategy: 'formation',
             phaseOffset: r * 0.4 + 0.3,
           });
           points.push({
             x: rightWingX + 28,
             y,
-            type: r % 2 === 0 ? 'pr' : 'commit',
+            type: r === 2 ? 'security' : r === 4 ? 'tech_debt' : r % 2 === 0 ? 'pr' : 'commit',
             strategy: 'formation',
             phaseOffset: r * 0.4 + 0.5,
           });
 
-          // Central Pincer bug advance
+          // Central Pincer bug & hotfix advance
           if (r < 3) {
             points.push({
               x: centerX - 32,
               y: y + 20,
-              type: 'issue',
+              type: r === 1 ? 'hotfix' : 'issue',
               strategy: 'dive',
               phaseOffset: r * 0.8,
             });
             points.push({
               x: centerX + 32,
               y: y + 20,
-              type: 'issue',
+              type: r === 1 ? 'hotfix' : 'issue',
               strategy: 'dive',
               phaseOffset: r * 0.8 + 0.4,
             });
@@ -250,30 +274,34 @@ export class WaveGenerator {
             const x = startX + c * spacingX;
             const y = startY + r * spacingY;
 
-            let type: 'commit' | 'pr' | 'issue' | 'conflict' | 'dependency' | 'branch' | 'security' = 'commit';
+            let type: EnemySpawnPoint['type'] = 'commit';
             let strategy: 'formation' | 'zigzag' | 'dive' = 'formation';
 
             if (r === 0) {
-              // Row 0: Agile vanguard bug bombers & branch drones
+              // Row 0: Agile vanguard bug bombers, hotfix interceptors & branch drones
               if (c === 2 || c === 5) {
-                type = 'issue';
+                type = 'hotfix';
                 strategy = 'zigzag';
               } else if (c === 0 || c === 7) {
                 type = 'branch';
               } else if (c === 3 || c === 4) {
-                type = 'conflict';
+                type = 'pipeline';
+              } else {
+                type = 'issue';
               }
             } else if (r === 1) {
-              // Row 1: Heavy Armored PR Cruisers at flanks and Security Sentinel in center
+              // Row 1: Heavy Armored PR Cruisers, Tech Debt Juggernauts & Security Sentinels
               if (c === 1 || c === 6) {
                 type = 'pr';
               } else if (c === 3 || c === 4) {
-                type = 'security';
+                type = c === 3 ? 'tech_debt' : 'security';
+              } else if (c === 0 || c === 7) {
+                type = 'conflict';
               } else {
-                type = 'commit';
+                type = 'dependency';
               }
             } else {
-              // Rows 2, 3, 4: Clean, uniform Space Invaders commit rows
+              // Rows 2, 3, 4: Clean Space Invaders commit rows
               type = 'commit';
             }
 

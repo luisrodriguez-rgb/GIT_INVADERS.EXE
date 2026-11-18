@@ -15,6 +15,17 @@ export class Boss extends Entity {
   public maxShieldHp: number = 0;
   public stateMachine: BossStateMachine;
 
+  // Destructible Sub-Modules (Left Flank, Right Flank, Dorsal Aux Core)
+  public leftModuleHp: number = 0;
+  public leftModuleMaxHp: number = 0;
+  public leftModuleAlive: boolean = true;
+  public rightModuleHp: number = 0;
+  public rightModuleMaxHp: number = 0;
+  public rightModuleAlive: boolean = true;
+  public auxModuleHp: number = 0;
+  public auxModuleMaxHp: number = 0;
+  public auxModuleAlive: boolean = true;
+
   // Formal CombatMemory & Neural Learning State
   public combatMemory: CombatMemory = {
     attacksUsed: 0,
@@ -47,7 +58,7 @@ export class Boss extends Entity {
   private floatAngle: number = 0;
 
   constructor(x: number, y: number, blueprint: BossBlueprint) {
-    super(x, y, 140, 80);
+    super(x, y, 168, 96);
     this.blueprint = blueprint;
 
     // Multidimensional dimension: RUST HEAVY grants +25% base shield and armor capacity
@@ -59,17 +70,37 @@ export class Boss extends Entity {
     this.maxShieldHp = Math.round(blueprint.shieldLayers * 150 * shieldBonus);
     this.shieldHp = this.maxShieldHp;
     this.attackTimer = 1.0;
+
+    // Initialize Destructible Sub-Modules
+    const modHp = Math.max(180, Math.round(this.maxHp * 0.22));
+    this.leftModuleMaxHp = modHp;
+    this.leftModuleHp = modHp;
+    this.rightModuleMaxHp = modHp;
+    this.rightModuleHp = modHp;
+    this.auxModuleMaxHp = Math.round(modHp * 0.85);
+    this.auxModuleHp = this.auxModuleMaxHp;
+
     this.stateMachine = new BossStateMachine('ENTER');
 
-    this.stateMachine.onStateChange((prev, next) => {
+    this.stateMachine.onStateChange((_prev, next) => {
       if (next === 'PHASE_2') {
-        this.currentPhase = 2;
+        this.currentPhase = Math.max(this.currentPhase, 2);
         this.shieldActive = true;
+        this.shieldHp = Math.round(this.maxShieldHp * 0.4);
         SFX.playBossWarning();
-      } else if (next === 'CRITICAL' || next === 'ENRAGED') {
-        this.currentPhase = 3;
+      } else if (next === 'PHASE_3') {
+        this.currentPhase = Math.max(this.currentPhase, 3);
         this.shieldActive = true;
         this.shieldHp = Math.round(this.maxShieldHp * 0.5);
+        SFX.playBossWarning();
+      } else if (next === 'CRITICAL' || next === 'ENRAGED') {
+        if (next === 'CRITICAL') {
+          this.currentPhase = 4;
+          this.shieldActive = true;
+          this.shieldHp = Math.round(this.maxShieldHp * 0.6);
+        } else {
+          this.currentPhase = Math.max(this.currentPhase, 2);
+        }
         SFX.playBossWarning();
       }
     });
@@ -208,7 +239,15 @@ export class Boss extends Entity {
       this.currentPhase,
       this.time,
       this.blueprint.languageColor,
-      this.blueprint.archetype || this.blueprint.chassisType || 'commit_core'
+      this.blueprint.archetype || this.blueprint.chassisType || 'commit_core',
+      {
+        leftAlive: this.leftModuleAlive,
+        rightAlive: this.rightModuleAlive,
+        auxAlive: this.auxModuleAlive,
+        leftRatio: this.leftModuleMaxHp > 0 ? this.leftModuleHp / this.leftModuleMaxHp : 0,
+        rightRatio: this.rightModuleMaxHp > 0 ? this.rightModuleHp / this.rightModuleMaxHp : 0,
+        auxRatio: this.auxModuleMaxHp > 0 ? this.auxModuleHp / this.auxModuleMaxHp : 0,
+      }
     );
   }
 
@@ -225,8 +264,20 @@ export class Boss extends Entity {
     const isForked = this.blueprint.mutation === 'FORKED';
     const isRecursive = this.blueprint.mutation === 'RECURSIVE';
 
-    const baseFireRate = this.blueprint.fireRateSeconds * (isFrenzy ? 0.55 : this.currentPhase === 3 ? 0.65 : 1.0);
-    const fireRate = isOverclocked ? baseFireRate * 0.75 : baseFireRate;
+    const baseFireRate =
+      this.blueprint.fireRateSeconds *
+      (this.currentPhase === 4 || isFrenzy
+        ? 0.5
+        : this.currentPhase === 3
+        ? 0.65
+        : this.currentPhase === 2
+        ? 0.82
+        : 1.0);
+    // Destroyed lateral modules slow down boss fire slightly as tactical reward
+    const destroyedCount =
+      (this.leftModuleAlive ? 0 : 1) + (this.rightModuleAlive ? 0 : 1) + (this.auxModuleAlive ? 0 : 1);
+    const modulePenalty = 1 + destroyedCount * 0.14;
+    const fireRate = (isOverclocked ? baseFireRate * 0.75 : baseFireRate) * modulePenalty;
     this.attackTimer = fireRate;
     const bullets: Projectile[] = [];
 
@@ -446,10 +497,10 @@ export class Boss extends Entity {
     return bullets;
   }
 
-  public takeDamage(amount: number): boolean {
+  public takeDamage(amount: number, hitX?: number, hitY?: number): boolean {
     // SECURED mutation deflects 20% incoming damage while shields remain active
     const isSecured = this.blueprint.mutation === 'SECURED';
-    const effectiveAmount = (isSecured && this.shieldActive) ? amount * 0.8 : amount;
+    const effectiveAmount = isSecured && this.shieldActive ? amount * 0.8 : amount;
 
     if (this.shieldActive && this.shieldHp > 0) {
       this.shieldHp -= effectiveAmount;
@@ -459,6 +510,32 @@ export class Boss extends Entity {
         SFX.playExplosion('medium');
       }
       return false;
+    }
+
+    // Sub-module targeted impact check
+    if (hitX !== undefined) {
+      if (hitX < this.x + this.width * 0.32 && this.leftModuleAlive) {
+        this.leftModuleHp -= effectiveAmount;
+        if (this.leftModuleHp <= 0) {
+          this.leftModuleHp = 0;
+          this.leftModuleAlive = false;
+          SFX.playExplosion('medium');
+        }
+      } else if (hitX > this.x + this.width * 0.68 && this.rightModuleAlive) {
+        this.rightModuleHp -= effectiveAmount;
+        if (this.rightModuleHp <= 0) {
+          this.rightModuleHp = 0;
+          this.rightModuleAlive = false;
+          SFX.playExplosion('medium');
+        }
+      } else if (hitY !== undefined && hitY < this.y + this.height * 0.42 && this.auxModuleAlive) {
+        this.auxModuleHp -= effectiveAmount;
+        if (this.auxModuleHp <= 0) {
+          this.auxModuleHp = 0;
+          this.auxModuleAlive = false;
+          SFX.playExplosion('medium');
+        }
+      }
     }
 
     // LEGACY Mutation: History Rewind temporal slip on heavy damage

@@ -1,10 +1,9 @@
 /**
- * GIT_INVADERS.EXE // SECURITY SENTINEL RENDERER
- * Aegis cybersecurity bastion:
- * - Heavy octagonal ballistic fortress hull with hazard warning chevrons
- * - Animated cryptographic padlock that articulates when discharging firewall
- * - Electric crackling hexagonal firewall barrier perimeter
- * - Dual defense turret blisters and perimeter sensors
+ * GIT_INVADERS.EXE // SECURITY SENTINEL RENDERER (Aegis Mecha-Golem Bastion)
+ * Structured Mecha-Guardian matching Boss #9 anatomy:
+ * - Horned armored guardian helmet with glowing visor optic
+ * - Heavy steel chest core with hazard chevrons
+ * - Twin floating hexagonal energy-shield gauntlets on flanks
  */
 
 export class SecurityRenderer {
@@ -22,140 +21,97 @@ export class SecurityRenderer {
 
     const hw = width / 2;
     const hh = height / 2;
-    const alertPulse = 0.85 + Math.sin(time * 8) * 0.15;
-    const amberColor = '#f59e0b';
+    const pulse = 0.85 + Math.sin(time * 7) * 0.15;
+    const skyColor = '#38bdf8';
+    const goldColor = '#f59e0b';
 
-    // 1. Crackling Hexagonal Firewall Barrier
-    if (isShieldActive) {
+    // 1. Twin Floating Hexagonal Gauntlet Shields (left & right shoulders)
+    [-1, 1].forEach((dir) => {
+      const gx = dir * hw * 0.88;
+      const gy = Math.sin(time * 4 + dir) * 2.5;
       ctx.save();
-      ctx.strokeStyle = 'rgba(245, 158, 11, 0.55)';
+      ctx.fillStyle = isShieldActive ? 'rgba(56, 189, 248, 0.28)' : 'rgba(100, 116, 139, 0.25)';
+      ctx.strokeStyle = isShieldActive ? skyColor : '#64748b';
       ctx.lineWidth = 1.6;
-      ctx.setLineDash([7, 5]);
-      ctx.lineDashOffset = -time * 18;
-
-      const hexRadius = hw * 1.28;
+      if (isShieldActive) {
+        ctx.shadowColor = skyColor;
+        ctx.shadowBlur = 7;
+      }
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
-        const a = (i * Math.PI) / 3;
-        const hx = Math.cos(a) * hexRadius;
-        const hy = Math.sin(a) * hexRadius;
-        if (i === 0) ctx.moveTo(hx, hy);
-        else ctx.lineTo(hx, hy);
+        const a = (i / 6) * Math.PI * 2;
+        const px = gx + Math.cos(a) * (hw * 0.38);
+        const py = gy + Math.sin(a) * (hh * 0.52);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
       }
       ctx.closePath();
+      ctx.fill();
       ctx.stroke();
 
-      // Electric sparks along firewall nodes
-      for (let i = 0; i < 6; i++) {
-        const a = (i * Math.PI) / 3;
-        const hx = Math.cos(a) * hexRadius;
-        const hy = Math.sin(a) * hexRadius;
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.arc(hx, hy, 1.8, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.restore();
-    }
-
-    // 2. Heavy Octagonal Fortress Plating
-    const fortress = new Path2D();
-    fortress.moveTo(-hw * 0.42, -hh * 0.92);
-    fortress.lineTo(hw * 0.42, -hh * 0.92);
-    fortress.lineTo(hw * 0.94, -hh * 0.4);
-    fortress.lineTo(hw * 0.94, hh * 0.4);
-    fortress.lineTo(hw * 0.42, hh * 0.92);
-    fortress.lineTo(-hw * 0.42, hh * 0.92);
-    fortress.lineTo(-hw * 0.94, hh * 0.4);
-    fortress.lineTo(-hw * 0.94, -hh * 0.4);
-    fortress.closePath();
-
-    ctx.fillStyle = '#170f05';
-    ctx.fill(fortress);
-    ctx.strokeStyle = amberColor;
-    ctx.lineWidth = 2.2;
-    ctx.stroke(fortress);
-
-    // 3. Hazard Warning Chevrons (Black & Amber slashes on side armor)
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(-hw * 0.88, -hh * 0.25, hw * 0.2, hh * 0.5);
-    ctx.rect(hw * 0.68, -hh * 0.25, hw * 0.2, hh * 0.5);
-    ctx.clip();
-    for (let i = -15; i < 30; i += 6) {
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 3;
+      // Inner shield rune
+      ctx.strokeStyle = '#e0f2fe';
+      ctx.lineWidth = 1;
       ctx.beginPath();
-      ctx.moveTo(-hw + i, -hh);
-      ctx.lineTo(-hw + i + 6, hh);
-      ctx.moveTo(hw * 0.6 + i, -hh);
-      ctx.lineTo(hw * 0.6 + i + 6, hh);
+      ctx.moveTo(gx, gy - hh * 0.25);
+      ctx.lineTo(gx + dir * 3, gy);
+      ctx.lineTo(gx, gy + hh * 0.25);
       ctx.stroke();
-    }
-    ctx.restore();
+      ctx.restore();
+    });
 
-    // 4. Inner Beveled Aegis Core Plate
-    const innerPlate = new Path2D();
-    innerPlate.moveTo(-hw * 0.28, -hh * 0.65);
-    innerPlate.lineTo(hw * 0.28, -hh * 0.65);
-    innerPlate.lineTo(hw * 0.65, -hh * 0.25);
-    innerPlate.lineTo(hw * 0.65, hh * 0.25);
-    innerPlate.lineTo(hw * 0.28, hh * 0.65);
-    innerPlate.lineTo(-hw * 0.28, hh * 0.65);
-    innerPlate.lineTo(-hw * 0.65, hh * 0.25);
-    innerPlate.lineTo(-hw * 0.65, -hh * 0.25);
-    innerPlate.closePath();
+    // 2. Armored Golem Torso & Pauldrons
+    const torso = new Path2D();
+    torso.moveTo(-hw * 0.52, -hh * 0.55);
+    torso.lineTo(hw * 0.52, -hh * 0.55);
+    torso.lineTo(hw * 0.68, -hh * 0.1);
+    torso.lineTo(hw * 0.44, hh * 0.82);
+    torso.lineTo(-hw * 0.44, hh * 0.82);
+    torso.lineTo(-hw * 0.68, -hh * 0.1);
+    torso.closePath();
 
-    ctx.fillStyle = '#291b07';
-    ctx.fill(innerPlate);
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-    ctx.lineWidth = 1.0;
-    ctx.stroke(innerPlate);
-
-    // 5. Articulated Cryptographic Padlock
-    ctx.save();
-    const isUnlocked = isShieldActive && Math.sin(time * 6) > 0.7;
-    const shackleLift = isUnlocked ? -3 : 0;
-
-    // Padlock Body
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(-5, 0, 10, 8);
-    ctx.strokeStyle = '#000000';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(-5, 0, 10, 8);
-
-    // Shackle Arch
-    ctx.strokeStyle = '#ffffff';
+    const grad = ctx.createLinearGradient(-hw, -hh, hw, hh);
+    grad.addColorStop(0, '#334155');
+    grad.addColorStop(0.5, '#0f172a');
+    grad.addColorStop(1, '#1e293b');
+    ctx.fillStyle = grad;
+    ctx.fill(torso);
+    ctx.strokeStyle = isShieldActive ? skyColor : goldColor;
     ctx.lineWidth = 1.8;
+    ctx.stroke(torso);
+
+    // 3. Horned Mecha Helmet & Visor
+    ctx.fillStyle = '#475569';
+    ctx.strokeStyle = '#bae6fd';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
-    ctx.arc(0, -1 + shackleLift, 4, Math.PI, isUnlocked ? Math.PI * 1.8 : 0);
+    ctx.moveTo(-hw * 0.28, -hh * 0.52);
+    ctx.lineTo(-hw * 0.42, -hh * 1.02);
+    ctx.lineTo(-hw * 0.12, -hh * 0.78);
+    ctx.lineTo(hw * 0.12, -hh * 0.78);
+    ctx.lineTo(hw * 0.42, -hh * 1.02);
+    ctx.lineTo(hw * 0.28, -hh * 0.52);
+    ctx.closePath();
+    ctx.fill();
     ctx.stroke();
 
-    // Glowing Keyhole
-    ctx.fillStyle = amberColor;
-    ctx.beginPath();
-    ctx.arc(0, 3, 1.4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillRect(-0.8, 3.5, 1.6, 3);
-    ctx.restore();
+    // Glowing Golem Eye Visor
+    ctx.fillStyle = isShieldActive ? skyColor : '#ef4444';
+    ctx.fillRect(-hw * 0.18, -hh * 0.64, hw * 0.36, 3);
 
-    // 6. Perimeter Sensor Beacons
-    ctx.save();
-    ctx.shadowColor = amberColor;
-    ctx.shadowBlur = 8;
-    ctx.fillStyle = amberColor;
-    const sensors = [
-      { x: -hw * 0.55, y: -hh * 0.55 },
-      { x: hw * 0.55, y: -hh * 0.55 },
-      { x: -hw * 0.55, y: hh * 0.55 },
-      { x: hw * 0.55, y: hh * 0.55 },
-    ];
-    for (const s of sensors) {
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, 1.8 * alertPulse, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.restore();
+    // 4. Central Chest Padlock Core
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(-4, hh * 0.02, 8, 6.5);
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(0, hh * 0.02, 3.2, Math.PI, 0);
+    ctx.stroke();
+
+    ctx.fillStyle = goldColor;
+    ctx.beginPath();
+    ctx.arc(0, hh * 0.2, 1.5 * pulse, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }

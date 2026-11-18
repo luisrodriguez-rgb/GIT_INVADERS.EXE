@@ -6,6 +6,9 @@ import { MergeConflict } from '../entities/MergeConflict';
 import { DependencyDrone } from '../entities/DependencyDrone';
 import { BranchDrone } from '../entities/BranchDrone';
 import { SecuritySentinel } from '../entities/SecuritySentinel';
+import { HotfixInterceptor } from '../entities/HotfixInterceptor';
+import { TechDebtJuggernaut } from '../entities/TechDebtJuggernaut';
+import { PipelineTurret } from '../entities/PipelineTurret';
 import { Entity } from '../entities/Entity';
 import { WaveGenerator } from './WaveGenerator';
 
@@ -60,6 +63,15 @@ export class EnemyFactory {
         entities.push(new BranchDrone(pt.x, pt.y, branchName, false));
       } else if (pt.type === 'security') {
         entities.push(new SecuritySentinel(pt.x, pt.y));
+      } else if (pt.type === 'hotfix') {
+        const patchTags = ['hotfix/auth', 'patch/mem', 'fix/race', 'emergency'];
+        const tag = patchTags[(depIdx++) % patchTags.length];
+        entities.push(new HotfixInterceptor(pt.x, pt.y, tag, pt.phaseOffset || 0));
+      } else if (pt.type === 'tech_debt') {
+        entities.push(new TechDebtJuggernaut(pt.x, pt.y, 'LEGACY_CORE'));
+      } else if (pt.type === 'pipeline') {
+        const stages = ['BUILD', 'TEST', 'DEPLOY', 'LINT'];
+        entities.push(new PipelineTurret(pt.x, pt.y, stages[(depIdx++) % stages.length]));
       } else {
         // Standard Commit Invader with rich semantic git coloration
         const commit = gameData.commits[commitIdx % Math.max(1, gameData.commits.length)] || {

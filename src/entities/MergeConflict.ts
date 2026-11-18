@@ -1,5 +1,8 @@
 import { Entity } from './Entity';
 
+/**
+ * Winged conflict splinter mini-drake spawned when a MergeConflict splits.
+ */
 export class ConflictFragment extends Entity {
   public branchName: string;
   public color: string;
@@ -8,7 +11,7 @@ export class ConflictFragment extends Entity {
   private animTimer: number = 0;
 
   constructor(x: number, y: number, vx: number, branchName: string, color: string) {
-    super(x, y, 22, 18);
+    super(x, y, 24, 20);
     this.vx = vx;
     this.vy = 40;
     this.branchName = branchName;
@@ -29,24 +32,30 @@ export class ConflictFragment extends Entity {
     if (!this.isAlive) return;
 
     ctx.save();
-    ctx.strokeStyle = this.color;
-    ctx.fillStyle = `${this.color}22`;
-    ctx.lineWidth = 1.5;
+    ctx.translate(this.centerX, this.centerY);
+    const hw = this.width / 2;
+    const hh = this.height / 2;
+    const flap = Math.sin(this.animTimer) * 3;
 
-    // Diamond fragment
+    // Winged mini-drake silhouette
+    ctx.fillStyle = '#1e1b4b';
+    ctx.strokeStyle = this.color;
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.moveTo(this.centerX, this.y);
-    ctx.lineTo(this.x + this.width, this.centerY);
-    ctx.lineTo(this.centerX, this.y + this.height);
-    ctx.lineTo(this.x, this.centerY);
+    ctx.moveTo(0, -hh * 0.8);
+    ctx.lineTo(hw * 0.95, -hh * 0.25 + flap);
+    ctx.lineTo(hw * 0.55, hh * 0.6);
+    ctx.lineTo(0, hh * 0.95);
+    ctx.lineTo(-hw * 0.55, hh * 0.6);
+    ctx.lineTo(-hw * 0.95, -hh * 0.25 + flap);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
     ctx.fillStyle = '#ffffff';
-    ctx.font = '700 7px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText(this.branchName.substring(0, 4), this.centerX, this.centerY + 2.5);
+    ctx.beginPath();
+    ctx.arc(0, 0, 2.2, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }
@@ -61,6 +70,9 @@ export class ConflictFragment extends Entity {
   }
 }
 
+/**
+ * Two-headed split Chimera invader representing colliding Git branches (HEAD vs Branch).
+ */
 export class MergeConflict extends Entity {
   public hp: number = 60;
   public maxHp: number = 60;
@@ -68,10 +80,10 @@ export class MergeConflict extends Entity {
   private animTime: number = 0;
 
   constructor(x: number, y: number) {
-    super(x, y, 40, 26);
+    super(x, y, 42, 32);
   }
 
-  public update(dt: number, bounds: { width: number; height: number }): void {
+  public update(dt: number, _bounds: { width: number; height: number }): void {
     this.animTime += dt;
     this.x += this.vx * dt;
     this.y += this.vy * dt;
@@ -81,48 +93,64 @@ export class MergeConflict extends Entity {
     if (!this.isAlive) return;
 
     ctx.save();
-    const w2 = this.width / 2;
+    ctx.translate(this.centerX, this.centerY);
+    const hw = this.width / 2;
+    const hh = this.height / 2;
+    const jitter = Math.sin(this.animTime * 14) * 1.4;
 
-    // Left half: Cyan (<<<<<<< HEAD)
-    ctx.fillStyle = 'rgba(0, 229, 255, 0.2)';
+    // Left Half: Cyan Cyber-Drake Wing & Horned Head (HEAD)
+    ctx.fillStyle = '#083344';
     ctx.strokeStyle = '#00e5ff';
-    ctx.lineWidth = 1.5;
+    ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.rect(this.x, this.y, w2, this.height);
+    ctx.moveTo(-2, -hh * 0.35);
+    ctx.lineTo(-hw * 0.32, -hh * 0.95);
+    ctx.lineTo(-hw * 1.0, -hh * 0.2 + jitter);
+    ctx.lineTo(-hw * 0.72, hh * 0.72);
+    ctx.lineTo(-2, hh * 0.45);
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Right half: Violet (>>>>>>> branch)
-    ctx.fillStyle = 'rgba(192, 132, 252, 0.2)';
-    ctx.strokeStyle = '#c084fc';
+    // Right Half: Magenta Cyber-Drake Wing & Horned Head (BRANCH)
+    ctx.fillStyle = '#3b0764';
+    ctx.strokeStyle = '#f43f5e';
     ctx.beginPath();
-    ctx.rect(this.x + w2, this.y, w2, this.height);
+    ctx.moveTo(2, -hh * 0.35);
+    ctx.lineTo(hw * 0.32, -hh * 0.95);
+    ctx.lineTo(hw * 1.0, -hh * 0.2 - jitter);
+    ctx.lineTo(hw * 0.72, hh * 0.72);
+    ctx.lineTo(2, hh * 0.45);
+    ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Divider line
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
+    // Chimera Eyes (Left & Right heads)
+    ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.moveTo(this.x + w2, this.y);
-    ctx.lineTo(this.x + w2, this.y + this.height);
+    ctx.arc(-hw * 0.36, -hh * 0.28, 2, 0, Math.PI * 2);
+    ctx.arc(hw * 0.36, -hh * 0.28, 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Crackling Golden Lightning Conflict Rift down the spine
+    ctx.strokeStyle = '#facc15';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = '#facc15';
+    ctx.shadowBlur = 7;
+    ctx.beginPath();
+    ctx.moveTo(0, -hh * 0.95);
+    ctx.lineTo(-3, -hh * 0.2);
+    ctx.lineTo(3, hh * 0.2);
+    ctx.lineTo(0, hh * 0.95);
     ctx.stroke();
-
-    // Text labels
-    ctx.fillStyle = '#00e5ff';
-    ctx.font = '700 7px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('<<', this.x + w2 * 0.5, this.centerY + 2.5);
-
-    ctx.fillStyle = '#c084fc';
-    ctx.fillText('>>', this.x + w2 * 1.5, this.centerY + 2.5);
+    ctx.shadowBlur = 0;
 
     // HP Bar
     const hpPct = Math.max(0, this.hp / this.maxHp);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(this.x, this.y - 5, this.width, 3);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.55)';
+    ctx.fillRect(-hw, -hh - 6, this.width, 3);
     ctx.fillStyle = '#f59e0b';
-    ctx.fillRect(this.x, this.y - 5, this.width * hpPct, 3);
+    ctx.fillRect(-hw, -hh - 6, this.width * hpPct, 3);
 
     ctx.restore();
   }
@@ -136,12 +164,9 @@ export class MergeConflict extends Entity {
     return false;
   }
 
-  /**
-   * Generates two fragmented entities when defeated
-   */
   public split(): [ConflictFragment, ConflictFragment] {
     const headFragment = new ConflictFragment(this.x - 6, this.y, -70, 'HEAD', '#00e5ff');
-    const branchFragment = new ConflictFragment(this.x + this.width / 2 + 6, this.y, 70, 'BRCH', '#c084fc');
+    const branchFragment = new ConflictFragment(this.x + this.width / 2 + 6, this.y, 70, 'BRCH', '#f43f5e');
     return [headFragment, branchFragment];
   }
 }

@@ -22,6 +22,15 @@ export interface BossPalette {
   coreGlow: string;
 }
 
+export interface BossModuleStatus {
+  leftAlive: boolean;
+  rightAlive: boolean;
+  auxAlive: boolean;
+  leftRatio: number;
+  rightRatio: number;
+  auxRatio: number;
+}
+
 export const ARCHETYPE_PALETTES: Record<string, BossPalette> = {
   commit_core: {
     primary: '#00e5ff',
@@ -138,6 +147,21 @@ export const ARCHETYPE_PALETTES: Record<string, BossPalette> = {
 };
 
 export class BossModularRenderer {
+  private static fillArmoredGrad(
+    ctx: CanvasRenderingContext2D,
+    hw: number,
+    hh: number,
+    hullDark: string,
+    primaryColor: string
+  ): CanvasGradient {
+    const grad = ctx.createLinearGradient(-hw, -hh, hw, hh);
+    grad.addColorStop(0, primaryColor + '38');
+    grad.addColorStop(0.28, hullDark);
+    grad.addColorStop(0.75, '#050814');
+    grad.addColorStop(1, primaryColor + '22');
+    return grad;
+  }
+
   public static render(
     ctx: CanvasRenderingContext2D,
     x: number,
@@ -147,46 +171,63 @@ export class BossModularRenderer {
     phase: number,
     time: number,
     coreColor: string = '#00e5ff',
-    chassisType: string = 'commit_core'
+    chassisType: string = 'commit_core',
+    modules?: BossModuleStatus
   ): void {
     ctx.save();
     ctx.translate(x + width / 2, y + height / 2);
 
     const palette = ARCHETYPE_PALETTES[chassisType] || ARCHETYPE_PALETTES.commit_core;
-    const isRage = phase >= 3;
-    const primaryColor = isRage ? '#ff0055' : (coreColor !== '#00e5ff' ? coreColor : palette.primary);
-    const secondaryColor = isRage ? '#ff7700' : palette.secondary;
-    const accentColor = isRage ? '#ffffff' : palette.accent;
+    const isPhase3Plus = phase >= 3;
+    const isFinalPush = phase >= 4;
+    const primaryColor = isFinalPush
+      ? '#ff0055'
+      : isPhase3Plus
+      ? '#f43f5e'
+      : coreColor !== '#00e5ff'
+      ? coreColor
+      : palette.primary;
+    const secondaryColor = isFinalPush ? '#ffd600' : isPhase3Plus ? '#ff7700' : palette.secondary;
+    const accentColor = isFinalPush ? '#ffffff' : palette.accent;
     const hullDark = palette.hullDark;
 
     const hw = width / 2;
     const hh = height / 2;
 
-    // Phase 3 Rage Overdrive: Thermal screen vibration jitter
-    if (isRage) {
-      const jitterX = (Math.random() - 0.5) * 2.8;
-      const jitterY = (Math.random() - 0.5) * 2.8;
+    // Phase 3-4 Rage Overdrive: Thermal jitter & aura bloom
+    if (isPhase3Plus) {
+      const amp = isFinalPush ? 3.5 : 1.8;
+      const jitterX = (Math.random() - 0.5) * amp;
+      const jitterY = (Math.random() - 0.5) * amp;
       ctx.translate(jitterX, jitterY);
+
+      ctx.save();
+      const rageGrad = ctx.createRadialGradient(0, 0, hw * 0.2, 0, 0, hw * 1.15);
+      rageGrad.addColorStop(0, isFinalPush ? 'rgba(255, 0, 85, 0.25)' : 'rgba(244, 63, 94, 0.14)');
+      rageGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = rageGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, hw * 1.15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
-    // 1. Universal Rotating Deflector Matrix (Phase 2+)
+    // 1. Universal Rotating Deflector Matrix (Phase 2+) & Outer Critical Ring (Phase 4)
     if (phase >= 2) {
       ctx.save();
-      const rotSpeed = isRage ? 3.8 : 2.0;
+      const rotSpeed = isFinalPush ? 4.5 : isPhase3Plus ? 3.2 : 1.8;
       ctx.rotate(time * rotSpeed);
       ctx.strokeStyle = secondaryColor;
-      ctx.lineWidth = isRage ? 3.5 : 2.5;
+      ctx.lineWidth = isFinalPush ? 3.5 : 2.4;
       ctx.setLineDash([14, 10]);
       ctx.beginPath();
-      ctx.arc(0, 0, width * 0.64, 0, Math.PI * 2);
+      ctx.arc(0, 0, width * 0.62, 0, Math.PI * 2);
       ctx.stroke();
 
-      // Rotating deflection nodes with energy halos
       for (let i = 0; i < 4; i++) {
         const a = (i * Math.PI) / 2;
-        const nx = Math.cos(a) * width * 0.64;
-        const ny = Math.sin(a) * width * 0.64;
-
+        const nx = Math.cos(a) * width * 0.62;
+        const ny = Math.sin(a) * width * 0.62;
         ctx.fillStyle = primaryColor;
         ctx.shadowColor = primaryColor;
         ctx.shadowBlur = 8;
@@ -198,52 +239,168 @@ export class BossModularRenderer {
       ctx.restore();
     }
 
+    if (isFinalPush) {
+      ctx.save();
+      ctx.rotate(-time * 3.0);
+      ctx.strokeStyle = 'rgba(255, 214, 0, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 12]);
+      ctx.beginPath();
+      ctx.arc(0, 0, width * 0.72, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
+
     // 2. Chassis-Specific Anatomical Assemblies
     switch (chassisType) {
       case 'the_fortress':
-        this.renderTheFortress(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderTheFortress(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'issue_swarm':
-        this.renderIssueSwarm(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderIssueSwarm(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'dependency_hydra':
-        this.renderDependencyHydra(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderDependencyHydra(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'merge_conflict':
       case 'merge_behemoth':
-        this.renderMergeConflict(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderMergeConflict(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'contributor_overlord':
       case 'octo_destroyer':
-        this.renderContributorOverlord(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderContributorOverlord(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'branchlord':
       case 'quantum_citadel':
-        this.renderBranchlord(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderBranchlord(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'rebase_phantom':
       case 'rebase_titan':
-        this.renderRebasePhantom(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderRebasePhantom(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'security_sentinel':
       case 'dreadnought_carrier':
-        this.renderSecuritySentinel(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderSecuritySentinel(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'code_abyss':
       case 'titan_skull':
-        this.renderCodeAbyss(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderCodeAbyss(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
       case 'commit_core':
       default:
-        this.renderCommitCore(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isRage);
+        this.renderCommitCore(ctx, hw, hh, phase, time, primaryColor, secondaryColor, accentColor, hullDark, isPhase3Plus);
         break;
     }
 
-    // 3. Phase 3 Rage: High-Voltage Electrical Discharge Arcs
-    if (isRage) {
+    // 3. Multi-Layer Armored Cyber Pylon Claws / Destructible Sub-Modules (Image 3 style!)
+    if (modules) {
+      this.renderSubModules(ctx, hw, hh, time, primaryColor, secondaryColor, hullDark, modules);
+    }
+
+    // 4. Phase 3-4 Rage: High-Voltage Electrical Discharge Arcs
+    if (isPhase3Plus) {
       this.renderElectricalArcs(ctx, hw, hh, time);
     }
 
+    ctx.restore();
+  }
+
+  private static renderSubModules(
+    ctx: CanvasRenderingContext2D,
+    hw: number,
+    hh: number,
+    time: number,
+    primaryColor: string,
+    secondaryColor: string,
+    hullDark: string,
+    modules: BossModuleStatus
+  ): void {
+    const drawClawPod = (dir: -1 | 1, alive: boolean, ratio: number) => {
+      const px = dir * hw * 0.94;
+      const py = Math.sin(time * 2.5 + dir) * 4;
+      ctx.save();
+      // Articulated shoulder strut
+      ctx.strokeStyle = alive ? secondaryColor : '#475569';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(dir * hw * 0.45, -hh * 0.1);
+      ctx.lineTo(px, py);
+      ctx.stroke();
+
+      if (alive) {
+        // Heavy Armored Claw Pylon
+        ctx.fillStyle = this.fillArmoredGrad(ctx, 18, 22, hullDark, primaryColor);
+        ctx.strokeStyle = primaryColor;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(px, py - 18);
+        ctx.lineTo(px + dir * 16, py - 6);
+        ctx.lineTo(px + dir * 12, py + 18);
+        ctx.lineTo(px - dir * 6, py + 24);
+        ctx.lineTo(px - dir * 12, py + 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Glowing emitter eye inside claw
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = primaryColor;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(px + dir * 3, py + 2, 3.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Compact module integrity bar above claw
+        const bw = 24;
+        ctx.fillStyle = 'rgba(0,0,0,0.75)';
+        ctx.fillRect(px - bw / 2, py - 26, bw, 3);
+        ctx.fillStyle = ratio > 0.5 ? '#38bdf8' : '#f59e0b';
+        ctx.fillRect(px - bw / 2, py - 26, bw * Math.max(0, ratio), 3);
+      } else {
+        // Destroyed charred pylon stump with flickering sparks
+        ctx.fillStyle = '#0f172a';
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 1.2;
+        ctx.fillRect(px - 6, py - 6, 12, 12);
+        ctx.strokeRect(px - 6, py - 6, 12, 12);
+        if (Math.sin(time * 24 + dir) > 0.3) {
+          ctx.fillStyle = '#facc15';
+          ctx.fillRect(px + (Math.random() - 0.5) * 10, py + (Math.random() - 0.5) * 10, 2.5, 2.5);
+        }
+      }
+      ctx.restore();
+    };
+
+    drawClawPod(-1, modules.leftAlive, modules.leftRatio);
+    drawClawPod(1, modules.rightAlive, modules.rightRatio);
+
+    // Dorsal Aux Shield Node
+    const ay = -hh * 0.92;
+    ctx.save();
+    if (modules.auxAlive) {
+      ctx.fillStyle = hullDark;
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, ay - 10);
+      ctx.lineTo(14, ay);
+      ctx.lineTo(0, ay + 10);
+      ctx.lineTo(-14, ay);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      const bw = 28;
+      ctx.fillStyle = 'rgba(0,0,0,0.75)';
+      ctx.fillRect(-bw / 2, ay - 16, bw, 3);
+      ctx.fillStyle = '#c084fc';
+      ctx.fillRect(-bw / 2, ay - 16, bw * Math.max(0, modules.auxRatio), 3);
+    } else {
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.5)';
+      ctx.lineWidth = 1.2;
+      ctx.strokeRect(-7, ay - 4, 14, 8);
+    }
     ctx.restore();
   }
 
@@ -591,31 +748,37 @@ export class BossModularRenderer {
     const headCount = 5;
     const headCoords: { x: number; y: number; angle: number; idx: number }[] = [];
     const coreX = 0;
-    const coreY = hh * 0.32;
+    const coreY = hh * 0.36;
 
     for (let h = 0; h < headCount; h++) {
       const spreadRatio = (h - (headCount - 1) / 2) / ((headCount - 1) / 2);
-      const baseAngle = -Math.PI / 2 + spreadRatio * 0.95;
-      const slither = Math.sin(time * 3 + h * 1.3) * 11;
-      const hDist = hw * 2 * (0.38 + Math.abs(spreadRatio) * 0.08);
-      const hx = Math.cos(baseAngle) * hDist + slither * 0.6;
-      const hy = Math.sin(baseAngle) * (hh * 0.9) + Math.cos(time * 2.2 + h) * 6 - 8;
+      const baseAngle = -Math.PI / 2 + spreadRatio * 1.05;
+      const slither = Math.sin(time * 3 + h * 1.3) * 8;
+      // Keep all 5 articulated hydra heads cleanly inside the canvas frame & portrait box
+      const hx = spreadRatio * (hw * 0.72) + slither * 0.45;
+      const hy = -hh * 0.46 + Math.abs(spreadRatio) * (hh * 0.26) + Math.cos(time * 2.2 + h) * 4;
       headCoords.push({ x: hx, y: hy, angle: baseAngle, idx: h });
 
-      const segments = 7;
+      const segments = 6;
       for (let s = 1; s <= segments; s++) {
         const tSeg = s / segments;
-        const segX = coreX + (hx - coreX) * tSeg + Math.sin(time * 3 + h * 1.5 + s * 0.7) * (6 * Math.sin(tSeg * Math.PI));
-        const segY = coreY + (hy - coreY) * tSeg - (1 - tSeg) * 8;
-        const segSize = 5 + (1 - tSeg) * 4;
+        const segX =
+          coreX +
+          (hx - coreX) * tSeg +
+          Math.sin(time * 3 + h * 1.5 + s * 0.7) * (5 * Math.sin(tSeg * Math.PI));
+        const segY = coreY + (hy - coreY) * tSeg - Math.sin(tSeg * Math.PI) * 6;
+        const segSize = 4 + (1 - tSeg) * 3.5;
 
         if (s > 1) {
           const prevTSeg = (s - 1) / segments;
-          const prevX = coreX + (hx - coreX) * prevTSeg + Math.sin(time * 3 + h * 1.5 + (s - 1) * 0.7) * (6 * Math.sin(prevTSeg * Math.PI));
-          const prevY = coreY + (hy - coreY) * prevTSeg - (1 - prevTSeg) * 8;
+          const prevX =
+            coreX +
+            (hx - coreX) * prevTSeg +
+            Math.sin(time * 3 + h * 1.5 + (s - 1) * 0.7) * (5 * Math.sin(prevTSeg * Math.PI));
+          const prevY = coreY + (hy - coreY) * prevTSeg - Math.sin(prevTSeg * Math.PI) * 6;
 
           ctx.strokeStyle = h % 2 === 0 ? primaryColor : secondaryColor;
-          ctx.lineWidth = 3;
+          ctx.lineWidth = 2.6;
           ctx.beginPath();
           ctx.moveTo(prevX, prevY);
           ctx.lineTo(segX, segY);
@@ -624,7 +787,7 @@ export class BossModularRenderer {
 
         ctx.fillStyle = hullDark;
         ctx.strokeStyle = h % 2 === 0 ? primaryColor : secondaryColor;
-        ctx.lineWidth = 1.5;
+        ctx.lineWidth = 1.4;
         ctx.beginPath();
         ctx.arc(segX, segY, segSize, 0, Math.PI * 2);
         ctx.fill();
@@ -635,13 +798,13 @@ export class BossModularRenderer {
     // Central Hydra Root Carapace
     ctx.fillStyle = hullDark;
     ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 3;
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
-    ctx.moveTo(coreX, coreY + hh * 0.65);
-    ctx.lineTo(coreX + hw * 0.45, coreY + hh * 0.2);
-    ctx.lineTo(coreX + hw * 0.34, coreY - hh * 0.4);
-    ctx.lineTo(coreX - hw * 0.34, coreY - hh * 0.4);
-    ctx.lineTo(coreX - hw * 0.45, coreY + hh * 0.2);
+    ctx.moveTo(coreX, coreY + hh * 0.42);
+    ctx.lineTo(coreX + hw * 0.36, coreY + hh * 0.14);
+    ctx.lineTo(coreX + hw * 0.28, coreY - hh * 0.28);
+    ctx.lineTo(coreX - hw * 0.28, coreY - hh * 0.28);
+    ctx.lineTo(coreX - hw * 0.36, coreY + hh * 0.14);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
@@ -649,29 +812,29 @@ export class BossModularRenderer {
     const corePulse = 0.85 + Math.sin(time * 5) * 0.2;
     ctx.fillStyle = primaryColor;
     ctx.beginPath();
-    ctx.arc(coreX, coreY, 19 * corePulse, 0, Math.PI * 2);
+    ctx.arc(coreX, coreY, 12 * corePulse, 0, Math.PI * 2);
     ctx.fill();
 
-    // Render 5 Dragon Heads with Razor Fangs & Plasma Glow
-    headCoords.forEach(({ x: hx, y: hy, angle, idx }) => {
+    // Render 5 Forward-Facing Dragon Heads with Razor Fangs & Plasma Glow
+    headCoords.forEach(({ x: hx, y: hy, idx }) => {
       ctx.save();
       ctx.translate(hx, hy);
-      ctx.rotate(angle + Math.PI / 2 + Math.sin(time * 2 + idx) * 0.15);
+      ctx.rotate((idx - 2) * 0.22 + Math.sin(time * 2 + idx) * 0.1);
 
-      const headScale = idx === 2 ? 1.2 : 0.98;
+      const headScale = idx === 2 ? 1.08 : 0.88;
       ctx.scale(headScale, headScale);
 
-      // Skull Armor
-      ctx.fillStyle = hullDark;
+      // Dragon Skull & Jaw Facing Forward
+      ctx.fillStyle = '#064e3b';
       ctx.strokeStyle = idx % 2 === 0 ? primaryColor : secondaryColor;
-      ctx.lineWidth = 2.4;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(0, -17);
-      ctx.lineTo(10, -9);
-      ctx.lineTo(12, 7);
-      ctx.lineTo(0, 11);
-      ctx.lineTo(-12, 7);
-      ctx.lineTo(-10, -9);
+      ctx.moveTo(0, -11);
+      ctx.lineTo(10, -4);
+      ctx.lineTo(7, 8);
+      ctx.lineTo(0, 12);
+      ctx.lineTo(-7, 8);
+      ctx.lineTo(-10, -4);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
@@ -679,110 +842,164 @@ export class BossModularRenderer {
       // Dragon Eyes (Glowing Accent Amber)
       ctx.fillStyle = accentColor;
       ctx.beginPath();
-      ctx.arc(-5, -4, 2, 0, Math.PI * 2);
-      ctx.arc(5, -4, 2, 0, Math.PI * 2);
+      ctx.arc(-4, 0, 1.9, 0, Math.PI * 2);
+      ctx.arc(4, 0, 1.9, 0, Math.PI * 2);
       ctx.fill();
 
-      // Plasma Breath Node
+      // Glowing Throat Plasma Node
       ctx.fillStyle = '#ffffff';
       ctx.beginPath();
-      ctx.arc(0, -13, 3, 0, Math.PI * 2);
+      ctx.arc(0, 6, 2.2, 0, Math.PI * 2);
       ctx.fill();
 
-      // Razor Fangs
-      ctx.fillStyle = '#ffffff';
+      // Forward Razor Fangs
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.moveTo(-5, -7);
-      ctx.lineTo(-3, -13);
-      ctx.lineTo(-1, -7);
-      ctx.moveTo(1, -7);
-      ctx.lineTo(3, -13);
-      ctx.lineTo(5, -7);
-      ctx.fill();
+      ctx.moveTo(-4, 7);
+      ctx.lineTo(-2, 12);
+      ctx.moveTo(4, 7);
+      ctx.lineTo(2, 12);
+      ctx.stroke();
+
+      if (isRage && Math.sin(time * 10 + idx) > 0.3) {
+        ctx.fillStyle = secondaryColor;
+        ctx.beginPath();
+        ctx.arc(0, 14, 3.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
 
       ctx.restore();
     });
   }
 
   /* ----------------------------------------------------
-     05. THE MERGE CONFLICT
+     05. THE MERGE CONFLICT (Split Dual-Mecha Leviathan - Image 2 #5)
      ---------------------------------------------------- */
   private static renderMergeConflict(
     ctx: CanvasRenderingContext2D,
     hw: number,
     hh: number,
-    phase: number,
+    _phase: number,
     time: number,
     primaryColor: string,
     secondaryColor: string,
     accentColor: string,
-    hullDark: string,
-    isRage: boolean
+    _hullDark: string,
+    _isRage: boolean
   ): void {
-    const splitOffset = Math.sin(time * 4) * 5;
+    const splitOffset = Math.sin(time * 4) * 4;
 
-    // LEFT HALF: HEAD (Cyan)
+    // LEFT CHASSIS HALF: CYAN CYBER-LEVIATHAN ARMOR (HEAD)
     ctx.save();
     ctx.translate(-splitOffset, 0);
-    ctx.fillStyle = '#041b24';
-    ctx.strokeStyle = primaryColor; // Cyan
-    ctx.lineWidth = 3.2;
+    const leftGrad = ctx.createLinearGradient(-hw, -hh, 0, hh);
+    leftGrad.addColorStop(0, '#bae6fd');
+    leftGrad.addColorStop(0.45, '#0369a1');
+    leftGrad.addColorStop(1, '#082f49');
+    ctx.fillStyle = leftGrad;
+    ctx.strokeStyle = primaryColor;
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
-    ctx.moveTo(-4, -hh * 0.88);
-    ctx.lineTo(-hw * 0.7, -hh * 0.4);
-    ctx.lineTo(-hw * 0.98, hh * 0.3);
-    ctx.lineTo(-hw * 0.5, hh * 0.85);
-    ctx.lineTo(-4, hh * 0.65);
+    ctx.moveTo(-4, -hh * 0.72);
+    ctx.lineTo(-hw * 0.35, -hh * 0.96);
+    ctx.lineTo(-hw * 0.98, -hh * 0.36);
+    ctx.lineTo(-hw * 1.04, hh * 0.25);
+    ctx.lineTo(-hw * 0.56, hh * 0.88);
+    ctx.lineTo(-4, hh * 0.74);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = primaryColor;
-    ctx.font = 'bold 11px "JetBrains Mono", monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText('<<<< HEAD', -14, 0);
+    // Left Horned Wing Blade & Glowing Visor Eye
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(-hw * 0.25, -hh * 0.25);
+    ctx.lineTo(-hw * 0.68, -hh * 0.45);
+    ctx.lineTo(-hw * 0.55, hh * 0.25);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = primaryColor;
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.ellipse(-hw * 0.28, -hh * 0.05, 5, 2.8, 0.35, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
 
-    // RIGHT HALF: BRANCH (Magenta/Crimson)
+    // RIGHT CHASSIS HALF: CRIMSON/MAGENTA CYBER-LEVIATHAN ARMOR (BRANCH)
     ctx.save();
     ctx.translate(splitOffset, 0);
-    ctx.fillStyle = '#260611';
-    ctx.strokeStyle = secondaryColor; // Crimson
-    ctx.lineWidth = 3.2;
+    const rightGrad = ctx.createLinearGradient(0, -hh, hw, hh);
+    rightGrad.addColorStop(0, '#fecdd3');
+    rightGrad.addColorStop(0.45, '#be123c');
+    rightGrad.addColorStop(1, '#4c0519');
+    ctx.fillStyle = rightGrad;
+    ctx.strokeStyle = secondaryColor;
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
-    ctx.moveTo(4, -hh * 0.88);
-    ctx.lineTo(hw * 0.7, -hh * 0.4);
-    ctx.lineTo(hw * 0.98, hh * 0.3);
-    ctx.lineTo(hw * 0.5, hh * 0.85);
-    ctx.lineTo(4, hh * 0.65);
+    ctx.moveTo(4, -hh * 0.72);
+    ctx.lineTo(hw * 0.35, -hh * 0.96);
+    ctx.lineTo(hw * 0.98, -hh * 0.36);
+    ctx.lineTo(hw * 1.04, hh * 0.25);
+    ctx.lineTo(hw * 0.56, hh * 0.88);
+    ctx.lineTo(4, hh * 0.74);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    ctx.fillStyle = secondaryColor;
-    ctx.font = 'bold 11px "JetBrains Mono", monospace';
-    ctx.textAlign = 'left';
-    ctx.fillText('branch >>>>', 14, 0);
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(hw * 0.25, -hh * 0.25);
+    ctx.lineTo(hw * 0.68, -hh * 0.45);
+    ctx.lineTo(hw * 0.55, hh * 0.25);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = secondaryColor;
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.ellipse(hw * 0.28, -hh * 0.05, 5, 2.8, -0.35, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
 
-    // Central Electric Lightning Rift: ======= (Accent Gold)
+    // Central High-Voltage Lightning Rift + Conflict Core
+    ctx.save();
     ctx.strokeStyle = accentColor;
+    ctx.shadowColor = accentColor;
+    ctx.shadowBlur = 10;
     ctx.lineWidth = 2.8;
     ctx.beginPath();
-    ctx.moveTo(0, -hh * 0.85);
-    const steps = 8;
-    for (let s = 1; s <= steps; s++) {
-      const sy = -hh * 0.85 + (hh * 1.65 * s) / steps;
-      const sx = (Math.random() - 0.5) * 8;
+    ctx.moveTo(0, -hh * 0.95);
+    for (let s = 1; s <= 8; s++) {
+      const sy = -hh * 0.95 + (hh * 1.9 * s) / 8;
+      const sx = Math.sin(time * 24 + s * 2.1) * 5;
       ctx.lineTo(sx, sy);
     }
     ctx.stroke();
 
-    // Conflict Label in center
+    ctx.fillStyle = '#020617';
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(0, hh * 0.08, 13, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
     ctx.fillStyle = accentColor;
     ctx.font = 'bold 9px "JetBrains Mono", monospace';
     ctx.textAlign = 'center';
-    ctx.fillText('=======', 0, -hh * 0.4);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('<>', 0, hh * 0.08);
+    ctx.restore();
   }
 
   /* ----------------------------------------------------
@@ -877,193 +1094,243 @@ export class BossModularRenderer {
   }
 
   /* ----------------------------------------------------
-     07. THE BRANCHLORD
+     07. THE BRANCHLORD (6-Winged Mecha-Archangel - Image 2 #7)
      ---------------------------------------------------- */
   private static renderBranchlord(
     ctx: CanvasRenderingContext2D,
     hw: number,
     hh: number,
-    phase: number,
+    _phase: number,
     time: number,
     primaryColor: string,
     secondaryColor: string,
     accentColor: string,
-    hullDark: string,
-    isRage: boolean
+    _hullDark: string,
+    _isRage: boolean
   ): void {
-    // Multi-tier Fractal Angel Wings
-    const branchLayers = 3;
-    for (let l = 1; l <= branchLayers; l++) {
-      const lWave = Math.sin(time * 3 + l) * 5;
-      const lSpan = hw * 2 * (0.28 + l * 0.09);
-      const lDepth = hh * 2 * (0.12 + l * 0.1);
-      ctx.strokeStyle = l % 2 === 0 ? primaryColor : secondaryColor;
-      ctx.lineWidth = 2.4;
-      ctx.beginPath();
-      ctx.moveTo(-lSpan, lDepth + lWave);
-      ctx.lineTo(0, -hh * 0.72);
-      ctx.lineTo(lSpan, lDepth + lWave);
-      ctx.stroke();
+    // 6 Solid Beveled Armor-Feather Wings fanned on Left & Right
+    [-1, 1].forEach((dir) => {
+      for (let tier = 0; tier < 3; tier++) {
+        const flap = Math.sin(time * 3.5 + tier * 0.9) * 3;
+        const yOff = -hh * 0.35 + tier * hh * 0.34;
+        const span = hw * (1.12 - tier * 0.16);
+        const wing = new Path2D();
+        wing.moveTo(dir * hw * 0.2, yOff);
+        wing.lineTo(dir * span, yOff - hh * 0.28 + flap);
+        wing.lineTo(dir * (span * 0.82), yOff + hh * 0.22 + flap);
+        wing.lineTo(dir * hw * 0.24, yOff + hh * 0.18);
+        wing.closePath();
 
-      // Branch Lineage Emitter Nodes
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(-lSpan - 3, lDepth + lWave - 3, 6, 6);
-      ctx.fillRect(lSpan - 3, lDepth + lWave - 3, 6, 6);
-    }
+        const wGrad = ctx.createLinearGradient(0, yOff - 10, dir * span, yOff + 10);
+        wGrad.addColorStop(0, '#475569');
+        wGrad.addColorStop(0.55, tier % 2 === 0 ? primaryColor : secondaryColor);
+        wGrad.addColorStop(1, '#fef08a');
+        ctx.fillStyle = wGrad;
+        ctx.fill(wing);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.3;
+        ctx.stroke(wing);
+      }
+    });
 
-    // Diamond Command Pod
-    ctx.fillStyle = hullDark;
+    // Armored Archangel Fuselage & Crowned Helm
+    const hull = new Path2D();
+    hull.moveTo(0, -hh * 0.98);
+    hull.lineTo(hw * 0.36, -hh * 0.28);
+    hull.lineTo(hw * 0.28, hh * 0.65);
+    hull.lineTo(0, hh * 0.94);
+    hull.lineTo(-hw * 0.28, hh * 0.65);
+    hull.lineTo(-hw * 0.36, -hh * 0.28);
+    hull.closePath();
+    ctx.fillStyle = this.fillArmoredGrad(ctx, hw * 0.4, hh, '#1a1608', primaryColor);
+    ctx.fill(hull);
     ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(0, -hh * 0.9);
-    ctx.lineTo(hw * 0.46, 0);
-    ctx.lineTo(0, hh * 0.9);
-    ctx.lineTo(-hw * 0.46, 0);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    ctx.lineWidth = 2.4;
+    ctx.stroke(hull);
 
-    // Central Core
+    // Emerald / Gold Core Heart
+    ctx.fillStyle = secondaryColor;
+    ctx.shadowColor = secondaryColor;
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.arc(0, hh * 0.05, 13, 0, Math.PI * 2);
+    ctx.fill();
     ctx.fillStyle = accentColor;
     ctx.beginPath();
-    ctx.arc(0, 0, 16, 0, Math.PI * 2);
+    ctx.arc(0, hh * 0.05, 6, 0, Math.PI * 2);
     ctx.fill();
+    ctx.shadowBlur = 0;
   }
 
   /* ----------------------------------------------------
-     08. THE REBASE PHANTOM
+     08. THE REBASE PHANTOM (Swept Stealth Leviathan - Image 2 #8)
      ---------------------------------------------------- */
   private static renderRebasePhantom(
     ctx: CanvasRenderingContext2D,
     hw: number,
     hh: number,
-    phase: number,
+    _phase: number,
     time: number,
     primaryColor: string,
     secondaryColor: string,
-    accentColor: string,
-    hullDark: string,
-    isRage: boolean
+    _accentColor: string,
+    _hullDark: string,
+    _isRage: boolean
   ): void {
-    // 3 RGB Chromatic Afterimages (Echo Shadows)
+    // 3 RGB Chromatic Afterimages
     const echoes = [
-      { offset: -6, color: 'rgba(0, 245, 255, 0.25)' }, // Cyan
-      { offset: 6, color: 'rgba(244, 63, 94, 0.25)' },  // Crimson
-      { offset: 0, color: 'rgba(168, 85, 247, 0.2)' },  // Violet
+      { offset: -7, color: 'rgba(0, 245, 255, 0.22)' },
+      { offset: 7, color: 'rgba(244, 63, 94, 0.22)' },
+      { offset: 0, color: 'rgba(168, 85, 247, 0.18)' },
     ];
-
     echoes.forEach(({ offset, color }, g) => {
-      ctx.save();
-      const gOffset = offset + Math.sin(time * 8 + g) * 4;
+      const gx = offset + Math.sin(time * 8 + g) * 4;
       ctx.fillStyle = color;
       ctx.beginPath();
-      ctx.moveTo(0 + gOffset, hh * 0.9);
-      ctx.lineTo(hw * 0.9 + gOffset, -hh * 0.25);
-      ctx.lineTo(hw * 0.36 + gOffset, -hh * 0.65);
-      ctx.lineTo(0 + gOffset, -hh * 0.98);
-      ctx.lineTo(-hw * 0.36 + gOffset, -hh * 0.65);
-      ctx.lineTo(-hw * 0.9 + gOffset, -hh * 0.25);
+      ctx.moveTo(gx, -hh * 0.96);
+      ctx.lineTo(gx + hw * 1.05, -hh * 0.15);
+      ctx.lineTo(gx + hw * 0.62, hh * 0.52);
+      ctx.lineTo(gx, hh * 0.94);
+      ctx.lineTo(gx - hw * 0.62, hh * 0.52);
+      ctx.lineTo(gx - hw * 1.05, -hh * 0.15);
       ctx.closePath();
       ctx.fill();
-      ctx.restore();
     });
 
-    // Razor-Sharp Obsidian Hull
-    ctx.fillStyle = hullDark;
+    // Multi-plate Obsidian/Crimson Gull-Wing Stealth Armor
+    const mainHull = new Path2D();
+    mainHull.moveTo(0, -hh * 0.96);
+    mainHull.lineTo(hw * 0.34, -hh * 0.42);
+    mainHull.lineTo(hw * 1.05, -hh * 0.15);
+    mainHull.lineTo(hw * 0.82, hh * 0.36);
+    mainHull.lineTo(hw * 0.42, hh * 0.22);
+    mainHull.lineTo(0, hh * 0.94);
+    mainHull.lineTo(-hw * 0.42, hh * 0.22);
+    mainHull.lineTo(-hw * 0.82, hh * 0.36);
+    mainHull.lineTo(-hw * 1.05, -hh * 0.15);
+    mainHull.lineTo(-hw * 0.34, -hh * 0.42);
+    mainHull.closePath();
+
+    const hullGrad = ctx.createLinearGradient(-hw, -hh, hw, hh);
+    hullGrad.addColorStop(0, '#475569');
+    hullGrad.addColorStop(0.5, '#09090d');
+    hullGrad.addColorStop(1, '#3b0718');
+    ctx.fillStyle = hullGrad;
+    ctx.fill(mainHull);
     ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 3.2;
+    ctx.lineWidth = 2.6;
+    ctx.stroke(mainHull);
+
+    // Glowing Crimson Wing Scythe Stripes & Central Diamond Eye
+    ctx.strokeStyle = secondaryColor;
+    ctx.lineWidth = 1.6;
+    for (const s of [-1, 1]) {
+      ctx.beginPath();
+      ctx.moveTo(s * hw * 0.24, -hh * 0.15);
+      ctx.lineTo(s * hw * 0.85, hh * 0.18);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = primaryColor;
+    ctx.shadowBlur = 10;
     ctx.beginPath();
-    ctx.moveTo(0, hh * 0.92);
-    ctx.lineTo(hw * 0.9, -hh * 0.25);
-    ctx.lineTo(hw * 0.36, -hh * 0.65);
-    ctx.lineTo(0, -hh * 0.98);
-    ctx.lineTo(-hw * 0.36, -hh * 0.65);
-    ctx.lineTo(-hw * 0.9, -hh * 0.25);
+    ctx.moveTo(0, -hh * 0.28);
+    ctx.lineTo(10, 0);
+    ctx.lineTo(0, hh * 0.28);
+    ctx.lineTo(-10, 0);
     ctx.closePath();
     ctx.fill();
-    ctx.stroke();
-
-    // Central Laser Sight Line
-    ctx.strokeStyle = accentColor;
-    ctx.lineWidth = 1.8;
-    ctx.beginPath();
-    ctx.moveTo(0, -hh * 0.85);
-    ctx.lineTo(0, hh * 0.78);
-    ctx.stroke();
-
-    // Crosshair Sight reticle
-    ctx.fillStyle = secondaryColor;
-    ctx.fillRect(-hw * 0.08, -hh * 0.18, hw * 0.16, 5);
+    ctx.shadowBlur = 0;
   }
 
   /* ----------------------------------------------------
-     09. THE SECURITY SENTINEL
+     09. THE SECURITY SENTINEL (Colossal Cyber-Aegis Guardian - Image 2 #9)
      ---------------------------------------------------- */
   private static renderSecuritySentinel(
     ctx: CanvasRenderingContext2D,
     hw: number,
     hh: number,
-    phase: number,
+    _phase: number,
     time: number,
     primaryColor: string,
     secondaryColor: string,
-    accentColor: string,
+    _accentColor: string,
     hullDark: string,
-    isRage: boolean
+    _isRage: boolean
   ): void {
-    // 4 Orbiting Hexagonal Firewalls with Laser Fences
-    for (let s = 0; s < 4; s++) {
-      const sAngle = time * 1.8 + (s * Math.PI * 2) / 4;
-      const sx = Math.cos(sAngle) * (hw * 1.08);
-      const sy = Math.sin(sAngle) * (hh * 0.82);
-      ctx.fillStyle = 'rgba(2, 132, 199, 0.25)';
+    // 1. Two Massive Flanking Hexagonal Energy-Shield Gauntlets (Left & Right Arms)
+    [-1, 1].forEach((dir) => {
+      const gx = dir * hw * 0.86;
+      const gy = hh * 0.08 + Math.sin(time * 3 + dir) * 3;
+      const shR = hw * 0.42;
+
+      const sGrad = ctx.createRadialGradient(gx, gy, 4, gx, gy, shR);
+      sGrad.addColorStop(0, 'rgba(56, 189, 248, 0.55)');
+      sGrad.addColorStop(0.65, 'rgba(2, 132, 199, 0.28)');
+      sGrad.addColorStop(1, 'rgba(14, 165, 233, 0.08)');
+      ctx.fillStyle = sGrad;
       ctx.strokeStyle = primaryColor;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 2.4;
+      ctx.shadowColor = primaryColor;
+      ctx.shadowBlur = 9;
       ctx.beginPath();
       for (let h = 0; h < 6; h++) {
         const ha = (h / 6) * Math.PI * 2;
-        const hx = sx + Math.cos(ha) * 12;
-        const hy = sy + Math.sin(ha) * 12;
+        const hx = gx + Math.cos(ha) * shR;
+        const hy = gy + Math.sin(ha) * (shR * 0.92);
         if (h === 0) ctx.moveTo(hx, hy);
         else ctx.lineTo(hx, hy);
       }
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
-    }
+      ctx.shadowBlur = 0;
+    });
 
-    // Heavy Cyber-Aegis Hull
-    ctx.fillStyle = hullDark;
+    // 2. Heavy Mecha-Guardian Torso & Pauldrons
+    const torso = new Path2D();
+    torso.moveTo(0, -hh * 0.92);
+    torso.lineTo(hw * 0.36, -hh * 0.72);
+    torso.lineTo(hw * 0.62, -hh * 0.28);
+    torso.lineTo(hw * 0.48, hh * 0.78);
+    torso.lineTo(0, hh * 0.96);
+    torso.lineTo(-hw * 0.48, hh * 0.78);
+    torso.lineTo(-hw * 0.62, -hh * 0.28);
+    torso.lineTo(-hw * 0.36, -hh * 0.72);
+    torso.closePath();
+
+    ctx.fillStyle = this.fillArmoredGrad(ctx, hw * 0.65, hh, hullDark, primaryColor);
+    ctx.fill(torso);
     ctx.strokeStyle = primaryColor;
-    ctx.lineWidth = 3.5;
+    ctx.lineWidth = 2.8;
+    ctx.stroke(torso);
+
+    // 3. Horned Guardian Visor Head
+    ctx.fillStyle = '#0f172a';
+    ctx.strokeStyle = '#bae6fd';
+    ctx.lineWidth = 1.6;
     ctx.beginPath();
-    ctx.moveTo(0, hh * 0.9);
-    ctx.lineTo(hw * 0.78, hh * 0.38);
-    ctx.lineTo(hw * 0.86, -hh * 0.62);
-    ctx.lineTo(0, -hh * 0.86);
-    ctx.lineTo(-hw * 0.86, -hh * 0.62);
-    ctx.lineTo(-hw * 0.78, hh * 0.38);
+    ctx.moveTo(-hw * 0.18, -hh * 0.76);
+    ctx.lineTo(-hw * 0.28, -hh * 1.06);
+    ctx.lineTo(0, -hh * 0.88);
+    ctx.lineTo(hw * 0.28, -hh * 1.06);
+    ctx.lineTo(hw * 0.18, -hh * 0.76);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
 
-    // Hazard Chevrons (Secondary Gold)
-    ctx.strokeStyle = secondaryColor;
-    ctx.lineWidth = 2;
-    [-1, 1].forEach((dir) => {
-      ctx.beginPath();
-      ctx.moveTo(dir * hw * 0.3, hh * 0.2);
-      ctx.lineTo(dir * hw * 0.5, hh * 0.45);
-      ctx.stroke();
-    });
+    ctx.fillStyle = '#38bdf8';
+    ctx.fillRect(-hw * 0.14, -hh * 0.7, hw * 0.28, 4);
 
-    // Animated Rotating Padlock Cipher Emblem
+    // 4. Illuminated Chest Padlock Cipher Core
     ctx.strokeStyle = secondaryColor;
     ctx.lineWidth = 2.4;
-    ctx.strokeRect(-12, -8, 24, 20);
+    ctx.fillStyle = 'rgba(250, 204, 21, 0.2)';
+    ctx.fillRect(-13, -6, 26, 20);
+    ctx.strokeRect(-13, -6, 26, 20);
     ctx.beginPath();
-    ctx.arc(0, -8, 8, Math.PI, Math.PI * 2);
+    ctx.arc(0, -6, 8, Math.PI, Math.PI * 2);
     ctx.stroke();
   }
 

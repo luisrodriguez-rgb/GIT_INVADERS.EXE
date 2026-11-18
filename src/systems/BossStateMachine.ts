@@ -9,6 +9,7 @@ export type BossState =
   | 'ATTACK'
   | 'ENRAGED'
   | 'PHASE_2'
+  | 'PHASE_3'
   | 'CRITICAL'
   | 'DESTROYED';
 
@@ -68,11 +69,13 @@ export class BossStateMachine {
       case 'ATTACK':
         if (context.hp <= 0) {
           this.setState('DESTROYED');
-        } else if (hpRatio <= 0.25) {
+        } else if (hpRatio <= 0.18 && context.currentPhase < 4) {
           this.setState('CRITICAL');
+        } else if (hpRatio <= 0.40 && context.currentPhase < 3) {
+          this.setState('PHASE_3');
         } else if (
-          (hpRatio <= 0.7 && (context.playerCombo || 0) > 5 && context.shieldDestroyed) ||
-          (hpRatio <= 0.55 && context.currentPhase < 2)
+          (hpRatio <= 0.70 && context.currentPhase < 2) ||
+          (hpRatio <= 0.75 && (context.playerCombo || 0) > 5 && context.shieldDestroyed && context.currentPhase < 2)
         ) {
           this.setState('PHASE_2');
         } else if (hpRatio <= 0.75 && this.stateTimer > 10) {
@@ -83,8 +86,10 @@ export class BossStateMachine {
       case 'ENRAGED':
         if (context.hp <= 0) {
           this.setState('DESTROYED');
-        } else if (hpRatio <= 0.25) {
+        } else if (hpRatio <= 0.18) {
           this.setState('CRITICAL');
+        } else if (hpRatio <= 0.40 && context.currentPhase < 3) {
+          this.setState('PHASE_3');
         } else if (this.stateTimer > 8) {
           this.setState('ATTACK');
         }
@@ -93,9 +98,21 @@ export class BossStateMachine {
       case 'PHASE_2':
         if (context.hp <= 0) {
           this.setState('DESTROYED');
-        } else if (hpRatio <= 0.25) {
+        } else if (hpRatio <= 0.18) {
           this.setState('CRITICAL');
-        } else if (this.stateTimer > 15) {
+        } else if (hpRatio <= 0.40 && context.currentPhase < 3) {
+          this.setState('PHASE_3');
+        } else if (this.stateTimer > 12) {
+          this.setState('ATTACK');
+        }
+        break;
+
+      case 'PHASE_3':
+        if (context.hp <= 0) {
+          this.setState('DESTROYED');
+        } else if (hpRatio <= 0.18) {
+          this.setState('CRITICAL');
+        } else if (this.stateTimer > 10) {
           this.setState('ATTACK');
         }
         break;

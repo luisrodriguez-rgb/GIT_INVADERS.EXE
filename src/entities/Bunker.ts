@@ -57,23 +57,53 @@ export class Bunker extends Entity {
     const integrity = this.getIntegrity();
 
     let bunkerColor = '#10b981'; // Healthy green
+    let undersideColor = '#064e3b';
     if (integrity <= 0.3) {
       bunkerColor = '#ef4444'; // Critical red
+      undersideColor = '#450a0a';
     } else if (integrity <= 0.65) {
       bunkerColor = '#f59e0b'; // Degraded yellow
+      undersideColor = '#451a03';
     }
 
-    ctx.fillStyle = bunkerColor;
+    // Subtle holographic shield arch above intact bunker bastion
+    if (integrity > 0.3) {
+      ctx.strokeStyle = bunkerColor;
+      ctx.globalAlpha = 0.28 + integrity * 0.22;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(this.centerX, this.y + this.height * 0.52, this.width * 0.64, Math.PI * 1.15, Math.PI * 1.85);
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
 
+    // Pass 1: 2.5D Vertical Extruded Dark Metallic Underside
+    ctx.fillStyle = undersideColor;
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
         if (this.grid[r][c]) {
           ctx.fillRect(
             this.x + c * this.cellWidth,
-            this.y + r * this.cellHeight,
+            this.y + r * this.cellHeight + 4,
             this.cellWidth - 0.5,
             this.cellHeight - 0.5
           );
+        }
+      }
+    }
+
+    // Pass 2: Top Beveled Energy-Armor Bastion Cells
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.cols; c++) {
+        if (this.grid[r][c]) {
+          const cx = this.x + c * this.cellWidth;
+          const cy = this.y + r * this.cellHeight;
+          ctx.fillStyle = bunkerColor;
+          ctx.fillRect(cx, cy, this.cellWidth - 0.5, this.cellHeight - 0.5);
+
+          // Upper specular bevel rim
+          ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
+          ctx.fillRect(cx, cy, this.cellWidth - 0.5, 1.1);
         }
       }
     }
@@ -86,7 +116,7 @@ export class Bunker extends Entity {
       ctx.fillStyle = '#ef4444';
       ctx.fillText('[ CORRUPTED ]', this.centerX, this.y + this.height + 11);
     } else {
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.78)';
       ctx.fillText(this.label, this.centerX, this.y + this.height + 10);
 
       // Segmented integrity bar
