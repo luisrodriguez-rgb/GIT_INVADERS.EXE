@@ -10,6 +10,10 @@ import { MergeConflict, ConflictFragment } from '../entities/MergeConflict';
 import { DependencyDrone } from '../entities/DependencyDrone';
 import { BranchDrone } from '../entities/BranchDrone';
 import { SecuritySentinel } from '../entities/SecuritySentinel';
+import { MysteryOctocat } from '../entities/MysteryOctocat';
+import { HotfixInterceptor } from '../entities/HotfixInterceptor';
+import { TechDebtJuggernaut } from '../entities/TechDebtJuggernaut';
+import { PipelineTurret } from '../entities/PipelineTurret';
 import { ParticleSystem } from '../rendering/Particles';
 import { CRTEffects } from '../rendering/CRT';
 import { SFX } from '../audio/SFX';
@@ -41,9 +45,24 @@ export class CollisionSystem {
     crt: CRTEffects,
     gameState: GameState
   ): void {
-    // 1. Projectiles vs Bunkers
+    // 1. Projectiles vs Bunkers & Supernova Wave clearing enemy projectiles
     for (const proj of projectiles) {
       if (!proj.isAlive) continue;
+
+      if (proj.owner === 'player' && proj.type === 'supernova_wave') {
+        for (const other of projectiles) {
+          if (other.isAlive && other.owner !== 'player' && this.checkAABB(proj, other)) {
+            other.isAlive = false;
+            particles.emitExplosion(other.centerX, other.centerY, '#facc15', 5);
+          }
+        }
+        continue;
+      }
+
+      if (proj.type === 'homing_missile' && proj.owner === 'player') {
+        // Player missiles fly over friendly bunkers
+        continue;
+      }
 
       for (const bunker of bunkers) {
         if (bunker.checkImpact(proj.centerX, proj.centerY, proj.width / 2 + 2)) {
@@ -60,12 +79,35 @@ export class CollisionSystem {
 
       // Check Boss first if present
       if (boss && boss.isAlive && this.checkAABB(proj, boss)) {
-        if (proj.type !== 'beam') proj.isAlive = false;
+        if (proj.type !== 'beam' && proj.type !== 'supernova_wave') proj.isAlive = false;
 
-        const bossDied = boss.takeDamage(proj.damage);
-        particles.emitExplosion(proj.centerX, proj.centerY, boss.blueprint.languageColor, 12);
+        const prevL = boss.leftModuleAlive;
+        const prevR = boss.rightModuleAlive;
+        const prevA = boss.auxModuleAlive;
+
+        const bossDied = boss.takeDamage(proj.damage, proj.centerX, proj.centerY);
+        particles.emitExplosion(proj.centerX, proj.centerY, proj.type === 'homing_missile' ? '#ef4444' : boss.blueprint.languageColor, proj.type === 'homing_missile' ? 20 : 12);
         particles.emitCodeFragments(proj.centerX, proj.centerY, boss.blueprint.languageColor, 4, 'boss');
-        crt.addTrauma(0.15);
+        crt.addTrauma(proj.type === 'homing_missile' ? 0.25 : 0.15);
+
+        if (prevL && !boss.leftModuleAlive) {
+          particles.emitExplosion(boss.x + 20, boss.centerY, '#f59e0b', 28);
+          particles.emitText(boss.x + 20, boss.y - 10, 'LEFT PYLON DESTROYED! +250 XP', '#f59e0b');
+          gameState.addScore(250);
+          crt.addTrauma(0.35);
+        }
+        if (prevR && !boss.rightModuleAlive) {
+          particles.emitExplosion(boss.x + boss.width - 20, boss.centerY, '#f59e0b', 28);
+          particles.emitText(boss.x + boss.width - 20, boss.y - 10, 'RIGHT PYLON DESTROYED! +250 XP', '#f59e0b');
+          gameState.addScore(250);
+          crt.addTrauma(0.35);
+        }
+        if (prevA && !boss.auxModuleAlive) {
+          particles.emitExplosion(boss.centerX, boss.y + 15, '#c084fc', 28);
+          particles.emitText(boss.centerX, boss.y - 14, 'SHIELD NODE BREACHED! +300 XP', '#c084fc');
+          gameState.addScore(300);
+          crt.addTrauma(0.35);
+        }
 
         if (bossDied) {
           SFX.playExplosion('boss');
@@ -85,7 +127,7 @@ export class CollisionSystem {
         if (!enemy.isAlive) continue;
 
         if (this.checkAABB(proj, enemy)) {
-          if (proj.type !== 'beam') {
+          if (proj.type !== 'beam' && proj.type !== 'supernova_wave') {
             if (proj.pierceCount > 0) {
               proj.pierceCount--;
             } else {
@@ -239,8 +281,60 @@ export class CollisionSystem {
                 crt.addTrauma(0.12);
               }
             }
+          } else if (enemy instanceof MysteryOctocat) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, '#c084fc', 16);
+            if (destroyed) {
+              SFX.playPowerup();
+              SFX.playExplosion('medium');
+              gameState.addScore(enemy.scoreValue);
+              gameState.incrementStreak();
+              player.addOverdriveCharge(35);
+              player.multiShotTimer = 8.0;
+              player.missileAmmo = player.maxMissileAmmo;
+              particles.emitCodeFragments(enemy.centerX, enemy.centerY, '#c084fc', 8, 'boss');
+              particles.emitText(enemy.centerX, enemy.centerY, 'MYSTERY OCTOCAT // +500 XP + AMMO', '#c084fc');
+              crt.addTrauma(0.25);
+            }
+          } else if (enemy instanceof HotfixInterceptor) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, '#f97316', 12);
+            if (destroyed) {
+              SFX.playExplosion('small');
+              gameState.addScore(enemy.scoreValue);
+              gameState.incrementStreak();
+              player.addOverdriveCharge(10);
+              player.falconOverclockTimer = Math.max(player.falconOverclockTimer, 3.0);
+              particles.emitText(enemy.centerX, enemy.centerY, 'HOTFIX PATCHED // +OVERCLOCK', '#fb923c');
+            }
+          } else if (enemy instanceof TechDebtJuggernaut) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, '#eab308', 14);
+            if (destroyed) {
+              SFX.playExplosion('medium');
+              gameState.addScore(enemy.scoreValue);
+              gameState.incrementStreak();
+              player.addOverdriveCharge(18);
+              player.missileAmmo = Math.min(player.maxMissileAmmo, player.missileAmmo + 2);
+              particles.emitDebris(enemy.centerX, enemy.centerY, '#facc15', 8);
+              particles.emitText(enemy.centerX, enemy.centerY, 'TECH DEBT REFACTORED // +2 MSL', '#facc15');
+              crt.addTrauma(0.18);
+            }
+          } else if (enemy instanceof PipelineTurret) {
+            const destroyed = enemy.takeDamage(proj.damage);
+            particles.emitExplosion(enemy.centerX, enemy.centerY, '#38bdf8', 14);
+            if (destroyed) {
+              SFX.playExplosion('medium');
+              gameState.addScore(enemy.scoreValue);
+              gameState.incrementStreak();
+              player.addOverdriveCharge(14);
+              particles.emitText(enemy.centerX, enemy.centerY, `PIPELINE ${enemy.stageName} CLEARED!`, '#38bdf8');
+              crt.addTrauma(0.14);
+            }
           }
-          break;
+          if (proj.type !== 'beam' && proj.type !== 'supernova_wave') {
+            break;
+          }
         }
       }
     }

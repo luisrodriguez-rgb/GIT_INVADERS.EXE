@@ -1,3 +1,5 @@
+import { MissionDirective } from '../github/Types';
+
 export type GamePhase =
   | 'BOOT'
   | 'LOBBY'
@@ -10,16 +12,21 @@ export type GamePhase =
 
 export class GameState {
   public phase: GamePhase = 'LOBBY';
+  public repoName: string = 'sketion';
   public score: number = 0;
   public highScore: number = 0;
   public xp: number = 0;
+  public bonusStars: number = 0;
   public currentWave: number = 1;
   public totalWaves: number = 4;
   public commitsPurged: number = 0;
   public prsMerged: number = 0;
   public issuesClosed: number = 0;
+  public waveElapsed: number = 0;
   public streakCount: number = 0;
   public streakMultiplier: number = 1.0;
+  public directives: MissionDirective[] = [];
+  public unlockedPerks: string[] = [];
 
   private static HIGH_SCORE_KEY = 'git_invaders_high_score';
 
@@ -51,12 +58,16 @@ export class GameState {
   public reset(): void {
     this.score = 0;
     this.xp = 0;
+    this.bonusStars = 0;
     this.currentWave = 1;
     this.commitsPurged = 0;
     this.prsMerged = 0;
     this.issuesClosed = 0;
+    this.waveElapsed = 0;
     this.streakCount = 0;
     this.streakMultiplier = 1.0;
+    this.directives = [];
+    this.unlockedPerks = [];
   }
 
   private loadHighScore(): void {

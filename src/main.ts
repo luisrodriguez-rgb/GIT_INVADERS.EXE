@@ -17,7 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const game = new Game(canvas, lobbyContainer, termContainer, hudContainer, modalContainer);
-  (window as any).__game = game;
+  if ((import.meta as any).env?.DEV) {
+    (window as any).__game = game;
+  }
 
   // Header Lobby Button
   const lobbyBtn = document.getElementById('lobbyBtn');
@@ -74,6 +76,9 @@ document.addEventListener('DOMContentLoaded', () => {
   btnRebase?.addEventListener('click', () => triggerKey('KeyQ', true));
   btnStash?.addEventListener('click', () => triggerKey('KeyE', true));
   btnOverdrive?.addEventListener('click', () => triggerKey('ShiftLeft', true));
+  document.getElementById('btnLoop')?.addEventListener('click', () => triggerKey('KeyC', true));
+  document.getElementById('btnMissile')?.addEventListener('click', () => triggerKey('KeyF', true));
+  document.getElementById('btnView')?.addEventListener('click', () => triggerKey('KeyV', true));
 
   // CRT intensity multi-tier toggle button in header (OFF, LOW, MEDIUM, HIGH)
   const crtToggle = document.getElementById('crtToggle');

@@ -4,6 +4,11 @@ import { Entity } from '../entities/Entity';
 import { Bunker } from '../entities/Bunker';
 import { Boss } from '../entities/Boss';
 import { IssueBomber } from '../entities/IssueBomber';
+import { ConflictFragment } from '../entities/MergeConflict';
+import { MysteryOctocat } from '../entities/MysteryOctocat';
+import { HotfixInterceptor } from '../entities/HotfixInterceptor';
+import { TechDebtJuggernaut } from '../entities/TechDebtJuggernaut';
+import { PipelineTurret } from '../entities/PipelineTurret';
 import { ParticleSystem } from '../rendering/Particles';
 import { CRTEffects } from '../rendering/CRT';
 import { Renderer } from '../rendering/Renderer';
@@ -55,6 +60,9 @@ export class Game {
   private waveDropPending: boolean = false;
   private invaderFireTimer: number = 2.0;
   private edgeCooldown: number = 0;
+  private mysterySpawnTimer: number = 12.0;
+  private lockedTarget: Entity | null = null;
+  private boostToggle: boolean = false;
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -167,13 +175,23 @@ export class Game {
           this.triggerRebase();
         } else if (e.code === 'KeyE') {
           this.triggerStash();
+        } else if (e.code === 'KeyC') {
+          this.triggerLoop();
+        } else if (e.code === 'KeyF') {
+          this.triggerMissiles();
+        } else if (e.code === 'KeyV') {
+          this.toggleViewMode();
+        } else if (e.code === 'KeyZ') {
+          this.triggerZoneCycle();
         }
 
-        // Tactical combat test keys
-        if (e.shiftKey && e.code === 'KeyB' && this.state.phase === 'PLAYING') {
-          this.triggerBossAlert();
-        } else if (e.shiftKey && e.code === 'KeyK' && this.state.phase === 'BOSS_FIGHT' && this.boss) {
-          this.boss.takeDamage(999999);
+        // Tactical combat test keys (DEV only)
+        if ((import.meta as any).env?.DEV) {
+          if (e.shiftKey && e.code === 'KeyB' && this.state.phase === 'PLAYING') {
+            this.triggerBossAlert();
+          } else if (e.shiftKey && e.code === 'KeyK' && this.state.phase === 'BOSS_FIGHT' && this.boss) {
+            this.boss.takeDamage(999999);
+          }
         }
       }
 
@@ -188,12 +206,15 @@ export class Game {
 
     // Wire interactive click events for footer arcade buttons
     document.getElementById('cmdFire')?.addEventListener('click', () => this.fireBlaster());
+    document.getElementById('cmdLoop')?.addEventListener('click', () => this.triggerLoop());
+    document.getElementById('cmdMissile')?.addEventListener('click', () => this.triggerMissiles());
+    document.getElementById('cmdView')?.addEventListener('click', () => this.toggleViewMode());
     document.getElementById('cmdRebase')?.addEventListener('click', () => this.triggerRebase());
     document.getElementById('cmdStash')?.addEventListener('click', () => this.triggerStash());
     document.getElementById('cmdPush')?.addEventListener('click', () => this.triggerOverdrive());
     document.getElementById('cmdPause')?.addEventListener('click', () => this.togglePause());
 
-    // Wire delegation for in-game canvas HUD power buttons
+    // Wire delegation for in-game canvas HUD power & flight buttons
     const hudContainer = document.getElementById('hudContainer');
     hudContainer?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
@@ -203,6 +224,16 @@ export class Game {
         this.triggerStash();
       } else if (target.closest('#hudBtnPush')) {
         this.triggerOverdrive();
+      } else if (target.closest('#hudBtnLoop')) {
+        this.triggerLoop();
+      } else if (target.closest('#hudBtnMissile')) {
+        this.triggerMissiles();
+      } else if (target.closest('#hudBtnView')) {
+        this.toggleViewMode();
+      } else if (target.closest('#hudZoneVal')) {
+        this.triggerZoneCycle();
+      } else if (target.closest('#hudBtnBoost')) {
+        this.boostToggle = !this.boostToggle;
       }
     });
 
@@ -215,6 +246,9 @@ export class Game {
   private updateKeyFeedback(code: string, isPressed: boolean): void {
     const keyMap: Record<string, string> = {
       Space: 'cmdFire',
+      KeyC: 'cmdLoop',
+      KeyF: 'cmdMissile',
+      KeyV: 'cmdView',
       KeyQ: 'cmdRebase',
       KeyE: 'cmdStash',
       ShiftLeft: 'cmdPush',
@@ -223,8 +257,12 @@ export class Game {
       KeyP: 'cmdPause',
       KeyA: 'cmdMove',
       KeyD: 'cmdMove',
+      KeyW: 'cmdMove',
+      KeyS: 'cmdMove',
       ArrowLeft: 'cmdMove',
       ArrowRight: 'cmdMove',
+      ArrowUp: 'cmdMove',
+      ArrowDown: 'cmdMove',
     };
     const btnId = keyMap[code];
     if (btnId) {
@@ -299,21 +337,89 @@ export class Game {
     }
   }
 
+  public triggerLoop(): void {
+    if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
+      AudioEngine.getInstance().init();
+      if (this.player.triggerLoop()) {
+        this.crt.addTrauma(0.18);
+        this.particles.emitText(this.player.centerX, this.player.y - 26, 'EVASIVE LOOP [INVULNERABLE]', '#38bdf8');
+      }
+    }
+  }
+
+  public triggerMissiles(): void {
+    if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
+      AudioEngine.getInstance().init();
+      const target = this.findPriorityTarget();
+      const missiles = this.player.fireHomingMissiles(target, this.renderer.width / 2, 110);
+      if (missiles.length > 0) {
+        this.projectiles.push(...missiles);
+        this.crt.addTrauma(0.2);
+        this.particles.emitText(this.player.centerX, this.player.y - 24, 'FOX-2 // MISSILE LOCK', '#ef4444');
+      }
+    }
+  }
+
+  public toggleViewMode(): void {
+    const mode = this.renderer.toggleViewMode();
+    SFX.playPowerup();
+    if (this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') {
+      this.particles.emitText(
+        this.player.centerX,
+        this.player.y - 30,
+        mode === 'ANGLED_25D' ? 'VIEW: 2.5D HORIZON' : 'VIEW: TOP-DOWN RADAR',
+        '#00e5ff'
+      );
+    }
+  }
+
+  public triggerZoneCycle(): void {
+    const nextZone = this.renderer.cycleZone();
+    SFX.playPowerup();
+    if (this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') {
+      const label = this.renderer.zoneRenderer.getZoneLabel(nextZone);
+      this.particles.emitText(this.renderer.width / 2 - 90, 95, `ZONE SWITCH // ${label}`, '#38bdf8');
+    }
+  }
+
   public triggerStash(): void {
     if ((this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT') && !this.isPaused) {
       AudioEngine.getInstance().init();
-      const res = this.player.triggerAbilityE();
+      const res = this.player.triggerAbilityE(this.renderer.width);
       if (res) {
-        if (res.type === 'stash_active') {
+        if (res.projectiles && res.projectiles.length > 0) {
+          this.projectiles.push(...res.projectiles);
+        }
+        if (res.type === 'falcon_overclock') {
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'COMPILER OVERCLOCK (4.0s)', '#00e5ff');
+        } else if (res.type === 'stash_active') {
           this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT STASH: INTANGIBLE PHASE (3.5s)', '#c084fc');
-        } else if (res.type === 'merge_burst' && res.projectile) {
-          this.projectiles.push(res.projectile);
+        } else if (res.type === 'merge_burst') {
           this.crt.addTrauma(0.4);
           this.particles.emitText(this.player.centerX, this.player.y - 35, 'MERGE BURST // KINETIC SHOCKWAVE', '#fbbf24');
         } else if (res.type === 'branch_split') {
           this.particles.emitText(this.player.centerX, this.player.y - 30, 'BRANCH SPLIT: DUAL DRONES DEPLOYED', '#10b981');
+        } else if (res.type === 'rebase_dash') {
+          this.crt.addTrauma(0.25);
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'GIT REBASE: HYPER-DASH ENGAGED!', '#ff0055');
+        } else if (res.type === 'quantum_salvo') {
+          this.crt.addTrauma(0.25);
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'QUANTUM PIERCE // LANCE SALVO', '#06b6d4');
         } else if (res.type === 'octo_protocol') {
           this.particles.emitText(this.player.centerX, this.player.y - 30, 'OCTO PROTOCOL: 8 DEFENSE DRONES ACTIVE', '#38bdf8');
+        } else if (res.type === 'codebreaker_lance') {
+          this.crt.addTrauma(0.35);
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'CODEBREAKER // KERNEL BEAM', '#ec4899');
+        } else if (res.type === 'temporal_rift') {
+          this.crt.addTrauma(0.3);
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'TEMPORAL RIFT // 80% TIME SLOW', '#ef4444');
+        } else if (res.type === 'supernova_nova') {
+          this.crt.addTrauma(0.65);
+          this.crt.triggerFlash('rgba(250, 204, 21, 0.35)', 0.25);
+          this.particles.emitText(this.player.centerX, this.player.y - 34, 'SUPERNOVA NOVA // 360° BLAST', '#facc15');
+        } else if (res.type === 'dna_overload') {
+          this.crt.addTrauma(0.3);
+          this.particles.emitText(this.player.centerX, this.player.y - 30, 'DNA OVERLOAD // SALVO', '#00e5ff');
         } else if (res.type === 'shield_up') {
           this.particles.emitText(this.player.centerX, this.player.y - 30, 'STASH SHIELD ENGAGED', '#10b981');
         }
@@ -422,19 +528,25 @@ export class Game {
 
     this.terminal.hide();
     this.state.reset();
+    this.state.repoName = this.gameData.repoName;
     this.state.totalWaves = this.gameData.totalWaves;
     this.state.currentWave = 1;
+    this.state.directives = (this.gameData.bossBlueprint.directives || []).map((d) => ({ ...d, isCompleted: false }));
     this.state.phase = 'PLAYING';
     this.isPaused = false;
+    this.boostToggle = false;
+    this.mysterySpawnTimer = 11.0;
     const combatControls = document.getElementById('combatControls');
     if (combatControls) combatControls.style.display = 'flex';
 
     this.renderer.resize();
-    this.player.reset(this.renderer.width / 2 - 22, Math.max(480, this.renderer.height - 105));
+    this.renderer.zoneRenderer.clearManualZone();
+    this.player.reset(this.renderer.width / 2 - 24, Math.max(460, this.renderer.height - 110));
     this.initBunkers();
     this.projectiles = [];
     this.particles.clear();
     this.boss = null;
+    this.lockedTarget = null;
 
     Music.setBpm(105 + (this.gameData.threatLevel / 100) * 25);
     Music.start();
@@ -444,6 +556,7 @@ export class Game {
 
   private spawnWave(waveNum: number): void {
     if (!this.gameData) return;
+    this.state.waveElapsed = 0;
     this.enemies = EnemyFactory.createWave(waveNum - 1, this.gameData, {
       width: this.renderer.width,
       height: this.renderer.height,
@@ -507,25 +620,111 @@ export class Game {
     Music.start();
   }
 
+  private findPriorityTarget(): Entity | null {
+    if (this.state.phase === 'BOSS_FIGHT' && this.boss && this.boss.isAlive) {
+      return this.boss;
+    }
+    const alive = this.enemies.filter((e) => e.isAlive);
+    if (alive.length === 0) return null;
+
+    let best: Entity | null = null;
+    let bestScore = Infinity;
+    for (const e of alive) {
+      const dist = Math.hypot(e.centerX - this.player.centerX, e.centerY - this.player.centerY);
+      const priorityBias =
+        e instanceof MysteryOctocat
+          ? 0.45
+          : e instanceof IssueBomber && e.isDiving
+          ? 0.55
+          : e instanceof HotfixInterceptor
+          ? 0.65
+          : e instanceof PipelineTurret
+          ? 0.7
+          : e instanceof TechDebtJuggernaut
+          ? 0.75
+          : 1.0;
+      const weighted = dist * priorityBias;
+      if (weighted < bestScore) {
+        bestScore = weighted;
+        best = e;
+      }
+    }
+    return best;
+  }
+
+  private evaluateDirectives(event: 'wave_1_clear' | 'wave_2_clear' | 'boss_defeated'): void {
+    if (event === 'wave_1_clear') {
+      const dir = this.state.directives.find((d) => d.id === 'dir_w1');
+      if (dir && !dir.isCompleted && this.bunkers.some((b) => b.getIntegrity() > 0)) {
+        dir.isCompleted = true;
+        this.state.bonusStars += 150;
+        this.state.xp += 200;
+        this.state.unlockedPerks.push('DIRECTIVA W1 (+150 STARS)');
+        SFX.playPowerup();
+        this.particles.emitText(this.renderer.width / 2 - 90, 180, 'DIRECTIVA W1 CUMPLIDA // +150 STARS +200 EXP', '#fbbf24');
+      }
+    } else if (event === 'wave_2_clear') {
+      const dir = this.state.directives.find((d) => d.id === 'dir_w2');
+      if (dir && !dir.isCompleted && this.state.waveElapsed <= 45) {
+        dir.isCompleted = true;
+        this.state.bonusStars += 300;
+        this.state.xp += 400;
+        this.state.unlockedPerks.push('REPARACIÓN KERNEL');
+        if (this.player.lives < this.player.maxLives) {
+          this.player.lives++;
+        }
+        this.player.hasShield = true;
+        SFX.playPowerup();
+        this.particles.emitText(this.renderer.width / 2 - 110, 180, 'DIRECTIVA W2 CUMPLIDA // REPARACIÓN KERNEL!', '#10b981');
+      }
+    } else if (event === 'boss_defeated') {
+      const dir = this.state.directives.find((d) => d.id === 'dir_boss');
+      if (dir && !dir.isCompleted) {
+        dir.isCompleted = true;
+        this.state.bonusStars += 400;
+        this.state.xp += 600;
+        this.state.unlockedPerks.push('EMBLEMA ARQUETIPO');
+      }
+    }
+  }
+
   private update(dt: number): void {
-    this.renderer.updateStars(dt);
+    const isBoss = this.state.phase === 'BOSS_FIGHT';
+    this.renderer.updateStars(dt, this.state.currentWave, isBoss, this.player.isBoosting);
     this.particles.update(dt);
 
     if (this.state.phase === 'BOOT' || this.state.phase === 'LOBBY' || this.isPaused) return;
 
-    // Tactical slow-mo factor from GIT REBASE
-    const enemyDt = this.player.isRebasing ? dt * 0.35 : dt;
+    this.state.waveElapsed += dt;
 
-    // 1. Player Movement & Updates
-    if (this.keys['ArrowLeft'] || this.keys['KeyA']) {
-      this.player.vx = -this.player.speed;
-    } else if (this.keys['ArrowRight'] || this.keys['KeyD']) {
-      this.player.vx = this.player.speed;
-    } else {
-      this.player.vx = 0;
-    }
+    // Tactical slow-mo factor: Temporal Rift (80%) or Git Rebase (65%)
+    const enemyDt =
+      this.player.temporalRiftTimer > 0
+        ? dt * 0.2
+        : this.player.isRebasing
+        ? dt * 0.35
+        : dt;
+
+    // 1. 2.5D Player Movement & Boost
+    let inX = 0;
+    let inY = 0;
+    if (this.keys['ArrowLeft'] || this.keys['KeyA']) inX -= 1;
+    if (this.keys['ArrowRight'] || this.keys['KeyD']) inX += 1;
+    if (this.keys['ArrowUp'] || this.keys['KeyW']) inY -= 1;
+    if (this.keys['ArrowDown'] || this.keys['KeyS']) inY += 1;
+
+    this.player.inputX = inX;
+    this.player.inputY = inY;
+    this.player.isBoosting = Boolean(this.keys['ArrowUp'] || this.keys['KeyW'] || this.boostToggle);
 
     this.player.update(dt, { width: this.renderer.width, height: this.renderer.height });
+
+    // Check Phantom Violet Stash exit burst
+    const exitBurst = this.player.consumeStashExitBurst();
+    if (exitBurst.length > 0) {
+      this.projectiles.push(...exitBurst);
+      this.particles.emitText(this.player.centerX, this.player.y - 25, 'STASH POP // DAGGER FAN', '#c084fc');
+    }
 
     // Auto-fire while holding space
     if (this.keys['Space'] && (this.state.phase === 'PLAYING' || this.state.phase === 'BOSS_FIGHT')) {
@@ -533,7 +732,7 @@ export class Game {
       if (shots.length > 0) this.projectiles.push(...shots);
     }
 
-    // 2. Projectiles Update (Enemy projectiles slow down in Rebase mode)
+    // 2. Projectiles Update (Enemy projectiles slow down in Rebase / Temporal Rift mode)
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const p = this.projectiles[i];
       const pDt = p.owner === 'player' ? dt : enemyDt;
@@ -543,9 +742,19 @@ export class Game {
       }
     }
 
-    // 3. Invaders Wave Motion
+    // 3. Invaders Wave Motion + Mystery Octocat Flyby
     if (this.state.phase === 'PLAYING') {
       this.updateInvaders(enemyDt);
+
+      this.mysterySpawnTimer -= dt;
+      if (this.mysterySpawnTimer <= 0) {
+        this.mysterySpawnTimer = 18 + Math.random() * 10;
+        const fromLeft = Math.random() < 0.5;
+        const startX = fromLeft ? -54 : this.renderer.width + 6;
+        const speed = fromLeft ? 145 : -145;
+        this.enemies.push(new MysteryOctocat(startX, 42, speed));
+        this.particles.emitText(this.renderer.width / 2 - 75, 58, 'ALERT // MYSTERY OCTOCAT DETECTED', '#c084fc');
+      }
     }
 
     // 4. Boss Update & Attack with Adaptive Memory
@@ -557,6 +766,9 @@ export class Game {
         this.projectiles.push(...bossShots);
       }
     }
+
+    // Update target-lock reticle
+    this.lockedTarget = this.findPriorityTarget();
 
     // 5. Collision Resolution
     CollisionSystem.resolve(
@@ -573,11 +785,11 @@ export class Game {
     // Check Boss Defeat (Triggered when boss HP drops to 0)
     if (this.state.phase === 'BOSS_FIGHT' && this.boss && !this.boss.isAlive) {
       this.state.phase = 'VICTORY';
+      this.evaluateDirectives('boss_defeated');
       Music.stop();
       SFX.playExplosion('boss');
       SFX.playPowerup();
 
-      // Emit dramatic celebratory fireworks and screen shake
       const bossCenterX = this.boss.centerX;
       const bossCenterY = this.boss.centerY;
       const bossBlueprint = this.boss.blueprint;
@@ -594,7 +806,7 @@ export class Game {
       }
 
       const store = Store.getInstance();
-      store.addXp(this.state.xp);
+      store.addXp(this.state.xp + this.state.bonusStars);
       store.recordBossDefeated(bossBlueprint);
       const repoId = this.gameData?.repoName?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'sketion';
       store.grantRepositoryArtifact(repoId, this.gameData?.repoName || 'sketion', bossBlueprint.language);
@@ -617,7 +829,7 @@ export class Game {
     if (!this.player.isAlive && this.state.phase !== 'GAMEOVER') {
       this.state.phase = 'GAMEOVER';
       Music.stop();
-      Store.getInstance().addXp(this.state.xp);
+      Store.getInstance().addXp(this.state.xp + this.state.bonusStars);
       this.modals.showGameOver(
         this.state,
         () => {
@@ -630,14 +842,25 @@ export class Game {
     }
 
     // 7. Update HUD
-    this.hud.update(this.state, this.player, this.boss, this.gameData);
+    this.hud.update(
+      this.state,
+      this.player,
+      this.boss,
+      this.gameData,
+      this.renderer.viewMode,
+      this.renderer.zoneRenderer.currentZone
+    );
   }
 
   private updateInvaders(dt: number): void {
     const aliveEnemies = this.enemies.filter((e) => e.isAlive);
+    const formationEnemies = aliveEnemies.filter((e) => !(e instanceof MysteryOctocat));
 
-    // Wave Cleared Check
-    if (aliveEnemies.length === 0) {
+    // Wave Cleared Check (MysteryOctocat flyby shouldn't block wave transition)
+    if (formationEnemies.length === 0) {
+      if (this.state.currentWave === 1) this.evaluateDirectives('wave_1_clear');
+      if (this.state.currentWave === 2) this.evaluateDirectives('wave_2_clear');
+
       if (this.state.currentWave < this.state.totalWaves) {
         this.state.currentWave++;
         this.spawnWave(this.state.currentWave);
@@ -649,30 +872,43 @@ export class Game {
 
     // Rhythm speed scales as enemy count dwindles
     const baseSpeed = this.gameData?.enemySpeedBase || 60;
-    const speedMultiplier = 1.0 + (1 - aliveEnemies.length / 40) * 1.5;
+    const speedMultiplier = 1.0 + (1 - formationEnemies.length / 40) * 1.5;
     const currentSpeed = baseSpeed * speedMultiplier;
 
     let hitEdge = false;
     for (const enemy of aliveEnemies) {
+      if (enemy instanceof MysteryOctocat) {
+        enemy.update(dt, { width: this.renderer.width, height: this.renderer.height });
+        continue;
+      }
+
       if (enemy instanceof IssueBomber) {
         enemy.targetPlayerX = this.player.centerX;
         enemy.targetPlayerY = this.player.centerY;
+      } else if (enemy instanceof PipelineTurret) {
+        enemy.targetX = this.player.centerX;
       }
-      enemy.vx = currentSpeed * this.waveMovementDirection;
+
+      const isIndependent =
+        (enemy instanceof IssueBomber && enemy.isDiving) || enemy instanceof ConflictFragment;
+
+      if (!isIndependent) {
+        enemy.vx = currentSpeed * this.waveMovementDirection;
+      }
       enemy.update(dt, { width: this.renderer.width, height: this.renderer.height });
 
-      if (
-        (enemy.x < 15 && this.waveMovementDirection < 0) ||
-        (enemy.x + enemy.width > this.renderer.width - 15 && this.waveMovementDirection > 0)
-      ) {
-        hitEdge = true;
-      }
+      if (!isIndependent) {
+        if (
+          (enemy.x < 15 && this.waveMovementDirection < 0) ||
+          (enemy.x + enemy.width > this.renderer.width - 15 && this.waveMovementDirection > 0)
+        ) {
+          hitEdge = true;
+        }
 
-      // Only marching formation invaders breach the defense line
-      const isDivingBug = enemy instanceof IssueBomber && enemy.isDiving;
-      if (!isDivingBug && enemy.y + enemy.height >= this.player.y + this.player.height) {
-        this.player.lives = 0;
-        this.player.isAlive = false;
+        if (enemy.y + enemy.height >= this.player.y + this.player.height) {
+          this.player.lives = 0;
+          this.player.isAlive = false;
+        }
       }
     }
 
@@ -680,8 +916,8 @@ export class Game {
       this.edgeCooldown = 0.45;
       this.waveMovementDirection *= -1;
       const dropAmount = this.gameData?.enemyDropSpeed || 16;
-      for (const enemy of aliveEnemies) {
-        if (!(enemy instanceof IssueBomber && enemy.isDiving)) {
+      for (const enemy of formationEnemies) {
+        if (!(enemy instanceof IssueBomber && enemy.isDiving) && !(enemy instanceof ConflictFragment)) {
           enemy.y += dropAmount;
         }
       }
@@ -691,16 +927,35 @@ export class Game {
       this.edgeCooldown -= dt;
     }
 
-    // Invader return fire
+    // Invader return fire (tailored per enemy archetype)
     this.invaderFireTimer -= dt;
     if (this.invaderFireTimer <= 0) {
       this.invaderFireTimer = 1.2 + Math.random() * 1.2;
-      const shooter = aliveEnemies[Math.floor(Math.random() * aliveEnemies.length)];
+      const shooter = formationEnemies[Math.floor(Math.random() * formationEnemies.length)];
       if (shooter) {
         SFX.playLaser('enemy');
-        this.projectiles.push(
-          new Projectile(shooter.centerX - 2, shooter.y + shooter.height, 0, 240, 'enemy', 'laser', 20, '#ef4444')
-        );
+        if (shooter instanceof PipelineTurret) {
+          const dx = this.player.centerX - shooter.centerX;
+          const dy = Math.max(80, this.player.centerY - shooter.centerY);
+          const norm = Math.hypot(dx, dy) || 1;
+          const speed = 290;
+          const vx = (dx / norm) * speed;
+          const vy = (dy / norm) * speed;
+          this.projectiles.push(
+            new Projectile(shooter.centerX - 6, shooter.y + shooter.height, vx, vy, 'enemy', 'laser', 20, '#38bdf8'),
+            new Projectile(shooter.centerX + 4, shooter.y + shooter.height, vx, vy, 'enemy', 'laser', 20, '#38bdf8')
+          );
+        } else if (shooter instanceof TechDebtJuggernaut) {
+          for (const spreadX of [-75, 0, 75]) {
+            this.projectiles.push(
+              new Projectile(shooter.centerX - 4, shooter.y + shooter.height, spreadX, 230, 'enemy', 'plasma', 25, '#eab308')
+            );
+          }
+        } else {
+          this.projectiles.push(
+            new Projectile(shooter.centerX - 2, shooter.y + shooter.height, 0, 240, 'enemy', 'laser', 20, '#ef4444')
+          );
+        }
       }
     }
   }
@@ -715,7 +970,8 @@ export class Game {
       this.boss,
       this.particles,
       this.crt,
-      shake
+      shake,
+      this.lockedTarget
     );
   }
 
