@@ -73,55 +73,87 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: rgba(4, 7, 15, 0.65);
+  background: rgba(4, 7, 15, 0.7);
   border: 1px solid var(--border-primary);
   border-radius: 6px;
-  padding: 4px 10px;
+  padding: 4px 8px;
   backdrop-filter: blur(6px);
-  gap: 10px;
+  gap: 8px;
 }
 
 .hud-stats-group {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 9px;
+  flex-shrink: 0;
 }
 
 .hud-stat {
-  font-size: 0.8rem;
+  font-size: 0.74rem;
 }
 
 .rank-badge-tag {
   background: rgba(16, 185, 129, 0.2);
   border: 1px solid #10b981;
   color: #10b981;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: 4px;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 700;
 }
 
 .hud-powers-group {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .power-slot {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(15, 23, 42, 0.84);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  padding: 4px 8px;
+  padding: 3px 6px;
   border-radius: 4px;
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-family: var(--font-mono);
   pointer-events: auto;
   cursor: pointer;
   outline: none;
   transition: all 0.15s ease;
   user-select: none;
+}
+
+.power-slot.flight-slot {
+  border-color: rgba(56, 189, 248, 0.32);
+  background: rgba(8, 20, 42, 0.85);
+}
+
+.power-slot.missile-slot {
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+.missile-pips-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 2px;
+}
+
+.m-pip {
+  width: 4px;
+  height: 9px;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.16);
+  transition: background 0.12s ease, box-shadow 0.12s ease;
+}
+
+.m-pip.filled {
+  background: #f97316;
+  box-shadow: 0 0 5px rgba(249, 115, 22, 0.8);
 }
 
 .power-slot:hover {
@@ -161,7 +193,7 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  width: 140px;
+  width: 118px;
   background: transparent;
   border: none;
   padding: 0;
@@ -223,12 +255,34 @@
   to { color: #ffffff; }
 }
 
+.hud-zone-chip {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  pointer-events: auto;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.hud-zone-chip:hover {
+  border-color: #00e5ff;
+  color: #ffffff;
+  background: rgba(0, 229, 255, 0.25);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
 /* Boss HUD Bar */
 .boss-hud-bar {
-  margin: 10px auto 0 auto;
-  width: 70%;
-  background: rgba(15, 23, 42, 0.9);
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  margin: 8px auto 0 auto;
+  width: 72%;
+  background: rgba(10, 17, 34, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.55);
   border-radius: 6px;
   padding: 6px 12px;
   text-align: center;
@@ -237,13 +291,26 @@
 .boss-hud-title {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.78rem;
   margin-bottom: 4px;
+}
+
+.boss-modules-tag {
+  color: #38bdf8;
+  font-size: 0.66rem;
+  font-weight: 700;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 1px 6px;
+  border-radius: 3px;
 }
 
 .boss-phase-badge {
   color: #ffd600;
   font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .boss-hp-track {
@@ -260,8 +327,46 @@
   transition: width 0.15s ease;
 }
 
+.boss-phases-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.bp-step {
+  font-size: 0.56rem;
+  padding: 2px 4px;
+  border-radius: 3px;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.bp-step.active {
+  color: #ffd600;
+  border-color: #ffd600;
+  background: rgba(255, 214, 0, 0.16);
+  box-shadow: 0 0 6px rgba(255, 214, 0, 0.3);
+}
+
+.bp-step.cleared {
+  color: #10b981;
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.1);
+}
+
 .boss-hp-text {
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.boss-adaptive-alert {
+  font-size: 0.65rem;
+  color: #ff007f;
+  font-weight: 700;
   margin-top: 2px;
 }

@@ -93,6 +93,9 @@
         <button id="btnRight" class="touch-btn">▶</button>
       </div>
       <div class="tactical-pad">
+        <button id="btnLoop" class="touch-btn touch-tactical">LOOP [C]</button>
+        <button id="btnMissile" class="touch-btn touch-tactical">MSL [F]</button>
+        <button id="btnView" class="touch-btn touch-tactical">VIEW [V]</button>
         <button id="btnRebase" class="touch-btn touch-tactical">REBASE [Q]</button>
         <button id="btnStash" class="touch-btn touch-tactical">STASH [E]</button>
       </div>
@@ -104,20 +107,29 @@
 
     <!-- Desktop Key Bindings Footer: Interactive Hardware Command Keys -->
     <footer class="arcade-footer" id="desktopControls">
-      <button class="arcade-cmd-btn" id="cmdMove" title="Navigate Lateral Thrusters">
-        <kbd>A</kbd> <kbd>D</kbd> <span id="lblKeyMove">Move</span>
+      <button class="arcade-cmd-btn" id="cmdMove" title="2.5D Flight & Boost Thrusters (W/↑ = Boost)">
+        <kbd>WASD</kbd> <span id="lblKeyMove">Fly / Boost</span>
       </button>
       <button class="arcade-cmd-btn" id="cmdFire" title="Fire Primary Blasters">
         <kbd>SPACE</kbd> <span id="lblKeyFire">Blaster Fire</span>
       </button>
+      <button class="arcade-cmd-btn" id="cmdLoop" title="Barrel Roll Evasive Loop 360°">
+        <kbd>C</kbd> <span id="lblKeyLoop">Loop 360°</span>
+      </button>
+      <button class="arcade-cmd-btn" id="cmdMissile" title="Fire Homing Micro-Missiles (6 Charges)">
+        <kbd>F</kbd> <span id="lblKeyMissile">Missiles</span>
+      </button>
+      <button class="arcade-cmd-btn" id="cmdView" title="Toggle 2.5D Horizon / Top-Down Camera">
+        <kbd>V</kbd> <span id="lblKeyView">2.5D View</span>
+      </button>
       <button class="arcade-cmd-btn" id="cmdRebase" title="Trigger Git Rebase Chrono Slow-Mo">
         <kbd>Q</kbd> <span id="lblKeyRebase">Git Rebase</span>
       </button>
-      <button class="arcade-cmd-btn" id="cmdStash" title="Deploy Stash Deflector Shield">
-        <kbd>E</kbd> <span id="lblKeyStash">Git Stash</span>
+      <button class="arcade-cmd-btn" id="cmdStash" title="Activate Ship Signature Skill">
+        <kbd>E</kbd> <span id="lblKeyStash">Ship Skill</span>
       </button>
       <button class="arcade-cmd-btn" id="cmdPush" title="Quantum Overdrive Screen Wipe">
-        <kbd>SHIFT</kbd> <span id="lblKeyPush">Git Push --Force</span>
+        <kbd>SHIFT</kbd> <span id="lblKeyPush">Push --Force</span>
       </button>
       <button class="arcade-cmd-btn" id="cmdPause" title="Tactical Pause & Terminal">
         <kbd>ESC</kbd> <span id="lblKeyPause">Pause</span>
